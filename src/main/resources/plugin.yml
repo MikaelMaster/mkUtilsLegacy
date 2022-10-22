@@ -1,0 +1,14 @@
+name: mkUtilsLegacy
+description: mkUtils for legacy versions. (1.8.8-R0.1)
+version: 1.0.0
+load: POSTWORLD
+authors: [ Mikael, Koddy ]
+main: com.mikael.mkutilslegacy.spigot.UtilsMain
+
+commands:
+  mkutils:
+    aliases:
+      - mkutilslegacy
+    description: Shows mkUtilsLegacy version.
+    usage: /mkutils
+    permission: mkutils.defaultperm

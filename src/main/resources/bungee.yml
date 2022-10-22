@@ -1,0 +1,4 @@
+name: mkUtilsProxy
+version: 1.2.5
+author: Mikael
+main: com.mikael.mkutils.bungee.UtilsBungeeMain
