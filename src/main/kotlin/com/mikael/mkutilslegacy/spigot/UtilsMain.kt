@@ -51,6 +51,12 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     lateinit var manager: UtilsManager
     lateinit var config: Config
 
+    /**
+     * Lang System
+     */
+    override val langConfigs: MutableMap<String, Config> = mutableMapOf()
+    lateinit var lang: String
+
     init {
         Hybrid.instance = BukkitServer // EduardAPI
     }
@@ -72,6 +78,13 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         log("§eLoading directories...")
         config = Config(this@UtilsMain, "config.yml")
         config.saveConfig()
+
+        langConfigs["en-US"] = Config(this@UtilsMain, "langs/en-US.yml")
+        langConfigs["pt-BR"] = Config(this@UtilsMain, "langs/pt-BR.yml")
+        langConfigs.forEach {
+            it.value.saveConfig()
+        }
+
         reloadConfigs() // x1
         reloadConfigs() // x2
         StorageAPI.updateReferences() // EduardAPI
@@ -88,7 +101,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         BungeeAPI.bukkit.register(this) // EduardAPI
 
         log("§eLoading systems...")
-        prepareDebugs(); prepareMySQL(); prepareRedis()
+        prepareDebugs(); prepareMySQL(); prepareRedis();
 
         // Commands
         VersionCommand().registerCommand(this)
@@ -237,6 +250,11 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     private fun prepareBasics() {
         // mkUtils Menu System - Debug Mode
         Menu.isDebug = false // EduardAPI legacy Menu System - Debug Mode
+        lang = if (config.getString("Region.Language").equals("en-US", true)) {
+            "en-US"
+        } else {
+            "pt-BR"
+        }
         DBManager.setDebug(false) // EduardAPI
         Config.isDebug = false // EduardAPI
         Hologram.debug = false // EduardAPI
@@ -277,7 +295,6 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
     private fun reloadConfigs() {
         // config.setHeader("mkUtils v${description.version} config file.") // It's bugged
-
         config.add(
             "Database",
             DBManager(),
@@ -294,6 +311,16 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
             "RedisBungeeAPI.spigotServerName",
             "lobby-1",
             "The name of this spigot server defined on Proxy config file."
+        )
+        config.add(
+            "Region.Language",
+            "en-us",
+            "The language of the region system."
+        )
+        config.add(
+            "Region.FormatRegion",
+            "US",
+            "The format of the region system."
         )
         config.add(
             "MenuAPI.autoUpdateMenus",

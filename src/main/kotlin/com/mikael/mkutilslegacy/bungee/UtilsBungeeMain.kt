@@ -38,6 +38,12 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     lateinit var manager: UtilsManager
     lateinit var config: Config
 
+    /**
+     * Lang System
+     */
+    override val langConfigs: MutableMap<String,Config> = mutableMapOf()
+    lateinit var lang: String
+
     init {
         Hybrid.instance = BungeeServer // EduardAPI
     }
@@ -159,18 +165,32 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
             false,
             "It'll send a message on Proxy server's console when a spigot server turn on/off."
         )
+        config.add(
+            "Region.Language",
+            "en-US",
+            "The language of the region system."
+        )
+        config.add(
+            "Region.FormatRegion",
+            "US",
+            "The format of the region system."
+        )
         config.saveConfig()
     }
 
     private fun prepareBasics() {
         DBManager.setDebug(false) // EduardAPI
+        lang = if(config.getString("Region.Language").equals("en-US", true)) {
+            "en-US"
+        } else {
+            "pt-BR"
+        }
         Config.isDebug = false // EduardAPI
         Copyable.setDebug(false) // EduardAPI
         Command.MESSAGE_PERMISSION = "§cYou don't have permission to use this command." // EduardAPI
     }
 
     override val isFree: Boolean get() = true
-
     override fun log(msg: String) {
         ProxyServer.getInstance().console.sendMessage("§b[${systemName}] §f${msg}".toTextComponent())
     }
