@@ -8,7 +8,6 @@ import com.mikael.mkutilslegacy.spigot.api.openedMineMenu
 import com.mikael.mkutilslegacy.spigot.api.openedMineMenuPage
 import com.mikael.mkutilslegacy.spigot.api.player
 import com.mikael.mkutilslegacy.spigot.api.soundClick
-import net.eduard.api.lib.modules.Mine
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -384,8 +383,9 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onInvClick(e: InventoryClickEvent) {
-        if (e.clickedInventory == null) return e.player.sendMessage("§cYou cannot click on this item 1 .")
+        if (e.clickedInventory == null) return
         val player = e.player
+
         val playerPages = pages[player] ?: return
         val clickedPage = playerPages.firstOrNull { e.clickedInventory == it.inventory!! }
         clickedPage?.buttons?.firstOrNull { e.slot == it.effectiveSlot }?.click?.invoke(e)
