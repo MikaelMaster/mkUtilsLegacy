@@ -1,8 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.api.lib
 
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
-import com.mikael.mkutilslegacy.spigot.UtilsMain
-import net.eduard.api.lib.modules.Mine
 import org.bukkit.Bukkit
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener

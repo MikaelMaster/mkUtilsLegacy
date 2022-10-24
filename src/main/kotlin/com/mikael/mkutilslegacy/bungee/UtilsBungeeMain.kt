@@ -3,6 +3,8 @@ package com.mikael.mkutilslegacy.bungee
 import com.mikael.mkutilslegacy.api.UtilsManager
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.mkplugin.MKPluginSystem
+import com.mikael.mkutilslegacy.api.mkplugin.language.LangSystem
+import com.mikael.mkutilslegacy.api.mkplugin.language.Translation
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
@@ -27,6 +29,7 @@ import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.plugin.Plugin
 import net.md_5.bungee.api.scheduler.ScheduledTask
 import java.io.File
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class UtilsBungeeMain : Plugin(), MKPlugin {
@@ -38,41 +41,37 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     lateinit var manager: UtilsManager
     lateinit var config: Config
 
-    /**
-     * Lang System
-     */
-    override val langConfigs: MutableMap<String,Config> = mutableMapOf()
-    lateinit var lang: String
-
     init {
         Hybrid.instance = BungeeServer // EduardAPI
     }
 
     override fun onEnable() {
-        instance = this@UtilsBungeeMain
+        instance = this@UtilsBungeeMain; manager = resolvePut(UtilsManager()) // Should be here
         val start = System.currentTimeMillis()
-        manager = resolvePut(UtilsManager()) // Should be here
 
-        log("§eStarting loading...")
+        log(LangSystem.getText(Translation.LOADING_STARTING))
         manager.mkUtilsVersion = this.description.version
         prepareStorageAPI() // EduardAPI
         HybridTypes // {static} # Hybrid types - Load
         store<RedisConnectionData>()
 
-        log("§eLoading directories...")
+        log(LangSystem.getText(Translation.LOADING_DIRECTORIES))
         config = Config(this, "config.yml")
         config.saveConfig()
         reloadConfigs() // x1
         reloadConfigs() // x2
         StorageAPI.updateReferences() // EduardAPI
 
-        log("§eLoading extras...")
+        usingLanguage = config.getString("Region.Language").lowercase() // LangSystem
+        regionFormatter = Locale.forLanguageTag(config.getString("Region.RegionFormatter").lowercase()) // LangSystem
+
+        log(LangSystem.getText(Translation.LOADING_EXTRAS))
         prepareBasics()
 
-        log("§eLoading APIs...")
+        log(LangSystem.getText(Translation.LOADING_APIS))
         BungeeAPI.bungee.register(this) // EduardAPI
 
-        log("§eLoading systems...")
+        log(LangSystem.getText(Translation.LOADING_SYSTEMS))
         prepareMySQL(); prepareRedis()
 
         // Commands
@@ -82,7 +81,9 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         BungeeGeneralListener().register(this)
 
         val endTime = System.currentTimeMillis() - start
-        log("§aPlugin loaded with success! (Time taken: §f${endTime}ms§a)"); MKPluginSystem.loadedMKPlugins.add(this@UtilsBungeeMain)
+        log(
+            LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$endTime")
+        ); MKPluginSystem.loadedMKPlugins.add(this@UtilsBungeeMain)
 
         ProxyServer.getInstance().scheduler.schedule(this, delay@{
 
@@ -104,13 +105,13 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     }
 
     override fun onDisable() {
-        log("§eUnloading systems...")
+        log(LangSystem.getText(Translation.UNLOADING_SYSTEMS))
         BungeeAPI.controller.unregister() // EduardAPI
         RedisBungeeAPI.proxyServerTask?.cancel()
         RedisAPI.finishConnection()
         mySqlQueueUpdater?.cancel()
         utilsmanager.dbManager.closeConnection()
-        log("§cPlugin unloaded!"); MKPluginSystem.loadedMKPlugins.remove(this@UtilsBungeeMain)
+        log(LangSystem.getText(Translation.UNLOADING_COMPLETE)); MKPluginSystem.loadedMKPlugins.remove(this@UtilsBungeeMain)
     }
 
     private fun prepareRedis() {
@@ -167,33 +168,34 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         )
         config.add(
             "Region.Language",
-            "en-US",
-            "The language of the region system."
+            "en_us",
+            "The language to be used by mkUtilsLegacy and all MK Plugins.",
+            "Languages available at moment: 'en_us' & 'pt_br'. DON'T PUT A DIFFERENT VALUE!"
         )
         config.add(
-            "Region.FormatRegion",
+            "Region.RegionFormatter",
             "US",
-            "The format of the region system."
+            "The Region Format to be used in Money formats.",
         )
         config.saveConfig()
     }
 
     private fun prepareBasics() {
         DBManager.setDebug(false) // EduardAPI
-        lang = if(config.getString("Region.Language").equals("en-US", true)) {
-            "en-US"
-        } else {
-            "pt-BR"
-        }
         Config.isDebug = false // EduardAPI
         Copyable.setDebug(false) // EduardAPI
         Command.MESSAGE_PERMISSION = "§cYou don't have permission to use this command." // EduardAPI
     }
 
     override val isFree: Boolean get() = true
+
     override fun log(msg: String) {
         ProxyServer.getInstance().console.sendMessage("§b[${systemName}] §f${msg}".toTextComponent())
     }
+
+    override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
+
+    override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
     override fun getPlugin(): Any {
         return this

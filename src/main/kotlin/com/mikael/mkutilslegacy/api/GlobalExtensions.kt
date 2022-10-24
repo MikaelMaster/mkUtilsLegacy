@@ -1,11 +1,9 @@
 package com.mikael.mkutilslegacy.api
 
-import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.mkplugin.MKPluginData
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
-import net.eduard.api.lib.config.Config
 import net.eduard.api.lib.hybrid.Hybrid
 import net.eduard.api.lib.kotlin.resolve
 import net.md_5.bungee.api.chat.TextComponent
@@ -44,6 +42,7 @@ val syncMysqUpdatesKey = Any()
  * @return True if the block code has been executed with no error. Otherwise, false.
  * @see syncMysqUpdatesKey
  */
+@Deprecated("Deprecated; Use { synchronized(syncMysqUpdatesKey) { *code* } } instead.")
 inline fun syncMysql(crossinline thing: (() -> Unit)): Boolean {
     synchronized(syncMysqUpdatesKey) {
         return try {
@@ -159,37 +158,25 @@ fun Int.isMultOf(multBy: Int): Boolean {
  *
  * @return a [String] with the formatted value.
  */
+@Deprecated("Use { Number.formatValue() } instead.")
 fun Number.formatEN(): String {
     return NumberFormat.getNumberInstance(Locale.US).format(this)
 }
 
 /**
- * Formats a [Number] using the North America (US) format.
+ * Formats a [Number] using the current [com.mikael.mkutilslegacy.api.mkplugin.MKPlugin.regionFormatter].
  *
- * Example:
- *
- * * 1000 -> 1.000
- * * 1065 -> 1.065
- * * 1000.5 -> 1.000,50
- *
- * @return a [String] with the formatted value.
- */
-fun Number.formatBR(): String {
-    return NumberFormat.getNumberInstance(Locale.GERMAN).format(this)
-}
-
-/**
- * Formats an [Int] using the North America (US) format.
- *
- * Example:
+ * Example ([Locale.US]):
  *
  * * 1000 -> 1,000
  * * 1065 -> 1,065
+ * * 1000.5 -> 1,000.50
  *
- * @return an [Int] with the formatted value.
+ * @return a [String] with the formatted value.
  */
-fun Int.formatEN(): String {
-    return this.toDouble().formatEN()
+fun Number.formatValue(): String {
+    val mkPlugin = if (isProxyServer) UtilsBungeeMain.instance else UtilsMain.instance
+    return NumberFormat.getNumberInstance(mkPlugin.regionFormatter).format(this)
 }
 
 /**
@@ -240,16 +227,3 @@ fun Long.formatDuration(): String {
         formatedTime.ifEmpty { "-1" }
     }
 }
-
-/**
- * SystemLang section
- * This returns the current configuration file language of the plugin
- *
- * @author KoddyDev
- * @see MKPlugin
- */
-val MKPlugin.currentLang: Config
-    get() = when (Hybrid.instance.isBungeecord) {
-        true -> this.langConfigs[UtilsBungeeMain.instance.lang]!!
-        false -> this.langConfigs[UtilsMain.instance.lang]!!
-    }
