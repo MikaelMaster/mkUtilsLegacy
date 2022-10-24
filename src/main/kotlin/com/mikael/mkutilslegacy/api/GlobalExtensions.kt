@@ -176,7 +176,6 @@ fun Number.formatValue(locale: String): String {
     if(locale == "en") {
         return NumberFormat.getNumberInstance(Locale.US).format(this)
     }
-
     return NumberFormat.getNumberInstance(Locale.GERMAN).format(this)
 }
 
