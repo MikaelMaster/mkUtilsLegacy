@@ -159,22 +159,24 @@ fun Int.isMultOf(multBy: Int): Boolean {
  *
  * @return a [String] with the formatted value.
  */
+@Deprecated("Use Number.formatValue instead.", ReplaceWith(
+"this.formatValue()",
+"com.mikael.mkutilslegacy.api.formatValue"))
 fun Number.formatEN(): String {
     return NumberFormat.getNumberInstance(Locale.US).format(this)
 }
 
 /**
- * Formats a [Number] using the North America (US) format.
+ * Formats a [Number] using the North America (US) format or Brazilian (BR) format.
  *
- * Example:
- *
- * * 1000 -> 1.000
- * * 1065 -> 1.065
- * * 1000.5 -> 1.000,50
  *
  * @return a [String] with the formatted value.
  */
-fun Number.formatBR(): String {
+fun Number.formatValue(locale: String): String {
+    if(locale == "en") {
+        return NumberFormat.getNumberInstance(Locale.US).format(this)
+    }
+
     return NumberFormat.getNumberInstance(Locale.GERMAN).format(this)
 }
 
