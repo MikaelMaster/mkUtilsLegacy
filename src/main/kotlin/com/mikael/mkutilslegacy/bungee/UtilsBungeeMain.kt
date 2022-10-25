@@ -47,7 +47,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
 
     override fun onEnable() {
         instance = this@UtilsBungeeMain; manager = resolvePut(UtilsManager()) // Should be here
-        val start = System.currentTimeMillis()
+        val loadStart = System.currentTimeMillis()
 
         log(LangSystem.getText(Translation.LOADING_STARTING))
         manager.mkUtilsVersion = this.description.version
@@ -80,9 +80,9 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         // Listeners
         BungeeGeneralListener().register(this)
 
-        val endTime = System.currentTimeMillis() - start
+        val loadTime = System.currentTimeMillis() - loadStart
         log(
-            LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$endTime")
+            LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$loadTime")
         ); MKPluginSystem.loadedMKPlugins.add(this@UtilsBungeeMain)
 
         ProxyServer.getInstance().scheduler.schedule(this, delay@{
@@ -188,14 +188,12 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     }
 
     override val isFree: Boolean get() = true
+    override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
+    override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
     override fun log(msg: String) {
         ProxyServer.getInstance().console.sendMessage("§b[${systemName}] §f${msg}".toTextComponent())
     }
-
-    override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
-
-    override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
     override fun getPlugin(): Any {
         return this

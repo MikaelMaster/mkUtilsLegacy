@@ -16,19 +16,6 @@ interface MKPlugin : IPluginInstance {
     val isFree: Boolean
 
     /**
-     * Use to log plugin messages to console.
-     *
-     * Example: {
-     *  override fun log(msg: String) {
-     *   Bukkit.getConsoleSender().sendMessage("§b[${systemName}] §f${msg}")
-     *   }
-     * }
-     *
-     * @param msg the message to log.
-     */
-    fun log(msg: String)
-
-    /**
      * The current 'selected' language.
      *
      * Example: 'pt-br', 'en-us'.
@@ -42,4 +29,17 @@ interface MKPlugin : IPluginInstance {
      * ?
      */
     var regionFormatter: Locale
+
+    /**
+     * Use to log plugin messages to console.
+     *
+     * Example: {
+     *  override fun log(msg: String) {
+     *   Bukkit.getConsoleSender().sendMessage("§b[${systemName}] §f${msg}")
+     *   }
+     * }
+     *
+     * @param msg the message to log.
+     */
+    fun log(msg: String)
 }

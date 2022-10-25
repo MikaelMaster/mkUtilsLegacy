@@ -60,7 +60,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
     override fun onEnable() {
         instance = this@UtilsMain; manager = resolvePut(UtilsManager()) // Should be here
-        val start = System.currentTimeMillis()
+        val loadStart = System.currentTimeMillis()
 
         log(LangSystem.getText(Translation.LOADING_STARTING))
         manager.mkUtilsVersion = this.description.version
@@ -102,9 +102,9 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         // Listeners
         GeneralListener().registerListener(this)
 
-        val endTime = System.currentTimeMillis() - start
+        val loadTime = System.currentTimeMillis() - loadStart
         log(
-            LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$endTime")
+            LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$loadTime")
         ); MKPluginSystem.loadedMKPlugins.add(this@UtilsMain)
 
         syncDelay(20) {
@@ -345,14 +345,12 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     }
 
     override val isFree: Boolean get() = true
+    override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
+    override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
     override fun log(msg: String) {
         Bukkit.getConsoleSender().sendMessage("§b[${systemName}] §f${msg}")
     }
-
-    override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
-
-    override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
     override fun getPlugin(): Any {
         return this
