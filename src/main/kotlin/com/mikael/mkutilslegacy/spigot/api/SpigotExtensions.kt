@@ -219,6 +219,7 @@ fun World.newHologram(loc: Location, line: String?): ArmorStand {
         holo.customName = line
     } else {
         holo.isCustomNameVisible = false
+        holo.customName = "§r" // empty line
     }
     return holo
 }
@@ -656,7 +657,7 @@ fun Player.clearTitle() {
  * @see Player.sendTitle
  */
 fun Player.title(title: String?, subtitle: String?, fadeIn: Int = 10, stay: Int = 20 * 2, fadeOut: Int = 10) {
-    this.mineSendTitle(title?: " ", subtitle?: " ", fadeIn, stay, fadeOut)
+    this.mineSendTitle(title ?: " ", subtitle ?: " ", fadeIn, stay, fadeOut)
 }
 
 /**
@@ -681,3 +682,8 @@ val Chunk.blocks: List<Block>
         }
         return blocks
     }
+
+/**
+ * @return the given [Entity]'s chunk. ([Location.getChunk])
+ */
+val Entity.chunk: Chunk get() = this.location.chunk

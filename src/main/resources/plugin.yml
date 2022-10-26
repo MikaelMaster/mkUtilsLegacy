@@ -1,6 +1,6 @@
 name: mkUtilsLegacy
-description: mkUtils for legacy versions. (1.8.8-R0.1)
-version: 1.0.1
+description: mkUtils for legacy versions. (Paper 1.8.8-R0.1)
+version: 1.0.2
 authors: [ Mikael, Koddy, Eduard ]
 main: com.mikael.mkutilslegacy.spigot.UtilsMain
 
