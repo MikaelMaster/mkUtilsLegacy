@@ -9,10 +9,10 @@ object LangSystem {
     fun getText(translation: Translation): String {
         val mkPlugin = if (isProxyServer) UtilsBungeeMain.instance else UtilsMain.instance
         return when (mkPlugin.usingLanguage) {
-            "en_us" -> {
+            "en-us" -> {
                 translation.en_us[0]
             }
-            "pt_br" -> {
+            "pt-br" -> {
                 translation.pt_br[0]
             }
             else -> {
@@ -24,10 +24,10 @@ object LangSystem {
     fun getTextLines(translation: Translation): List<String> {
         val mkPlugin = if (isProxyServer) UtilsBungeeMain.instance else UtilsMain.instance
         return when (mkPlugin.usingLanguage) {
-            "en_us" -> {
+            "en-us" -> {
                 translation.en_us
             }
-            "pt_br" -> {
+            "pt-br" -> {
                 translation.pt_br
             }
             else -> {

@@ -27,7 +27,7 @@ dependencies {
     compileOnly(files("libs/spigot-1.8.8.jar"))
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
-    api("redis.clients:jedis:4.3.0")
+    api("redis.clients:jedis:4.3.1")
     api("org.slf4j:slf4j-api:2.0.3")
     api("org.slf4j:slf4j-log4j12:2.0.3")
     api(files("C:\\Users\\Usuario\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar\\"))

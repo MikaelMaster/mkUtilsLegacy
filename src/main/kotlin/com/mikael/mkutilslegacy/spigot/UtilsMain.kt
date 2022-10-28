@@ -304,9 +304,9 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         )
         config.add(
             "Region.Language",
-            "en_us",
+            "en-us",
             "The language to be used by mkUtilsLegacy and all MK Plugins.",
-            "Languages available at moment: 'en_us' & 'pt_br'. DON'T PUT A DIFFERENT VALUE!"
+            "Languages available at moment: 'en-us' and 'pt-br'. DON'T PUT A DIFFERENT VALUE!"
         )
         config.add(
             "Region.RegionFormatter",

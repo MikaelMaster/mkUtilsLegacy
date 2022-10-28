@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.spigot.api
 
-import com.mikael.mkutilslegacy.api.formatEN
 import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
@@ -661,6 +660,17 @@ fun Player.title(title: String?, subtitle: String?, fadeIn: Int = 10, stay: Int 
 }
 
 /**
+ * @return a new location where X,Y,Z are the center of the [Location.getBlock].
+ */
+fun Location.toCenterLocation(): Location {
+    val centerLoc = this.clone()
+    centerLoc.x = blockX + 0.5
+    centerLoc.y = blockY + 0.5
+    centerLoc.z = blockZ + 0.5
+    return centerLoc
+}
+
+/**
  * Get all blocks inside the given chunk.
  *
  * Use with moderation.
@@ -684,6 +694,6 @@ val Chunk.blocks: List<Block>
     }
 
 /**
- * @return the given [Entity]'s chunk. ([Location.getChunk])
+ * @return the given [Entity]'s chunk. (Entity.[Location.getChunk])
  */
 val Entity.chunk: Chunk get() = this.location.chunk
