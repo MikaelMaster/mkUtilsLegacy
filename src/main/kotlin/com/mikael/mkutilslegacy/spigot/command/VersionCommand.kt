@@ -12,7 +12,7 @@ class VersionCommand : CommandManager("mkutils", "mkutilslegacy") {
         usage = "/mkutils"
         permission = "mkutils.defaultperm"
         permissionMessage = versionMsg
-        this.command.setExecutor(this@VersionCommand)
+        this.command.executor = this@VersionCommand
     }
 
     override fun command(sender: CommandSender, args: Array<String>) {

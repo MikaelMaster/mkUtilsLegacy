@@ -2,6 +2,7 @@ package com.mikael.mkutilslegacy.spigot.api.lib
 
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
+import net.eduard.api.lib.game.ItemBuilder
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.block.CreatureSpawner
@@ -13,6 +14,7 @@ import org.bukkit.inventory.meta.BlockStateMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.PotionMeta
 import org.bukkit.inventory.meta.SkullMeta
+import org.bukkit.material.MaterialData
 import org.bukkit.potion.PotionEffect
 import java.util.*
 
@@ -91,6 +93,11 @@ class MineItem(item: ItemStack) : ItemStack(item) {
 
     fun type(material: Material): MineItem {
         this.type = material
+        return this
+    }
+
+    fun data(data: Int): MineItem {
+        this.durability = data.toShort() // durability = material data
         return this
     }
 

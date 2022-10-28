@@ -4,6 +4,8 @@ import com.mikael.mkutilslegacy.api.UtilsManager
 import com.mikael.mkutilslegacy.api.formatEN
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.mkplugin.MKPluginSystem
+import com.mikael.mkutilslegacy.api.mkplugin.language.LangSystem
+import com.mikael.mkutilslegacy.api.mkplugin.language.Translation
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
@@ -41,6 +43,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitTask
 import java.io.File
 import java.text.SimpleDateFormat
+import java.util.*
 
 class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     companion object {
@@ -51,23 +54,17 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     lateinit var manager: UtilsManager
     lateinit var config: Config
 
-    /**
-     * Lang System
-     */
-    override val langConfigs: MutableMap<String, Config> = mutableMapOf()
-    lateinit var lang: String
-
     init {
         Hybrid.instance = BukkitServer // EduardAPI
     }
 
     override fun onEnable() {
-        instance = this@UtilsMain
-        val start = System.currentTimeMillis()
-        log("§eLoading basics...")
-        manager = resolvePut(UtilsManager())
+        instance = this@UtilsMain; manager = resolvePut(UtilsManager()) // Should be here
+        val loadStart = System.currentTimeMillis()
+
+        log(LangSystem.getText(Translation.LOADING_STARTING))
         manager.mkUtilsVersion = this.description.version
-        prepareStorageAPI() // EduardAPI
+        prepareStorageAPI(); prepareBasics() // EduardAPI
         HybridTypes // {static} # Hybrid types - Load
         BukkitTypes.register() // Bukkit types - Load
         store<RedisConnectionData>()
@@ -75,24 +72,20 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         Extra.FORMAT_DATE = SimpleDateFormat("MM/dd/yyyy") // EduardAPI
         Extra.FORMAT_DATETIME = SimpleDateFormat("MM/dd/yyyy HH:mm:ss") // EduardAPI
 
-        log("§eLoading directories...")
+        log(LangSystem.getText(Translation.LOADING_DIRECTORIES))
         config = Config(this@UtilsMain, "config.yml")
         config.saveConfig()
-
-        langConfigs["en-US"] = Config(this@UtilsMain, "langs/en-US.yml")
-        langConfigs["pt-BR"] = Config(this@UtilsMain, "langs/pt-BR.yml")
-        langConfigs.forEach {
-            it.value.saveConfig()
-        }
-
         reloadConfigs() // x1
         reloadConfigs() // x2
         StorageAPI.updateReferences() // EduardAPI
 
-        log("§eLoading extras...")
-        preparePlaceholders(); prepareBasics(); prepareTasks()
+        usingLanguage = config.getString("Region.Language").lowercase() // LangSystem
+        regionFormatter = Locale.forLanguageTag(config.getString("Region.RegionFormatter").lowercase()) // LangSystem
 
-        log("§eLoading APIs...")
+        log(LangSystem.getText(Translation.LOADING_EXTRAS))
+        preparePlaceholders(); prepareTasks()
+
+        log(LangSystem.getText(Translation.LOADING_APIS))
         MenuSystem.onEnable()
 
         // BukkitBungeeAPI
@@ -100,7 +93,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         BukkitBungeeAPI.requestCurrentServer() // EduardAPI
         BungeeAPI.bukkit.register(this) // EduardAPI
 
-        log("§eLoading systems...")
+        log(LangSystem.getText(Translation.LOADING_SYSTEMS))
         prepareDebugs(); prepareMySQL(); prepareRedis();
 
         // Commands
@@ -109,8 +102,10 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         // Listeners
         GeneralListener().registerListener(this)
 
-        val endTime = System.currentTimeMillis() - start
-        log("§aPlugin loaded with success! (Time taken: §f${endTime}ms§a)"); MKPluginSystem.loadedMKPlugins.add(this@UtilsMain)
+        val loadTime = System.currentTimeMillis() - loadStart
+        log(
+            LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$loadTime")
+        ); MKPluginSystem.loadedMKPlugins.add(this@UtilsMain)
 
         syncDelay(20) {
             log("§aPreparing MineReflect...")
@@ -138,14 +133,14 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
     override fun onDisable() {
         if (config.getBoolean("CustomKick.isEnabled")) {
-            log("§eDisconnecting players...")
+            log(LangSystem.getText(Translation.UNLOADING_DISCONNECTING_PLAYERS))
             for (playerLoop in Bukkit.getOnlinePlayers()) {
                 playerLoop.kickPlayer(config.getString("CustomKick.customKickMessage"))
             }
         }
 
         if (RedisAPI.useToSyncBungeePlayers) {
-            log("§6[RedisBungeeAPI] §eMarking server as disabled on Redis...")
+            log(LangSystem.getText(Translation.UNLOADING_REDISBUNGEEAPI_DISABLING))
             val newServerList = mutableListOf(
                 *RedisBungeeAPI.getSpigotServers().toTypedArray()
             ); newServerList.removeIf { it == RedisBungeeAPI.spigotServerName }
@@ -154,17 +149,17 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
             RedisAPI.sendEvent("mkUtils:BungeeAPI:Event:ServerPowerAction", "${RedisBungeeAPI.spigotServerName};off")
         }
 
-        log("§eUnloading APIs...")
+        log(LangSystem.getText(Translation.UNLOADING_APIS))
         MenuSystem.onDisable()
 
-        log("§eUnloading systems...")
+        log(LangSystem.getText(Translation.UNLOADING_SYSTEMS))
         BungeeAPI.controller.unregister() // EduardAPI
         RedisBungeeAPI.bukkitServerTask?.cancel()
         RedisAPI.finishConnection()
         mySqlQueueUpdater?.cancel()
         utilsmanager.dbManager.closeConnection()
 
-        log("§cPlugin unloaded!"); MKPluginSystem.loadedMKPlugins.remove(this@UtilsMain)
+        log(LangSystem.getText(Translation.UNLOADING_COMPLETE)); MKPluginSystem.loadedMKPlugins.remove(this@UtilsMain)
     }
 
     private fun prepareRedis() {
@@ -250,11 +245,6 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     private fun prepareBasics() {
         // mkUtils Menu System - Debug Mode
         Menu.isDebug = false // EduardAPI legacy Menu System - Debug Mode
-        lang = if (config.getString("Region.Language").equals("en-US", true)) {
-            "en-US"
-        } else {
-            "pt-BR"
-        }
         DBManager.setDebug(false) // EduardAPI
         Config.isDebug = false // EduardAPI
         Hologram.debug = false // EduardAPI
@@ -315,12 +305,14 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         config.add(
             "Region.Language",
             "en-us",
-            "The language of the region system."
+            "The language to be used by mkUtilsLegacy and all MK Plugins.",
+            "Languages available at moment: 'en-us' and 'pt-br'. DON'T PUT A DIFFERENT VALUE!"
         )
         config.add(
-            "Region.FormatRegion",
+            "Region.RegionFormatter",
             "US",
-            "The format of the region system."
+            "The Region Format to be used in Money formats.",
+            "Don't change it if you don't have sure what you're doing!"
         )
         config.add(
             "MenuAPI.autoUpdateMenus",
@@ -353,6 +345,8 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     }
 
     override val isFree: Boolean get() = true
+    override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
+    override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
     override fun log(msg: String) {
         Bukkit.getConsoleSender().sendMessage("§b[${systemName}] §f${msg}")

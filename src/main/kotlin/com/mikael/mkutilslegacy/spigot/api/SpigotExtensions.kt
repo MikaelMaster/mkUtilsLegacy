@@ -1,5 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.api
 
+import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
@@ -217,6 +218,7 @@ fun World.newHologram(loc: Location, line: String?): ArmorStand {
         holo.customName = line
     } else {
         holo.isCustomNameVisible = false
+        holo.customName = "§r" // empty line
     }
     return holo
 }
@@ -453,8 +455,64 @@ inline fun Player.asyncLoading(
         } finally {
             UtilsMain.instance.syncTask {
                 runnable.cancel()
-                this.actionBar("§a∎∎∎∎∎ §8${System.currentTimeMillis() - runStart} ms")
+                this.actionBar("§a∎∎∎∎∎ §8${(System.currentTimeMillis() - runStart).toInt().formatValue()}ms")
             }
+        }
+    }
+}
+
+/**
+ * Runs a loading animation to the player using an async thread, while execute the given [thing] using sync (main thread).
+ *
+ * Please note that the given [thing] will be run 5 ticks (approximately 250ms) after the function ram.
+ * This is to avoid animation internal erros.
+ *
+ * @param thing the block code to run using the main thread (sync), try catch and the load animation.
+ */
+inline fun Player.syncLoading(
+    errorMessage: String = "§cAn internal error occurred while executing something to you.",
+    crossinline thing: (() -> Unit)
+) {
+    val runStart = System.currentTimeMillis()
+    var step = 0
+    var animating = true
+    UtilsMain.instance.asyncTask {
+        while (animating) {
+            when (step) {
+                0 -> {
+                    this.actionBar("§a∎§7∎∎∎∎")
+                }
+
+                1 -> {
+                    this.actionBar("§7∎§a∎§7∎∎∎")
+                }
+
+                2 -> {
+                    this.actionBar("§7∎∎§a∎§7∎∎")
+                }
+
+                3 -> {
+                    this.actionBar("§7∎∎∎§a∎§7∎")
+                }
+
+                4 -> {
+                    this.actionBar("§7∎∎∎∎§a∎")
+                }
+            }
+            if (step == 4) step = 0 else step++
+            Thread.sleep(100)
+        }
+    }
+    UtilsMain.instance.syncDelay(5) {
+        try {
+            thing.invoke()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            this.soundNo()
+            this.sendMessage(errorMessage)
+        } finally {
+            animating = false
+            this.actionBar("§a∎∎∎∎∎ §8${(System.currentTimeMillis() - runStart).toInt().formatValue()}ms")
         }
     }
 }
@@ -598,7 +656,18 @@ fun Player.clearTitle() {
  * @see Player.sendTitle
  */
 fun Player.title(title: String?, subtitle: String?, fadeIn: Int = 10, stay: Int = 20 * 2, fadeOut: Int = 10) {
-    this.mineSendTitle(title?: " ", subtitle?: " ", fadeIn, stay, fadeOut)
+    this.mineSendTitle(title ?: " ", subtitle ?: " ", fadeIn, stay, fadeOut)
+}
+
+/**
+ * @return a new location where X,Y,Z are the center of the [Location.getBlock].
+ */
+fun Location.toCenterLocation(): Location {
+    val centerLoc = this.clone()
+    centerLoc.x = blockX + 0.5
+    centerLoc.y = blockY + 0.5
+    centerLoc.z = blockZ + 0.5
+    return centerLoc
 }
 
 /**
@@ -623,3 +692,8 @@ val Chunk.blocks: List<Block>
         }
         return blocks
     }
+
+/**
+ * @return the given [Entity]'s chunk. (Entity.[Location.getChunk])
+ */
+val Entity.chunk: Chunk get() = this.location.chunk
