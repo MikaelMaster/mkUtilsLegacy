@@ -1,7 +1,7 @@
 package com.mikael.mkutilslegacy.spigot
 
 import com.mikael.mkutilslegacy.api.UtilsManager
-import com.mikael.mkutilslegacy.api.formatEN
+import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.mkplugin.MKPluginSystem
 import com.mikael.mkutilslegacy.api.mkplugin.language.LangSystem
@@ -71,6 +71,10 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
         Extra.FORMAT_DATE = SimpleDateFormat("MM/dd/yyyy") // EduardAPI
         Extra.FORMAT_DATETIME = SimpleDateFormat("MM/dd/yyyy HH:mm:ss") // EduardAPI
+
+        /*
+        * Baixar aqui a jar do mkCommons do site.
+         */
 
         log(LangSystem.getText(Translation.LOADING_DIRECTORIES))
         config = Config(this@UtilsMain, "config.yml")
@@ -224,7 +228,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
     private fun preparePlaceholders() { // mkUtils default placeholders
         Mine.addReplacer("mkutils_players") {
-            Bukkit.getOnlinePlayers().size.formatEN()
+            Bukkit.getOnlinePlayers().size.formatValue()
         }
         Mine.addReplacer("mkbungeeapi_players") {
             try {
@@ -344,7 +348,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         config.saveConfig()
     }
 
-    override val isFree: Boolean get() = true
+    override val isFree: Boolean = true
     override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
     override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 

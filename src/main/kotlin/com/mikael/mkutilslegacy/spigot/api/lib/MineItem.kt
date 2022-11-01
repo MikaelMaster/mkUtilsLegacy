@@ -2,9 +2,9 @@ package com.mikael.mkutilslegacy.spigot.api.lib
 
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
-import net.eduard.api.lib.game.ItemBuilder
 import org.bukkit.Color
 import org.bukkit.Material
+import org.bukkit.SkullType
 import org.bukkit.block.CreatureSpawner
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.EntityType
@@ -14,7 +14,6 @@ import org.bukkit.inventory.meta.BlockStateMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.PotionMeta
 import org.bukkit.inventory.meta.SkullMeta
-import org.bukkit.material.MaterialData
 import org.bukkit.potion.PotionEffect
 import java.util.*
 
@@ -198,7 +197,7 @@ class MineItem(item: ItemStack) : ItemStack(item) {
     }
 
     fun skull(skullName: String): MineItem { // Custom Skull Name
-        this.type = Material.SKULL_ITEM
+        this.type = Material.SKULL_ITEM; this.data(SkullType.PLAYER.ordinal)
         if (this.itemMeta == null) return this
         val meta = this.itemMeta as SkullMeta
         meta.owner = skullName
@@ -207,7 +206,7 @@ class MineItem(item: ItemStack) : ItemStack(item) {
     }
 
     private fun texture(textureBase64: String): MineItem { // Custom Skull Texture
-        this.type = Material.SKULL_ITEM
+        this.type = Material.SKULL_ITEM; this.data(SkullType.PLAYER.ordinal)
         if (this.itemMeta == null) return this
         val meta = this.itemMeta as SkullMeta
         val profile = GameProfile(UUID.randomUUID(), null as String?)
