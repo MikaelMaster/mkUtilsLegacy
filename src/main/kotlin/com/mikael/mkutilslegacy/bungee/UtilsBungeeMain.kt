@@ -187,7 +187,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         Command.MESSAGE_PERMISSION = "§cYou don't have permission to use this command." // EduardAPI
     }
 
-    override val isFree: Boolean get() = true
+    override val isFree: Boolean = true
     override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
     override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
