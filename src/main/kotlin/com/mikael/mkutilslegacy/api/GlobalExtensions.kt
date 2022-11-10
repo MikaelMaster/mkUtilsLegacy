@@ -2,13 +2,16 @@ package com.mikael.mkutilslegacy.api
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.mkplugin.MKPluginData
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import net.eduard.api.lib.hybrid.Hybrid
 import net.eduard.api.lib.kotlin.resolve
+import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
+import org.bukkit.Bukkit
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -148,6 +151,13 @@ fun Boolean.formatYesNo(colored: Boolean = true): String {
 }
 
 /**
+ * @return a [String] with '§aON', '§cOFF' or the custom given texts, following the given [Boolean].
+ */
+fun Boolean.formatOnOff(onText: String = "§aON", offText: String = "§cOFF"): String {
+    return if (this) onText else offText
+}
+
+/**
  * @return True if the given [Int] is multiple of [multBy]. Otherwise, false.
  */
 fun Int.isMultOf(multBy: Int): Boolean {
@@ -262,4 +272,28 @@ fun URL.stream(): String {
  */
 fun URL.getJson(): JsonObject {
     return JsonParser().parse(this.stream()).asJsonObject
+}
+
+/**
+ * @return The current server port ([Int]) running the given [MKPlugin].
+ */
+fun MKPlugin.serverPort(): Int {
+    return if (isProxyServer) {
+        ProxyServer.getInstance().config.listeners.firstOrNull()?.queryPort
+            ?: error("Cannot get ProxyServer query port")
+    } else {
+        Bukkit.getPort()
+    }
+}
+
+/**
+ * @return a new [String] [List] with all given elements replaced.
+ * @see String.replace
+ */
+fun List<String>.replaceAll(oldValue: String, newValue: String, ignoreCase: Boolean = false): List<String> {
+    val newList = mutableListOf<String>()
+    this.forEach { line ->
+        newList.add(line.replace(oldValue, newValue, ignoreCase))
+    }
+    return newList
 }
