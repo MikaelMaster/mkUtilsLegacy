@@ -2,6 +2,7 @@ package com.mikael.mkutilslegacy.spigot.api
 
 import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.spigot.UtilsMain
+import com.mikael.mkutilslegacy.spigot.api.lib.MineBook
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
@@ -18,11 +19,28 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
+// MineBook extra functions - Start
 /**
- * @return if [Ageable.isAdult] 'Adult' else 'Baby'.
+ * Opens the [book] to the given [Player].
+ *
+ * Note: The function [MineBook.open] uses NMS. (NMS 1.8_R3)
+ *
+ * @see MineBook.open
  */
-fun Ageable.formatAgeText(): String {
-    return if (this.isAdult) "Adult" else "Baby"
+fun Player.openMineBook(book: MineBook): Unit {
+    book.open(this)
+}
+// MineBook extra functions - End
+
+// MineMenu extra functions - Start
+/**
+ * Opens the [menu] to the given [Player].
+ *
+ * @return the opened [Inventory] owned by the [MineMenu] ([menu]).
+ * @see MineMenu.open
+ */
+fun Player.openMineMenu(menu: MineMenu): Inventory {
+    return menu.open(this)
 }
 
 /**
@@ -75,6 +93,14 @@ var Player.openedMineMenuPage: MenuPage?
             MenuSystem.openedPage[this] = value
         }
     }
+// MineMenu extra functions - End
+
+/**
+ * @return if [Ageable.isAdult] 'Adult' else 'Baby'.
+ */
+fun Ageable.formatAgeText(): String {
+    return if (this.isAdult) "Adult" else "Baby"
+}
 
 /**
  * @return The player that clicked the menu. ([InventoryClickEvent.getWhoClicked] as [Player])
@@ -645,9 +671,11 @@ fun Player.actionBar(msg: String) {
  * Clears the given [Player] client title field.
  *
  * @see Player.resetTitle
+ * @suppress to ingore internal deprecated.
  */
+@Suppress("DEPRECATION")
 fun Player.clearTitle() {
-    this.resetTitle() // fds o deprecated
+    this.resetTitle() // Just ignore the deprecated
 }
 
 /**
