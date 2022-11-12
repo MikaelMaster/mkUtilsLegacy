@@ -112,7 +112,7 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
      * @see pages
      * @see pageCount
      */
-    fun setPages(vararg pages: List<String>) {
+    fun setPages(vararg pages: List<String>): MineBook {
 
         // Verifications
         if (pages.size > 50) error("A book cannot have more than 50 pages")
@@ -137,6 +137,7 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
             bookMeta.addPage(pageLinesBuilder.toString())
         }
         this.itemMeta = bookMeta
+        return this
     }
 
     /**
