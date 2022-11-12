@@ -44,21 +44,29 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
     var title
         get() = book.title
         set(newTitle) {
-            book.title = newTitle
-            this.itemMeta = book
+            setTitle(newTitle)
         }
 
     /**
      * Sets/returns the [book] author.
+     *
+     * Important: If the [BookMeta.hasAuthor] is false, "Unknown" will be returned.
+     * Calling [BookMeta.getAuthor] without checking it before can throw an [NullPointerException] if the author is null.
+     *
      * @see BookMeta.hasAuthor
      * @see BookMeta.getAuthor
      * @see BookMeta.setAuthor
      */
     var visualAuthor
-        get() = book.author
+        get() = run {
+            if (book.hasAuthor()) {
+                book.author
+            } else {
+                "Unknown"
+            }
+        }
         set(newAuthor) {
-            book.author = newAuthor
-            this.itemMeta = book
+            setAuthor(newAuthor)
         }
 
     /**
@@ -71,28 +79,73 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
      */
     val pageCount get() = book.pageCount
 
+    /**
+     * @param title the new title of this book. Cannot have more than 16 characters.
+     * @throws IllegalStateException if the given [title] have more than 16 characters.
+     */
     fun setTitle(title: String): MineBook {
-        this.title = title
-        this.itemMeta = book
+        if (title.length > 16) error("The title of the book cannot have more than 16 characters")
+        val bookMeta = book
+        bookMeta.title = title
+        this.itemMeta = bookMeta
         return this
     }
 
     /**
+     * @param author the new author of this book.
+     */
+    fun setAuthor(author: String): MineBook {
+        val bookMeta = book
+        bookMeta.author = author
+        this.itemMeta = bookMeta
+        return this
+    }
+
+    /**
+     * Important:
+     * - A book can have only a MAXIMUM of 50 pages.
+     * - Each page cannot have more than 256 characters.
+     *
      * @param pages the new pages to set on this book. Each page can have multiple [String] lines.
+     * @throws IllegalStateException if the [pages] size is larger than 50.
+     * @throws IllegalStateException if any page's sum of all characters is greater than 256.
      * @see pages
      * @see pageCount
      */
     fun setPages(vararg pages: List<String>) {
-        book.pages.clear()
-        for ((pageId, page) in pages.withIndex()) {
-            page.forEach { pageLine ->
-                book.setPage(pageId, pageLine)
+
+        // Verifications
+        if (pages.size > 50) error("A book cannot have more than 50 pages")
+        pages.forEach { page ->
+            var charCount = 0
+            page.forEach { line ->
+                charCount += line.length
+                charCount += 2 // Line break separator (\n) - 2 chars
             }
+            if (charCount > 256) error("The sum of all characters in a book page should not be greater than 256")
         }
+
+        // Action - Change pages
+        val bookMeta = book
+        bookMeta.pages.clear() // Reset pages
+        for (page in pages) {
+            val pageLinesBuilder = StringBuilder()
+            page.forEach { pageLine ->
+                pageLinesBuilder.append(pageLine)
+                pageLinesBuilder.append("\n")
+            }
+            bookMeta.addPage(pageLinesBuilder.toString())
+        }
+        this.itemMeta = bookMeta
     }
 
     /**
      * Note: This function uses NMS. (NMS 1.8_R3)
+     *
+     * When this function is called, pay attention to some points: ([BookMeta] = [book])
+     * - if the [BookMeta.hasTitle] is false, the default book title will be "Blank".
+     * - if the [BookMeta.hasAuthor] is false, the default book author will be "Unknown".
+     * - if the [BookMeta.hasPages] is false, the book will have one page with the text "Nothing here...".
      *
      * @param player the player to open this book gui.
      * @return this [MineBook].
@@ -102,10 +155,17 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
     // @suppress because of [player] as [CraftPlayer]. (NMS of this function)
     // @SuppressWarnings("unchecked") // Useless?
     fun open(player: Player): MineBook {
+        if (!book.hasTitle()) setTitle("Blank")
+        if (!book.hasAuthor()) setAuthor("Unknown")
+        if (!book.hasPages()) setPages(listOf("Nothing here..."))
+        val holdSlot = player.inventory.heldItemSlot
         val invItem = player.inventory.getItem(0)
         player.inventory.setItem(0, this) // This is necessary, otherwise the book gui will not open
+        player.inventory.heldItemSlot = 0 // The player needs to hold the given book
         (player as CraftPlayer).handle.openBook(CraftItemStack.asNMSCopy(this)) // Open book gui
         player.inventory.setItem(0, invItem)
+        player.inventory.heldItemSlot = holdSlot
+        player.updateInventory()
         return this
     }
 

@@ -27,7 +27,7 @@ import org.bukkit.inventory.ItemStack
  *
  * @see MineBook.open
  */
-fun Player.openMineBook(book: MineBook): Unit {
+fun Player.openMineBook(book: MineBook) {
     book.open(this)
 }
 // MineBook extra functions - End
