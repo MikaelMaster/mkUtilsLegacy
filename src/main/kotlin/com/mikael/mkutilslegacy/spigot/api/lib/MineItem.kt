@@ -1,5 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.api.lib
 
+import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import org.bukkit.Color

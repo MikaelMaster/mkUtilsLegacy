@@ -1,5 +1,7 @@
-package com.mikael.mkutilslegacy.spigot.api.lib
+package com.mikael.mkutilslegacy.spigot.api.lib.book
 
+import com.mikael.mkutilslegacy.api.isMultOf
+import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import org.bukkit.Material
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack
@@ -102,15 +104,41 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
     }
 
     /**
+     * @param lines the [String]s to be 'write' in this book.
+     * @return this [MineBook].
+     * @throws IllegalStateException if the characters sum of the given [lines] is greater than 2,800 (256 * 50).
+     * @see [BookMeta.addPage]
+     * @see pages
+     */
+    fun setText(vararg lines: String): MineBook {
+        val textBuilder = StringBuilder(); lines.forEach { textBuilder.append(it) }
+        val finalText = textBuilder.toString()
+        if (finalText.length > (256 * 50)) error("The characters sum of the given lines cannot be greater than 2,800 (256 * 50)") // Verification
+        val bookMeta = book
+        var pageBuilder = StringBuilder()
+        for ((index, char) in finalText.toList().withIndex()) {
+            pageBuilder.append(char)
+            if (index != 1 && index.isMultOf(255)) {
+                bookMeta.addPage(pageBuilder.toString())
+                pageBuilder = StringBuilder()
+
+            }
+        }
+        this.itemMeta = bookMeta
+        return this
+    }
+
+    /**
      * Important:
      * - A book can have only a MAXIMUM of 50 pages.
      * - Each page cannot have more than 256 characters.
      *
      * @param pages the new pages to set on this book. Each page can have multiple [String] lines.
+     * @return this [MineBook].
      * @throws IllegalStateException if the [pages] size is larger than 50.
      * @throws IllegalStateException if any page's sum of all characters is greater than 256.
+     * @see [BookMeta.addPage]
      * @see pages
-     * @see pageCount
      */
     fun setPages(vararg pages: List<String>): MineBook {
 
@@ -120,6 +148,49 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
             var charCount = 0
             page.forEach { line ->
                 charCount += line.length
+                charCount += 2 // Line break separator (\n) - 2 chars
+            }
+            if (charCount > 256) error("The sum of all characters in a book page should not be greater than 256")
+        }
+
+        // Action - Change pages
+        val bookMeta = book
+        bookMeta.pages.clear() // Reset pages
+        for (page in pages) {
+            val pageLinesBuilder = StringBuilder()
+            page.forEach { pageLine ->
+                pageLinesBuilder.append(pageLine)
+                pageLinesBuilder.append("\n")
+            }
+            bookMeta.addPage(pageLinesBuilder.toString())
+        }
+        this.itemMeta = bookMeta
+        return this
+    }
+
+    /**
+     * Important:
+     * - A book can have only a MAXIMUM of 50 pages.
+     * - Each page cannot have more than 256 characters.
+     *
+     * @param pages the new pages to set on this book. Each page is a [BookClickableLine].
+     * @return this [MineBook].
+     * @throws IllegalStateException if the [pages] size is larger than 50.
+     * @throws IllegalStateException if any page's sum of all characters is greater than 256.
+     * @see BookClickableLine
+     * @see [BookMeta.addPage]
+     * @see pages
+     */
+    @JvmName("setPages1")
+    @Deprecated("Not done yet.")
+    fun setPages(vararg pages: List<BookClickableLine>): MineBook {
+
+        // Verifications
+        if (pages.size > 50) error("A book cannot have more than 50 pages")
+        pages.forEach { page ->
+            var charCount = 0
+            page.forEach { line ->
+                charCount += line.textLine.length
                 charCount += 2 // Line break separator (\n) - 2 chars
             }
             if (charCount > 256) error("The sum of all characters in a book page should not be greater than 256")
@@ -153,12 +224,11 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
      * @see CraftPlayer // NMS
      * @see CraftItemStack.asNMSCopy // NMS
      */
-    // @suppress because of [player] as [CraftPlayer]. (NMS of this function)
-    // @SuppressWarnings("unchecked") // Useless?
     fun open(player: Player): MineBook {
-        if (!book.hasTitle()) setTitle("Blank")
-        if (!book.hasAuthor()) setAuthor("Unknown")
-        if (!book.hasPages()) setPages(listOf("Nothing here..."))
+        val bookMeta = book
+        if (!bookMeta.hasTitle()) setTitle("Blank")
+        if (!bookMeta.hasAuthor()) setAuthor("Unknown")
+        if (!bookMeta.hasPages()) setPages(listOf("Nothing here..."))
         val holdSlot = player.inventory.heldItemSlot
         val invItem = player.inventory.getItem(0)
         player.inventory.setItem(0, this) // This is necessary, otherwise the book gui will not open

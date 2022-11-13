@@ -89,7 +89,7 @@ fun String?.toTextComponent(): TextComponent {
  * Example:
  *
  * * Notch.{[String.formatPersonal]} phone. -> Notch's phone.
- * * MKjubs.{[String.formatPersonal]} phone. -> MKjubs' phone
+ * * MKjubs.{[String.formatPersonal]} phone. -> MKjubs' phone.
  *
  * @return the new [String] as a Personal format.
  */
@@ -112,6 +112,7 @@ fun String.fixGrammar(): String {
     for ((index, char) in this.toCharArray().withIndex()) {
         if (index == 0) continue
         newString.append(char)
+        this.trim()
     }
     return newString.toString()
 }
