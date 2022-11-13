@@ -1,5 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.api.lib
 
+import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import org.bukkit.Color
@@ -31,7 +32,7 @@ import java.util.*
  * @author Mikael
  * @see ItemStack
  */
-class MineItem(item: ItemStack) : ItemStack(item) {
+open class MineItem(item: ItemStack) : ItemStack(item) {
 
     constructor(material: Material) : this(ItemStack(material))
     constructor(material: Material, amount: Int) : this(ItemStack(material, amount))
@@ -150,6 +151,18 @@ class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * @return a new [MineBook] using this [MineItem] as 'baseItem'.
+     * @see MineBook
+     */
+    fun toMineBook(): MineBook {
+        return MineBook(this)
+    }
+
+    /**
+     * @return a clone of this [MineItem].
+     * @see ItemStack.clone
+     */
     override fun clone(): MineItem {
         return super.clone() as MineItem
     }
@@ -167,7 +180,7 @@ class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
-    fun potion(effect: PotionEffect): MineItem { // Change Item PotionEffect
+    fun potion(effect: PotionEffect): MineItem { // Change Item Potion Effect
         if (this.type != Material.POTION) {
             this.type = Material.POTION
         }
@@ -179,7 +192,7 @@ class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
-    fun spawnerType(type: EntityType): MineItem {
+    fun spawnerType(type: EntityType): MineItem { // Change Item Spawner Type
         this.type = Material.MOB_SPAWNER
         if (this.itemMeta == null) return this
         val meta = this.itemMeta as BlockStateMeta
@@ -224,8 +237,9 @@ class MineItem(item: ItemStack) : ItemStack(item) {
 
     fun skin(skinUrl: String): MineItem { // Custom Skull Skin
         this.skinURL = skinUrl
-        val encodedData = Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}", skinUrl).toByteArray())
-        return texture(String(encodedData)) // DON'T CHANGE IT-- .toString() will NOT work
+        val encodedData =
+            Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}", skinUrl).toByteArray())
+        return texture(String(encodedData)) // DON'T CHANGE IT! '.toString()' will NOT work
     }
 
     fun skinId(skinId: String): MineItem { // Custom Skull Skin ID

