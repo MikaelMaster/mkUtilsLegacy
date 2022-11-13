@@ -5,19 +5,30 @@ import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
 
-@Deprecated("Not done yet.")
-open class BookClickableLine(val component: TextComponent) {
+open class BookClickableLine(component: TextComponent) : TextComponent(component) {
 
     constructor(textLine: String) : this(textLine.toTextComponent())
 
     var textLine: String
-        get() = component.text
+        get() = this.text
         set(newLine) {
-            component.text = newLine
+            this.text = newLine
         }
 
-    val clickAction: ClickEvent.Action get() = component.clickEvent.action
+    // Click Event (ClickEvent)
 
-    val hoverAction: HoverEvent.Action get() = component.hoverEvent.action
+    val clickAction: ClickEvent.Action get() = this.clickEvent.action
+
+    fun setClickAction(action: ClickEvent.Action, value: String) {
+        this.clickEvent = ClickEvent(action, value)
+    }
+
+    // Hover Event (HoverEvent)
+
+    val hoverAction: HoverEvent.Action get() = this.hoverEvent.action
+
+    fun setHoverAction(action: HoverEvent.Action, vararg value: String) {
+        this.hoverEvent = HoverEvent(action, arrayOf(value.joinToString("/n").toTextComponent()))
+    }
 
 }

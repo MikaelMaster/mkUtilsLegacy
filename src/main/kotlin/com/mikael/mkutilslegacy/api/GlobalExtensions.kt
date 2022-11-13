@@ -98,23 +98,36 @@ fun String.formatPersonal(): String {
 }
 
 /**
- * The first letter (Char) of the given [String] will be changed to UpperCase.
+ * The given [String] will be grammar-fixed.
+ *
+ * Important: Characters considering append a net UpperCase lether at the moment is '.', '!' and '?'.
+ * If the word doesn't end with one of them, the next letter will not be 'Upper-cased'.
+ *
+ * THIS FUNCTION WAS BUILT FOR THESE LANGUAGES: Brazilian Portuguese, Portuguese and US English.
+ * This MAY work well with other languages, but was not tested for it.
  *
  * Example:
  *
- * * hi, how are you? -> Hi, how are you?
+ * - hi, how are you? -> Hi, how are you?
+ * - hi, how are you? i'm fine, thanks. -> Hi, how are you? I'm fine, thanks.
+ * - hey, Mikael! you here? -> Hey, Mikael! You here?
  *
- * @return the fixed [String].
+ * @return the grammar-fixed [String].
  */
 fun String.fixGrammar(): String {
-    val firstChar = this.first().uppercase()
-    val newString = StringBuilder(); newString.append(firstChar)
-    for ((index, char) in this.toCharArray().withIndex()) {
-        if (index == 0) continue
-        newString.append(char)
-        this.trim()
+    val newTextBuilder = StringBuilder()
+    for ((index, char) in this.toList().withIndex()) {
+        if (index == 0 ||
+            this[index - 2] == '.' ||
+            this[index - 2] == '!' ||
+            this[index - 2] == '?'
+        ) {
+            newTextBuilder.append(char.uppercase())
+            continue
+        }
+        newTextBuilder.append(char)
     }
-    return newString.toString()
+    return newTextBuilder.toString()
 }
 
 /**
