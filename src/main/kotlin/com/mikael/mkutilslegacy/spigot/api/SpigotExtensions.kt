@@ -24,7 +24,6 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import java.util.*
 
-
 // MineBook extra functions - Start
 /**
  * Opens the [book] to the given [Player].
@@ -253,6 +252,7 @@ fun Location.newHologram(toDown: Boolean, vararg lines: String?): List<ArmorStan
  * @return The spawned [ArmorStand] that compose this hologram.
  * @see ArmorStand
  */
+@Deprecated("Deprecated since mkUtilsLegacy 1.1.9; Use MineHologram util class instead.")
 fun World.newHologram(loc: Location, line: String?): ArmorStand {
     if (!loc.chunk.isLoaded) {
         loc.chunk.load(true)
@@ -281,6 +281,7 @@ fun World.newHologram(loc: Location, line: String?): ArmorStand {
  * @return A [List] of all spawned [ArmorStand] that compose the hologram.
  * @see ArmorStand
  */
+@Deprecated("Deprecated since mkUtilsLegacy 1.1.9; Use MineHologram util class instead.")
 fun World.newHologram(loc: Location, toDown: Boolean, vararg lines: String?): List<ArmorStand> {
     val holos = mutableListOf<ArmorStand>()
     var location: Location = loc

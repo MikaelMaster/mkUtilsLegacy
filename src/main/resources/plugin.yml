@@ -1,6 +1,6 @@
 name: mkUtilsLegacy
 description: mkUtils for legacy versions (Paper 1.8.8-R0.1). mkUtils is a lib for plugins development. By Mikael with help of Eduard and Koddy.
-version: 1.1.8
+version: 1.1.9
 authors: [ Mikael, Eduard, Koddy ]
 main: com.mikael.mkutilslegacy.spigot.UtilsMain
 
