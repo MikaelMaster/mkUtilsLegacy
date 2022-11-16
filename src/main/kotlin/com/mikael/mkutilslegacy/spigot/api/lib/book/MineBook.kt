@@ -231,9 +231,9 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
         if (!bookMeta.hasPages()) setPages(listOf("Nothing here..."))
         val holdSlot = player.inventory.heldItemSlot
         val invItem = player.inventory.getItem(0)
-        player.inventory.setItem(0, this) // This is necessary, otherwise the book gui will not open
+        player.inventory.setItem(0, this@MineBook) // This is necessary, otherwise the book gui will not open
         player.inventory.heldItemSlot = 0 // The player needs to hold the given book
-        (player as CraftPlayer).handle.openBook(CraftItemStack.asNMSCopy(this)) // Open book gui
+        (player as CraftPlayer).handle.openBook(CraftItemStack.asNMSCopy(this@MineBook)) // Open book gui
         player.inventory.setItem(0, invItem)
         player.inventory.heldItemSlot = holdSlot
         player.updateInventory()

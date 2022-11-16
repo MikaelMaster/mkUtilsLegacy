@@ -16,7 +16,7 @@ import org.bukkit.entity.Player
  *
  * The 'player-holograms' functions uses [net.minecraft.server.v1_8_R3]! (NMS 1.8_R3)
  *
- * To create/invoke a new MineItem you can use:
+ * To create/invoke a new MineHologram you can use:
  * - MineHologram(vararg lines: [String]?) -> MineHologram("Line 1", "Line 2", null, "Line 4") -> 'null' will be an empty line.
  *
  * @author KoddyDev
