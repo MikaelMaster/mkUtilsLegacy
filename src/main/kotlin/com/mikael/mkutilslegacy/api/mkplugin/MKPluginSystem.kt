@@ -11,6 +11,14 @@ object MKPluginSystem {
         loadedMKPlugins.clear()
     }
 
+    /**
+     * @return all loaded [MKPlugin]s.
+     * @see loadedMKPlugins
+     */
+    fun getLoadedMKPlugins(): List<MKPlugin> {
+        return loadedMKPlugins
+    }
+
     fun registerMKPlugin(plugin: MKPlugin) {
         loadedMKPlugins.add(plugin)
     }

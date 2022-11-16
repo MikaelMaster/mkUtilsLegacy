@@ -118,9 +118,9 @@ fun String.fixGrammar(): String {
     val newTextBuilder = StringBuilder()
     for ((index, char) in this.toList().withIndex()) {
         if (index == 0 ||
-            this[index - 2] == '.' ||
-            this[index - 2] == '!' ||
-            this[index - 2] == '?'
+            this.getOrNull((index - 2)) == '.' ||
+            this.getOrNull((index - 2)) == '!' ||
+            this.getOrNull((index - 2)) == '?'
         ) {
             newTextBuilder.append(char.uppercase())
             continue
