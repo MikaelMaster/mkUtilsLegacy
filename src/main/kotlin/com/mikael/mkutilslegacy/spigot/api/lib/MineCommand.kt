@@ -170,22 +170,6 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
                             break@aliases
                         }
                     }
-
-                    if(sub == null) {
-                        for (subSubCommand in subCommand.subCommands) {
-                            if (subSubCommand.name.equals(subC, true)) {
-                                sub = subSubCommand
-                                break
-                            } else {
-                                aliases@ for (alias in subSubCommand.aliases) {
-                                    if (alias.equals(subC, true)) {
-                                        sub = subSubCommand
-                                        break@aliases
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
 
