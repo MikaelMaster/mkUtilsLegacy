@@ -81,9 +81,8 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         BungeeGeneralListener().register(this)
 
         val loadTime = System.currentTimeMillis() - loadStart
-        log(
-            LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$loadTime")
-        ); MKPluginSystem.loadedMKPlugins.add(this@UtilsBungeeMain)
+        log(LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$loadTime"))
+        MKPluginSystem.registerMKPlugin(this@UtilsBungeeMain)
 
         ProxyServer.getInstance().scheduler.schedule(this, delay@{
 
@@ -106,12 +105,15 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
 
     override fun onDisable() {
         log(LangSystem.getText(Translation.UNLOADING_SYSTEMS))
+
         BungeeAPI.controller.unregister() // EduardAPI
         RedisBungeeAPI.proxyServerTask?.cancel()
         RedisAPI.finishConnection()
         mySqlQueueUpdater?.cancel()
         utilsmanager.dbManager.closeConnection()
-        log(LangSystem.getText(Translation.UNLOADING_COMPLETE)); MKPluginSystem.loadedMKPlugins.remove(this@UtilsBungeeMain)
+
+        log(LangSystem.getText(Translation.UNLOADING_COMPLETE))
+        MKPluginSystem.unregisterMKPlugin(this@UtilsBungeeMain)
     }
 
     private fun prepareRedis() {

@@ -1,7 +1,6 @@
 package com.mikael.mkutilslegacy.api
 
 import net.eduard.api.lib.database.SQLManager
-import net.eduard.api.lib.database.annotations.TableName
 
 class UtilsManager {
     companion object {

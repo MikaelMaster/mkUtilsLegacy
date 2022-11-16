@@ -5,10 +5,18 @@ package com.mikael.mkutilslegacy.api.mkplugin
  */
 object MKPluginSystem {
 
-    val loadedMKPlugins = mutableListOf<MKPlugin>()
+    internal val loadedMKPlugins = mutableListOf<MKPlugin>()
 
     init {
         loadedMKPlugins.clear()
+    }
+
+    fun registerMKPlugin(plugin: MKPlugin) {
+        loadedMKPlugins.add(plugin)
+    }
+
+    fun unregisterMKPlugin(plugin: MKPlugin) {
+        loadedMKPlugins.remove(plugin)
     }
 
 }

@@ -14,7 +14,6 @@ java.targetCompatibility = JavaVersion.VERSION_1_8
 repositories {
     mavenLocal()
     mavenCentral()
-    maven("https://mvnrepository.com/artifact/mysql/mysql-connector-java")
     maven("https://papermc.io/repo/repository/maven-public/")
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
@@ -28,17 +27,16 @@ dependencies {
     compileOnly(files("libs/spigot-1.8.8.jar"))
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
-    api("mysql:mysql-connector-java:8.0.30")
     api("redis.clients:jedis:4.3.1")
     api("org.slf4j:slf4j-api:2.0.3")
     api("org.slf4j:slf4j-log4j12:2.0.3")
-    api(files("C:\\Users\\Koddy\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar"))
+    api(files("C:\\Users\\Usuario\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar\\"))
 }
 
 tasks {
     jar {
         destinationDirectory
-            .set(file("C:\\Users\\Koddy\\Desktop\\IntelliJ Global Depends\\Plugins"))
+            .set(file("C:\\Users\\Usuario\\Desktop\\Meus Plugins - Jars\\"))
     }
     compileJava {
         options.encoding = "UTF-8"
@@ -53,7 +51,7 @@ tasks {
         archiveVersion.set("1.1")
         archiveBaseName.set("mkUtilsLegacy")
         destinationDirectory.set(
-            file("C:\\Users\\Koddy\\Desktop\\IntelliJ Global Depends\\Plugins")
+            file("C:\\Users\\Usuario\\Desktop\\Meus Plugins - Jars\\")
         )
     }
 }

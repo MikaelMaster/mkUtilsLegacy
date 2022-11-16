@@ -10,8 +10,6 @@ import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
 import com.mikael.mkutilslegacy.api.utilsmanager
-import com.mikael.mkutilslegacy.spigot.api.lib.MineCommand
-import com.mikael.mkutilslegacy.spigot.api.lib.TestCommand
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.example.ExampleMenuCommand
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.example.SinglePageExampleMenu
@@ -105,9 +103,8 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         GeneralListener().registerListener(this)
 
         val loadTime = System.currentTimeMillis() - loadStart
-        log(
-            LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$loadTime")
-        ); MKPluginSystem.loadedMKPlugins.add(this@UtilsMain)
+        log(LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$loadTime"))
+        MKPluginSystem.registerMKPlugin(this@UtilsMain)
 
         syncDelay(20) {
             log("§aPreparing MineReflect...")
@@ -161,7 +158,8 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         mySqlQueueUpdater?.cancel()
         utilsmanager.dbManager.closeConnection()
 
-        log(LangSystem.getText(Translation.UNLOADING_COMPLETE)); MKPluginSystem.loadedMKPlugins.remove(this@UtilsMain)
+        log(LangSystem.getText(Translation.UNLOADING_COMPLETE))
+        MKPluginSystem.unregisterMKPlugin(this@UtilsMain)
     }
 
     private fun prepareRedis() {

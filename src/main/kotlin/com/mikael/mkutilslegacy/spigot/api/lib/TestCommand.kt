@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.spigot.api.lib
 
-import com.mikael.mkutilslegacy.spigot.command.VersionCommand
 import com.mikael.mkutilslegacy.spigot.command.VersionSubCommand
 import org.bukkit.entity.Player
 
