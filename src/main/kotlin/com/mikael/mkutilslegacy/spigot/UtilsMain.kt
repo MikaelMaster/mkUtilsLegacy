@@ -69,8 +69,8 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         BukkitTypes.register() // Bukkit types - Load
         store<RedisConnectionData>()
 
-        Extra.FORMAT_DATE = SimpleDateFormat("MM/dd/yyyy") // EduardAPI
-        Extra.FORMAT_DATETIME = SimpleDateFormat("MM/dd/yyyy HH:mm:ss") // EduardAPI
+        Extra.FORMAT_DATE = SimpleDateFormat("dd/MM/yyyy") // EduardAPI
+        Extra.FORMAT_DATETIME = SimpleDateFormat("dd/MM/yyyy HH:mm:ss") // EduardAPI
 
         log(LangSystem.getText(Translation.LOADING_DIRECTORIES))
         config = Config(this@UtilsMain, "config.yml")

@@ -18,10 +18,12 @@ import net.minecraft.server.v1_8_R3.Vec3D
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity
 import org.bukkit.entity.*
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.Vector
 import java.util.*
 
 // MineBook extra functions - Start
@@ -700,6 +702,57 @@ fun Player.actionBar(msg: String) {
 @Suppress("DEPRECATION")
 fun Player.clearTitle() {
     this.resetTitle() // Just ignore the deprecated
+}
+
+fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true) {
+    val from = this.location
+    val velocity = Vector(0, 0, 0)
+
+    val horse = this.world.spawnEntity(from, EntityType.HORSE) as Horse
+    horse.isTamed = true
+    horse.variant = Horse.Variant.HORSE
+    horse.setAdult()
+    horse.inventory.saddle = MineItem(Material.SADDLE)
+    horse.owner = this
+    horse.passenger = this
+
+    if(entityInvisible) {
+        (horse as CraftEntity).handle.isInvisible = true
+    }
+
+    val to = toMovePlayer
+    val distance = from.distance(to)
+    val direction = to.toVector().subtract(from.toVector()).normalize()
+    val step = direction.multiply(0.5)
+    val ticks = (distance * 20 / 0.5).toInt()
+    val steps = (ticks / 2)
+    var ticksDelay = 1L
+
+    for (i in 0..steps) {
+        UtilsMain.instance.syncDelay(ticksDelay) {
+            if(horse.passenger == null) {
+                horse.passenger = this
+            }
+            velocity.add(step)
+            horse.velocity = velocity
+            ticksDelay++
+        }
+    }
+
+    UtilsMain.instance.syncDelay(steps + 1L) {
+        horse.remove()
+    }
+}
+
+fun Player.moveTo(toMovePlayer: Location, xzForce: Double = 4.0, yForce: Double = 1.0, soundEffect: Boolean = true) {
+    val speed = toMovePlayer.toVector().subtract(this.location.toVector()).normalize().multiply(xzForce)
+    speed.y = yForce
+
+    if(soundEffect) {
+        this.playSound(this.location, Sound.FIREWORK_LAUNCH, 2f, 2f)
+    }
+
+    this.velocity = speed
 }
 
 /**
