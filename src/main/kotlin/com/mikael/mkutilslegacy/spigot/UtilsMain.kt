@@ -10,6 +10,8 @@ import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
 import com.mikael.mkutilslegacy.api.utilsmanager
+import com.mikael.mkutilslegacy.spigot.api.lib.MineCommand
+import com.mikael.mkutilslegacy.spigot.api.lib.TestCommand
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.example.ExampleMenuCommand
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.example.SinglePageExampleMenu
