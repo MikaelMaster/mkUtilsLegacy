@@ -401,16 +401,25 @@ fun Player.soundTP(volume: Float = 2f, speed: Float = 1f) {
  * @see Item
  */
 fun Player.giveItem(item: ItemStack): Item? {
+    val itemClone = item.clone()
+    if (itemClone.amount < 1) error("Cannot give an ItemStack with amount less than 1 (item amount: ${itemClone.amount})")
     invSlot@ for (invItem in this.inventory.contents) {
         if (invItem == null) continue@invSlot
-        if (item.isSimilar(invItem) && invItem.amount < 64) {
-            invItem.amount++
+        if (itemClone.isSimilar(invItem) && invItem.amount < 64) {
+            val sumAmount = invItem.amount + itemClone.amount
+            if (sumAmount <= 64) {
+                invItem.amount += itemClone.amount
+            } else {
+                invItem.amount = 64
+                itemClone.amount = sumAmount - 64
+                return this.giveItem(itemClone)
+            }
             return null
         }
     }
     val slot = this.inventory.contents.withIndex().firstOrNull { it.value == null && it.index < 36 }
-        ?: return this.world.dropItemNaturally(this.eyeLocation, item)
-    this.inventory.setItem(slot.index, item)
+        ?: return this.world.dropItemNaturally(this.eyeLocation, itemClone)
+    this.inventory.setItem(slot.index, itemClone)
     this.updateInventory()
     return null
 }
@@ -716,7 +725,7 @@ fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true
     horse.owner = this
     horse.passenger = this
 
-    if(entityInvisible) {
+    if (entityInvisible) {
         (horse as CraftEntity).handle.isInvisible = true
     }
 
@@ -730,7 +739,7 @@ fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true
 
     for (i in 0..steps) {
         UtilsMain.instance.syncDelay(ticksDelay) {
-            if(horse.passenger == null) {
+            if (horse.passenger == null) {
                 horse.passenger = this
             }
             velocity.add(step)
@@ -748,7 +757,7 @@ fun Player.moveTo(toMovePlayer: Location, xzForce: Double = 4.0, yForce: Double 
     val speed = toMovePlayer.toVector().subtract(this.location.toVector()).normalize().multiply(xzForce)
     speed.y = yForce
 
-    if(soundEffect) {
+    if (soundEffect) {
         this.playSound(this.location, Sound.FIREWORK_LAUNCH, 2f, 2f)
     }
 
