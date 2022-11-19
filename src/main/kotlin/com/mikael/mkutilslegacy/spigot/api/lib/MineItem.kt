@@ -152,6 +152,14 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
     }
 
     /**
+     * @return this super class [ItemStack].
+     * @see MineItem.clone
+     */
+    fun toItemStack(): ItemStack {
+        return this.clone()
+    }
+
+    /**
      * @return a new [MineBook] using this [MineItem] as 'baseItem'.
      * @see MineBook
      */
