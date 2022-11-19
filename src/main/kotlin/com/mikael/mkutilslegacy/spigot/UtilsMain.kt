@@ -10,6 +10,7 @@ import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
 import com.mikael.mkutilslegacy.api.utilsmanager
+import com.mikael.mkutilslegacy.spigot.api.lib.hooks.Vault
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.example.ExampleMenuCommand
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.example.SinglePageExampleMenu
@@ -93,6 +94,9 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         BukkitBungeeAPI.requestCurrentServer() // EduardAPI
         BungeeAPI.bukkit.register(this) // EduardAPI
 
+        // VaultAPI
+        Vault.onEnable()
+
         log(LangSystem.getText(Translation.LOADING_SYSTEMS))
         prepareDebugs(); prepareMySQL(); prepareRedis();
 
@@ -150,6 +154,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
         log(LangSystem.getText(Translation.UNLOADING_APIS))
         MenuSystem.onDisable()
+        Vault.onDisable()
 
         log(LangSystem.getText(Translation.UNLOADING_SYSTEMS))
         BungeeAPI.controller.unregister() // EduardAPI
@@ -159,6 +164,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         utilsmanager.dbManager.closeConnection()
 
         log(LangSystem.getText(Translation.UNLOADING_COMPLETE))
+
         MKPluginSystem.unregisterMKPlugin(this@UtilsMain)
     }
 

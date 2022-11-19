@@ -122,48 +122,7 @@ open class MineHologram(private vararg val lines: String?) {
         return this
     }
 
-    /*
-    fun spawn(): MutableList<ArmorStand> {
-        remove()
-        val list = Mine.newHologram(location, lines.toMutableList())
-
-        holos.addAll(list)
-        return list
-    }
-
     /**
-     * Update a line of a Hologram
-     *
-     * @author KoddyDev
-     * @param line to update
-     * @param text to update
-     * @return [Boolean] if updated
-     */
-    fun update(line: Int, text: String): Boolean {
-        if (line >= holos.size) return false
-        holos[line].customName = text
-
-        return true
-    }
-
-    /**
-     * Update all lines of a Hologram
-     *
-     * @author KoddyDev
-     * @param lines Lines to update
-     * @return [Boolean] if updated
-     */
-    fun update(vararg lines: String): Boolean {
-        if (lines.size != holos.size) {
-            Mine.newHologram(location, lines.toMutableList())
-        } else {
-            for (i in lines.indices) {
-                holos[i].customName = lines[i]
-            }
-        }
-
-        return true
-    }
 
     /**
      * Remove a Hologram

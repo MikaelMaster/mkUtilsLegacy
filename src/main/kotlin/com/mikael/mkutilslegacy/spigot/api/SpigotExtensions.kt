@@ -5,6 +5,7 @@ import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
+import com.mikael.mkutilslegacy.spigot.api.lib.hooks.Vault
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MineMenu
@@ -771,6 +772,34 @@ fun Player.moveTo(toMovePlayer: Location, xzForce: Double = 4.0, yForce: Double 
  */
 fun Player.title(title: String?, subtitle: String?, fadeIn: Int = 10, stay: Int = 20 * 2, fadeOut: Int = 10) {
     this.mineSendTitle(title ?: " ", subtitle ?: " ", fadeIn, stay, fadeOut)
+}
+
+/**
+ * @see [Vault.getPlayerBalance]
+ */
+fun Player.getVaultBalance(): Double {
+    return Vault.getPlayerBalance(this)
+}
+
+/**
+ * @see [Vault.setPlayerBalance]
+ */
+fun Player.setVaultBalance(amount: Double) {
+    Vault.setPlayerBalance(this, amount)
+}
+
+/**
+ * @see [Vault.addPlayerBalance]
+ */
+fun Player.addVaultBalance(amount: Double) {
+    Vault.addPlayerBalance(this, amount)
+}
+
+/**
+ * @see [Vault.removePlayerBalance]
+ */
+fun Player.removeVaultBalance(amount: Double) {
+    Vault.removePlayerBalance(this, amount)
 }
 
 /**

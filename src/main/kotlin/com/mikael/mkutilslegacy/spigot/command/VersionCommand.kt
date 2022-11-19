@@ -2,7 +2,6 @@ package com.mikael.mkutilslegacy.spigot.command
 
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineCommand
-import com.mikael.mkutilslegacy.spigot.api.lib.TestCommand
 import org.bukkit.command.CommandSender
 
 class VersionCommand : MineCommand("mkutils", "mkutilslegacy") {
@@ -12,7 +11,6 @@ class VersionCommand : MineCommand("mkutils", "mkutilslegacy") {
     init {
         usage = "/mkutils"
         permissionMessage = versionMsg
-        registerSubCommand(TestCommand())
     }
 
     override fun command(sender: CommandSender, args: List<String>) {

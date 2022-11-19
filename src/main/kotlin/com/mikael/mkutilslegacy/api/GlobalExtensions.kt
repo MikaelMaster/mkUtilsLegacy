@@ -311,3 +311,11 @@ fun List<String>.replaceAll(oldValue: String, newValue: String, ignoreCase: Bool
     }
     return newList
 }
+
+/**
+ * @return a new [String] replacing all '&' to '§'.
+ * @see String.replace
+ */
+fun String.mineColored(): String {
+    return this.replace("&", "§")
+}
