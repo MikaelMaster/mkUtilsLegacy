@@ -156,16 +156,16 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
                 return
             }
 
-            val subC = if(args.size > 1) args.last() else args[0]
+            val subC = args.firstOrNull()?.lowercase()
             var sub: MineCommand? = null
 
             for (subCommand in subCommands) {
-                if (subCommand.name.equals(subC, true)) {
+                if (subCommand.name.lowercase() == subC) {
                     sub = subCommand
                     break
                 } else {
                     aliases@ for (alias in subCommand.aliases) {
-                        if (alias.equals(subC, true)) {
+                        if (alias.lowercase() == subC) {
                             sub = subCommand
                             break@aliases
                         }
