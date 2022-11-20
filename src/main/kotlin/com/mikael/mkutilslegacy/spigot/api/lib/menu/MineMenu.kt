@@ -2,12 +2,10 @@ package com.mikael.mkutilslegacy.spigot.api.lib.menu
 
 import com.mikael.mkutilslegacy.api.isMultOf
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
+import com.mikael.mkutilslegacy.spigot.api.*
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import com.mikael.mkutilslegacy.spigot.api.lib.MineListener
-import com.mikael.mkutilslegacy.spigot.api.openedMineMenu
-import com.mikael.mkutilslegacy.spigot.api.openedMineMenuPage
-import com.mikael.mkutilslegacy.spigot.api.player
-import com.mikael.mkutilslegacy.spigot.api.soundClick
+import net.eduard.api.lib.modules.Mine
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -37,6 +35,7 @@ import org.bukkit.inventory.Inventory
 open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
 
     var isAutoUpdate = true // Auto update this menu
+    var canReceiveItems = false // If the menu can 'receive items' from the player inventory in some icons
 
     // Auto Align options - Start
     var isAutoAlignItems = false
@@ -371,25 +370,44 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     fun onInvClose(e: InventoryCloseEvent) { // PlayerQuitEvent is not used anymore, onInvClose already clear all lists on quit.
         if (e.player !is Player) return
         val player = e.player as Player
-        val playerPages = pages[player] ?: return
-        if (playerPages.firstOrNull { e.inventory == it.inventory!! } == null) return
-        if (playerPages.any { it.nextPage != null && it.nextPage!!.inventory == player.openInventory }) {
-            pages.remove(player)
-            inventories.remove(player)
+        player.runBlock {
+            val playerPages = pages[player] ?: return@runBlock
+            if (playerPages.firstOrNull { e.inventory == it.inventory!! } == null) return@runBlock
+            if (playerPages.any { it.nextPage != null && it.nextPage!!.inventory == player.openInventory }) {
+                pages.remove(player)
+                inventories.remove(player)
+            }
+            player.openedMineMenu = null // MenuSystem.openedMenu.remove(player)
+            player.openedMineMenuPage = null // MenuSystem.openedPage.remove(player)
         }
-        player.openedMineMenu = null // MenuSystem.openedMenu.remove(player)
-        player.openedMineMenuPage = null // MenuSystem.openedPage.remove(player)
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onInvClick(e: InventoryClickEvent) {
         if (e.clickedInventory == null) return
         val player = e.player
+        player.runBlock {
+            if (player.openedMineMenu == null) {
+                Mine.broadcast("0")
+                return@runBlock
+            }
+            val playerPages = pages[player]
 
-        val playerPages = pages[player] ?: return
-        val clickedPage = playerPages.firstOrNull { e.clickedInventory == it.inventory!! }
-        clickedPage?.buttons?.firstOrNull { e.slot == it.effectiveSlot }?.click?.invoke(e)
-        if (player.openedMineMenu == null) return
-        e.isCancelled = true
+            if (playerPages == null) {
+                Mine.broadcast("1")
+                return@runBlock
+            }
+
+            val clickedPage = playerPages.firstOrNull { e.clickedInventory == it.inventory!! }
+            clickedPage?.buttons?.firstOrNull { e.slot == it.effectiveSlot }?.click?.invoke(e)
+
+            if (canReceiveItems && e.clickedInventory == player.openInventory) {
+                Mine.broadcast("2")
+                return@runBlock
+            }
+            // player.updateInventory()
+            e.isCancelled = true
+            Mine.broadcast("Cancelling event; 3")
+        }
     }
 }
