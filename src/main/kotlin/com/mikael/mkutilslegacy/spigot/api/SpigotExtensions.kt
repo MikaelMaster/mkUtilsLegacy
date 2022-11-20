@@ -775,6 +775,13 @@ fun Player.title(title: String?, subtitle: String?, fadeIn: Int = 10, stay: Int 
 }
 
 /**
+ * Sends to the given [Player] all given [messages].
+ */
+fun Player.sendMessage(vararg messages: String) {
+    this.sendMessage(messages)
+}
+
+/**
  * @see [Vault.getPlayerBalance]
  */
 fun Player.getVaultBalance(): Double {
