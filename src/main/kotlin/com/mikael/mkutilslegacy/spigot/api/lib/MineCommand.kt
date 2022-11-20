@@ -15,7 +15,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent
 /**
  * [MineCommand] util class
  *
- * *NOT FINISHED YET! DON'T USE IT!*
+ * *BETA: WORK IN PROGRESS!*
  *
  * This class represents a [CommandExecutor].
  *
@@ -34,6 +34,9 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
     companion object {
         private val registeredMineCommands = mutableListOf<MineCommand>()
 
+        /**
+         * @return all registered [MineCommand]s.
+         */
         fun getRegisteredMineCommands(): List<MineCommand> {
             return registeredMineCommands
         }
@@ -98,26 +101,28 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
      * @see usage
      */
     fun sendUsage(sender: CommandSender) {
-        sender.sendMessage(usage)
+        sender.sendMessage("§cUse: $usage")
     }
 
     /**
      * This will run the command itself.
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    fun onCommandProccess(e: PlayerCommandPreprocessEvent) {
+    fun onCommandPreProcess(e: PlayerCommandPreprocessEvent) {
         val player = e.player
         player.runBlock {
             val cmdName = e.message.split(" ")[0].replace("/", "")
             if (cmdName != name && !aliases.contains(cmdName)) return@runBlock
-
             executeCommand(player, Extra.getText(1, *e.message.split(" ").toTypedArray()).split(" "))
             e.isCancelled = true
         }
     }
 
-    fun registerSubCommand(command: MineCommand) {
-        subCommands.add(command)
+    /**
+     * Registers the given [subCommand] as child of this [MineCommand].
+     */
+    fun registerSubCommand(subCommand: MineCommand) {
+        subCommands.add(subCommand)
     }
 
     /**

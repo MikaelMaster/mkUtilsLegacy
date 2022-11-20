@@ -34,6 +34,8 @@ import org.bukkit.inventory.Inventory
  */
 open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
 
+    // Menu Properties - Start
+
     var isAutoUpdate = true // Auto update this menu
     var canReceiveItems = false // If the menu can 'receive items' from the player inventory in some icons
 
@@ -60,6 +62,8 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     var nextPageButtonItem = MineItem(Material.ARROW).name("§aPage %page%")
     // Back and Skip Page buttons options - End
 
+    // Menu Properties - End
+
     val buttonsToRegister = mutableSetOf<MenuButton>()
     private val pages = mutableMapOf<Player, MutableList<MenuPage>>()
     private val inventories = mutableMapOf<Player, MutableMap<Int, Inventory>>()
@@ -82,27 +86,30 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         }
 
     /**
-     * Register this menu. Must be used on your plugin onEnable.
+     * Registers this [MineMenu]. Must be used on your plugin onEnable.
      *
      * @param plugin your plugin instance that is a [MKPlugin].
-     * @return True if the menu is successfully registered. Otherwise, false.
+     * @return True if this [MineMenu] is successfully registered. Otherwise, false.
+     * @see MineListener.registerListener
+     * @see MenuSystem.registeredMenus
      */
     open fun registerMenu(plugin: MKPlugin): Boolean {
-        if (lineAmount < 1 || lineAmount > 6) error("menu lineAmount must be between 1 and 6")
+        if (lineAmount < 1 || lineAmount > 6) error("Menu lineAmount must be between 1 and 6")
         this.registerListener(plugin)
         MenuSystem.registeredMenus.add(this)
         return true
     }
 
     /**
-     * Unregister this menu. Must be used on your plugin onDisable.
+     * Unregisters this [MineMenu]. Must be used on your plugin onDisable.
      *
-     * You only need use this if needed.
+     * You only should use this if needed.
      * For example: If you want that your plugin have support to /reload.
      *
-     * Please note that all players seeing this menu will have it closed.
+     * Please note that all [Player]s seeing this [MineMenu] will have it closed.
      *
-     * @return True if the menu is successfully unregistered. Otherwise, false.
+     * @return True if this [MineMenu] is successfully unregistered. Otherwise, false.
+     * @see MineListener.unregisterListener
      */
     open fun unregisterMenu(): Boolean {
         MenuSystem.openedMenu.keys.removeIf {// Remove menu, pages and close it to players
@@ -148,9 +155,9 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      * Internal; Private.
      */
     private fun invokePageNextAndBackButtons(page: MenuPage) {
-        val inv = page.inventory ?: error("page inventory can't be null")
+        val inv = page.inventory ?: error("Page's inventory can't be null")
         if (page.hasBackPage) {
-            val backPageInv = page.backPage?.inventory ?: error("menu previous page/inventory is null")
+            val backPageInv = page.backPage?.inventory ?: error("Menu previous page/inventory is null")
             val backButton = MenuButton("back-page").apply {
                 autoEffectiveSlot = 0
                 fixed = true
@@ -171,7 +178,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             page.buttons.add(backButton)
         }
         if (page.hasNextPage) {
-            val nextPageInv = page.nextPage?.inventory ?: error("menu next page/inventory is null")
+            val nextPageInv = page.nextPage?.inventory ?: error("Menu next page/inventory is null")
             val nextButton = MenuButton("next-page").apply {
                 autoEffectiveSlot = 8
                 fixed = true
@@ -218,12 +225,12 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      */
     fun open(player: Player, pageToOpen: Int): Inventory {
         update(player) // Rebuilds menu
-        if (lineAmount < 1 || lineAmount > 6) error("menu lineAmount must be between 1 and 6")
-        if (!isAutoAlignItems && pageToOpen != 1) error("can't open a non-autoAlignItems menu with a page different than 1")
+        if (lineAmount < 1 || lineAmount > 6) error("Menu lineAmount must be between 1 and 6")
+        if (!isAutoAlignItems && pageToOpen != 1) error("Cannot open a non-autoAlignItems menu with a page different than 1")
         // if (pageToOpen > 1 && inventories[pageToOpen] == null) error("the required page $pageToOpen is not registered; pages size: ${pages.size}") // legacy
         autoAlignSkipLines.forEach {
-            if (it != 1 && it != 2 && it != 3 && it != 4 && it != 5 && it != 6) error("menu autoAlignSkipLines can't contains any Int different from 1, 2, 3, 4, 5 and 6")
-            if (it > lineAmount) error("this menu just have $lineAmount lines, can't apply rule to skip line $it")
+            if (it != 1 && it != 2 && it != 3 && it != 4 && it != 5 && it != 6) error("Menu autoAlignSkipLines can't contains any Int different from 1, 2, 3, 4, 5 and 6")
+            if (it > lineAmount) error("This menu just have $lineAmount lines, can't apply rule to skip line $it")
         }
 
         val playerPages = pages.getOrPut(player) { mutableListOf() }
@@ -313,7 +320,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             }
             buttonsToRegister.clear()
             val choosenInv =
-                playerInventories[pageToOpen] ?: error("cannot open page $pageToOpen; pages size: ${pages.size}")
+                playerInventories[pageToOpen] ?: error("Cannot open page $pageToOpen; pages size: ${pages.size}")
             player.openInventory(choosenInv)
             player.openedMineMenu = this
             player.openedMineMenuPage = playerPages.first { it.pageId == pageToOpen }
@@ -372,7 +379,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         val player = e.player as Player
         player.runBlock {
             val playerPages = pages[player] ?: return@runBlock
-            if (playerPages.firstOrNull { e.inventory == it.inventory!! } == null) return@runBlock
+            if (!playerPages.any { e.inventory == it.inventory!! }) return@runBlock
             if (playerPages.any { it.nextPage != null && it.nextPage!!.inventory == player.openInventory }) {
                 pages.remove(player)
                 inventories.remove(player)
@@ -387,27 +394,12 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         if (e.clickedInventory == null) return
         val player = e.player
         player.runBlock {
-            if (player.openedMineMenu == null) {
-                Mine.broadcast("0")
-                return@runBlock
-            }
-            val playerPages = pages[player]
-
-            if (playerPages == null) {
-                Mine.broadcast("1")
-                return@runBlock
-            }
-
+            if (player.openedMineMenu != this) return@runBlock
+            val playerPages = pages[player] ?: return@runBlock
             val clickedPage = playerPages.firstOrNull { e.clickedInventory == it.inventory!! }
             clickedPage?.buttons?.firstOrNull { e.slot == it.effectiveSlot }?.click?.invoke(e)
-
-            if (canReceiveItems && e.clickedInventory == player.openInventory) {
-                Mine.broadcast("2")
-                return@runBlock
-            }
-            // player.updateInventory()
+            if (clickedPage == null && canReceiveItems) return@runBlock
             e.isCancelled = true
-            Mine.broadcast("Cancelling event; 3")
         }
     }
 }

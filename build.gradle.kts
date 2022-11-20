@@ -25,6 +25,7 @@ dependencies {
     compileOnly("org.github.paperspigot:paperspigot-api:1.8.8-R0.1-SNAPSHOT")
     compileOnly("net.md-5:bungeecord-api:1.16-R0.3")
     compileOnly(files("libs/spigot-1.8.8.jar"))
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
     api("redis.clients:jedis:4.3.1")
