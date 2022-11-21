@@ -12,6 +12,7 @@ import net.eduard.api.lib.kotlin.resolve
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -291,14 +292,15 @@ fun URL.getJson(): JsonObject {
 /**
  * @return The current server port ([Int]) running the given [MKPlugin].
  */
-fun MKPlugin.serverPort(): Int {
-    return if (isProxyServer) {
-        ProxyServer.getInstance().config.listeners.firstOrNull()?.queryPort
-            ?: error("Cannot get ProxyServer query port")
-    } else {
-        Bukkit.getPort()
+val MKPlugin.serverPort: Int
+    get() {
+        return if (isProxyServer) {
+            ProxyServer.getInstance().config.listeners.firstOrNull()?.queryPort
+                ?: error("Cannot get ProxyServer query port")
+        } else {
+            Bukkit.getPort()
+        }
     }
-}
 
 /**
  * @return a new [String] [List] with all given elements replaced.
@@ -313,6 +315,9 @@ fun List<String>.replaceAll(oldValue: String, newValue: String, ignoreCase: Bool
 }
 
 /**
+ * This function is more fast when comparing to [ChatColor.translateAlternateColorCodes] since this
+ * uses the Kotlin String Replace and ignore the next chars after '&' and '§'.
+ *
  * @return a new [String] replacing all '&' to '§'.
  * @see String.replace
  */
@@ -323,20 +328,18 @@ fun String.mineColored(): String {
 fun String.breakLines(lineLength: Int = 50): List<String> {
     val split = this.split(" ")
     val lines = mutableListOf<String>()
-
-    for(word in split) {
-        if(lines.isEmpty()) {
+    for (word in split) {
+        if (lines.isEmpty()) {
             lines.add(word)
             continue
         }
 
         val lastLine = lines.last()
-        if(lastLine.length + word.length > 25) {
+        if (lastLine.length + word.length > 25) {
             lines.add(word)
         } else {
             lines[lines.lastIndex] = "$lastLine $word"
         }
     }
-
     return lines
 }
