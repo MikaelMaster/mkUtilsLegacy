@@ -319,3 +319,24 @@ fun List<String>.replaceAll(oldValue: String, newValue: String, ignoreCase: Bool
 fun String.mineColored(): String {
     return this.replace("&", "§")
 }
+
+fun String.breakLines(lineLength: Int = 50): List<String> {
+    val split = this.split(" ")
+    val lines = mutableListOf<String>()
+
+    for(word in split) {
+        if(lines.isEmpty()) {
+            lines.add(word)
+            continue
+        }
+
+        val lastLine = lines.last()
+        if(lastLine.length + word.length > 25) {
+            lines.add(word)
+        } else {
+            lines[lines.lastIndex] = "$lastLine $word"
+        }
+    }
+
+    return lines
+}
