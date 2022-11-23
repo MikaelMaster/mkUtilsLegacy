@@ -48,7 +48,7 @@ fun Player.openMineBook(book: MineBook) {
  * @see MineMenu.open
  */
 fun Player.openMineMenu(menu: MineMenu): Inventory {
-    return menu.open(this)
+    return MenuSystem.openMenu(this, menu)
 }
 
 /**

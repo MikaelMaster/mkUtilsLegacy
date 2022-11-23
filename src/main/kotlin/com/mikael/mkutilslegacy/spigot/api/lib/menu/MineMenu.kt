@@ -2,9 +2,11 @@ package com.mikael.mkutilslegacy.spigot.api.lib.menu
 
 import com.mikael.mkutilslegacy.api.isMultOf
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
+import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.*
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import com.mikael.mkutilslegacy.spigot.api.lib.MineListener
+import net.eduard.api.lib.modules.BukkitTimeHandler
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -13,6 +15,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
+import org.bukkit.scheduler.BukkitRunnable
 
 /**
  * [MineMenu] util class
@@ -316,6 +319,9 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     menuPage.inventory!!.setItem(fixedButton.effectiveSlot, fixedButton.icon)
                     menuPage.buttons.add(fixedButton)
                 }
+                menuPage.buttons.forEach { pageButton ->
+                    pageButton.inventory = menuPage.inventory!!
+                }
             }
             buttonsToRegister.clear()
             val choosenInv =
@@ -358,13 +364,131 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      * Creates a new button inside the menu.
      *
      * @param buttonName the button name. Can be null.
-     * @param setup the builder.
+     * @param fixed if this button will be auto align or not.
+     * @param x the icon X position. Let it as null if [fixed] is false.
+     * @param y the icon Y position. Let it as null if [fixed] is false.
+     * @param setup the [MenuButton] builder.
      * @return the built [MenuButton].
      */
-    inline fun button(buttonName: String? = null, crossinline setup: (MenuButton.() -> Unit)): MenuButton {
+    fun button(
+        buttonName: String? = null,
+        fixed: Boolean = true,
+        x: Int = 1,
+        y: Int = 1,
+        setup: (MenuButton.() -> Unit)
+    ): MenuButton {
         val newButton = if (buttonName != null) MenuButton(buttonName) else MenuButton()
         newButton.setup()
+        newButton.fixed = fixed
+        if (fixed) {
+            newButton.positionX = x
+            newButton.positionY = y
+        }
         buttonsToRegister.add(newButton)
+        return newButton
+    }
+
+    /**
+     * Creates a new animated [MenuButton] inside the menu.
+     *
+     * @param buttonName the button name. Can be null.
+     * @param fixed if this button will be auto align or not.
+     * @param x the icon X position. Let it as null if [fixed] is false.
+     * @param y the icon Y position. Let it as null if [fixed] is false.
+     * @param changeFrameDelay the time to change between icons (frames). Defined in ticks (20 = 1s).
+     * @param setup the [MenuButton] builder.
+     * @return the built [MenuButton].
+     */
+    fun animatedButton(
+        buttonName: String? = null,
+        fixed: Boolean = true,
+        x: Int = 1,
+        y: Int = 1,
+        changeFrameDelay: Long = 20,
+        setup: (MenuButton.() -> Unit)
+    ): MenuButton {
+        val newButton = if (buttonName != null) MenuButton(buttonName) else MenuButton()
+        newButton.setup()
+        newButton.fixed = fixed
+        if (fixed) {
+            newButton.positionX = x
+            newButton.positionY = y
+        }
+        object : BukkitRunnable() {
+            override fun run() {
+                newButton.inventory?.let { buttonInv ->
+                    if (newButton.lastFrameId + 1 > newButton.frames.size) {
+                        newButton.lastFrameId = 0
+                    }
+                    newButton.icon = newButton.frames[newButton.lastFrameId]
+                    newButton.lastFrameId++
+
+                    val currentAutoSlot = newButton.autoEffectiveSlot
+                    if (currentAutoSlot != null) {
+                        buttonInv.setItem(currentAutoSlot, newButton.icon)
+                    } else {
+                        buttonInv.setItem(newButton.effectiveSlot, newButton.icon)
+                    }
+
+                    if (buttonInv.viewers.isEmpty()) cancel()
+                }
+            }
+        }.runTaskTimer(UtilsMain.instance, changeFrameDelay, changeFrameDelay)
+        buttonsToRegister.add(newButton)
+        return newButton
+    }
+
+    /**
+     * Creates a new [MenuButton] inside this menu with will be built using async.
+     *
+     * This will process the code inside [setup] using async, then
+     * will update the button using its data once it's complete.
+     *
+     * @param buttonName the button name. Can be null.
+     * @param fixed if this button will be auto align or not.
+     * @param x the icon X position. Let it as null if [fixed] is false.
+     * @param y the icon Y position. Let it as null if [fixed] is false.
+     * @param setup the [MenuButton] builder.
+     * @return the built [MenuButton]. This button will be changed once [setup] is complete run using async.
+     * @see [BukkitTimeHandler.asyncDelay]
+     * @see [BukkitTimeHandler.syncTask]
+     */
+    fun asyncButton(
+        buttonName: String? = null,
+        fixed: Boolean = true,
+        x: Int = 1,
+        y: Int = 1,
+        setup: (MenuButton.() -> Unit)
+    ): MenuButton {
+        val newButton = if (buttonName != null) MenuButton(buttonName) else MenuButton()
+        newButton.icon = MineItem(Material.STAINED_GLASS_PANE).data(7).name("§8Loading...")
+        newButton.fixed = fixed
+        if (fixed) {
+            newButton.positionX = x
+            newButton.positionY = y
+        }
+        buttonsToRegister.add(newButton)
+        UtilsMain.instance.asyncDelay(1) {
+            try {
+                newButton.setup()
+                UtilsMain.instance.syncTask {
+                    try {
+                        newButton.inventory?.let { buttonInv ->
+                            val currentAutoSlot = newButton.autoEffectiveSlot
+                            if (currentAutoSlot != null) {
+                                buttonInv.setItem(currentAutoSlot, newButton.icon)
+                            } else {
+                                buttonInv.setItem(newButton.effectiveSlot, newButton.icon)
+                            }
+                        }
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                    }
+                }
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        }
         return newButton
     }
 

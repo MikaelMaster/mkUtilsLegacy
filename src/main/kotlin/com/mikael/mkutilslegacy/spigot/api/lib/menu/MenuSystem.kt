@@ -2,6 +2,7 @@ package com.mikael.mkutilslegacy.spigot.api.lib.menu
 
 import com.mikael.mkutilslegacy.spigot.api.openedMineMenu
 import org.bukkit.entity.Player
+import org.bukkit.inventory.Inventory
 
 object MenuSystem {
 
@@ -22,6 +23,18 @@ object MenuSystem {
      * @see Player.openedMineMenuPage
      */
     val openedPage = mutableMapOf<Player, MenuPage>()
+
+    /**
+     * Opens the given [menu] to the given [player]
+     *
+     * @param player the [Player] to open the given [menu].
+     * @param menu the [MineMenu] to open to the given [player].
+     * @return the opened [Inventory] for the player.
+     * @see MineMenu.open
+     */
+    fun openMenu(player: Player, menu: MineMenu): Inventory {
+        return menu.open(player)
+    }
 
     /**
      * It'll check if the value returned from [Player.openedMineMenu] is not null.
