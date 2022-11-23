@@ -7,7 +7,6 @@ import com.mikael.mkutilslegacy.spigot.api.*
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import com.mikael.mkutilslegacy.spigot.api.lib.MineListener
 import net.eduard.api.lib.modules.BukkitTimeHandler
-import net.eduard.api.lib.modules.Mine
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -322,7 +321,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 menuPage.buttons.forEach { pageButton ->
                     pageButton.inventory = menuPage.inventory!!
                     if (pageButton.isAnimated) {
-                        Mine.broadcast("Change delay: ${pageButton.changeFrameDelay}")
+                        // Mine.broadcast("Change delay: ${pageButton.changeFrameDelay}")
                         pageButton.runAnimationTask = object : BukkitRunnable() {
                             var lastId = 0
                             override fun run() {
@@ -337,15 +336,15 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                                     if (currentAutoSlot != null) {
                                         buttonInv.setItem(currentAutoSlot, pageButton.icon)
                                         player.updateInventory()
-                                        Mine.broadcast("Atualizando item para ID: ${lastId - 1} (auto)")
+                                        // Mine.broadcast("Atualizando item para ID: ${lastId - 1} (auto)")
                                     } else {
                                         buttonInv.setItem(pageButton.effectiveSlot, pageButton.icon)
                                         player.updateInventory()
-                                        Mine.broadcast("Atualizando item para ID: ${lastId - 1} (static)")
+                                        // Mine.broadcast("Atualizando item para ID: ${lastId - 1} (static)")
                                     }
 
                                     if (buttonInv.viewers.isEmpty()) {
-                                        Mine.broadcast("Cancelando timer")
+                                        // Mine.broadcast("Cancelando timer")
                                         cancel()
                                         pageButton.runAnimationTask = null
                                     }
@@ -402,9 +401,8 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                                         player.updateInventory()
                                     }
 
-
                                     if (buttonInv.viewers.isEmpty()) {
-                                        Mine.broadcast("Cancelando timer")
+                                        // Mine.broadcast("Cancelando timer")
                                         cancel()
                                         button.runAnimationTask = null
                                     }
