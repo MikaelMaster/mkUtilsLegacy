@@ -372,7 +372,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      */
     fun button(
         buttonName: String? = null,
-        fixed: Boolean = true,
+        fixed: Boolean = !isAutoAlignItems,
         x: Int = 1,
         y: Int = 1,
         setup: (MenuButton.() -> Unit)
@@ -401,7 +401,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      */
     fun animatedButton(
         buttonName: String? = null,
-        fixed: Boolean = true,
+        fixed: Boolean = !isAutoAlignItems,
         x: Int = 1,
         y: Int = 1,
         changeFrameDelay: Long = 20,
@@ -455,7 +455,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      */
     fun asyncButton(
         buttonName: String? = null,
-        fixed: Boolean = true,
+        fixed: Boolean = !isAutoAlignItems,
         x: Int = 1,
         y: Int = 1,
         setup: (MenuButton.() -> Unit)
