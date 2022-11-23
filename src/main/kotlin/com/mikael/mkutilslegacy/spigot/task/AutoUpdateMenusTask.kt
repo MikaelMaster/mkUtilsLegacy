@@ -23,8 +23,8 @@ class AutoUpdateMenusTask : TimeManager(UtilsMain.instance.config.getLong("MenuA
         for (player in Mine.getPlayers()) { // mkUtils new Menu System
             try {
                 val menu = player.openedMineMenu ?: continue
-                val pageOpened = menu.getPageOpened(player) ?: continue
                 if (!menu.isAutoUpdate) continue
+                val pageOpened = menu.getPageOpened(player) ?: continue
                 menu.open(player, pageOpened)
             } catch (ex: Exception) {
                 ex.printStackTrace()

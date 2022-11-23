@@ -61,6 +61,14 @@ object MenuSystem {
      * Should be run when mkUtils disables.
      */
     internal fun onDisable() {
+        registeredMenus.forEach { menu ->
+            menu.buttons.values.forEach {
+                it.forEach { button ->
+                    button.runAnimationTask?.cancel()
+                    button.runAnimationTask = null
+                }
+            }
+        }
         val registeredMenusCopy = mutableSetOf<MineMenu>(); registeredMenusCopy.addAll(registeredMenus)
         registeredMenusCopy.forEach { it.unregisterMenu() }; registeredMenusCopy.clear()
         registeredMenus.clear()

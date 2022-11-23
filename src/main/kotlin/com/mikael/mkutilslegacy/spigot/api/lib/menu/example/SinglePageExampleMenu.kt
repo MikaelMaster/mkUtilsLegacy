@@ -10,14 +10,13 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
+/**
+ * Here, you'll learn how to create a single-page [MineMenu].
+ *
+ * @author Mikael
+ * @see MineMenu
+ */
 class SinglePageExampleMenu : MineMenu("Cool Example Menu :D", 6) {
-
-    /**
-     * Here, you'll learn how to create a single-page [MineMenu].
-     *
-     * @author Mikael
-     * @see MineMenu
-     */
 
     /**
      * Let's start creating a companion object.
@@ -67,12 +66,7 @@ class SinglePageExampleMenu : MineMenu("Cool Example Menu :D", 6) {
          * Now, let's create a [button].
          * The buttonName can be set how you want. Don't use spaces. use - instead.
          */
-        button("info-paper") {
-            /**
-             * Here, you'll set the menu button position.
-             * Using X and Y.
-             */
-            setPosition(5, 3)
+        button("info-paper", true, 5, 3) {
 
             /**
              * Here, you'll set the menu button icon.
@@ -83,7 +77,7 @@ class SinglePageExampleMenu : MineMenu("Cool Example Menu :D", 6) {
              * @see MineItem
              */
             icon = MineItem(Material.PAPER)
-                .name("§aRandom infos (For tests)")
+                .name("§aRandom infos for tests")
                 .lore(
                     "",
                     "§fCurrent time: §e${System.currentTimeMillis().formatDate()} ${
@@ -92,7 +86,7 @@ class SinglePageExampleMenu : MineMenu("Cool Example Menu :D", 6) {
                 )
 
             /**
-             * Here, you'll set the button click. (ClickEffect)
+             * Here, you'll set up the button click. (ClickEffect)
              * See more details here: [MenuButton]
              *
              * Important: Inside a click, IT is InventoryClickEvent.
@@ -100,12 +94,13 @@ class SinglePageExampleMenu : MineMenu("Cool Example Menu :D", 6) {
              * The click on a menu button will always be cancelled, and the button will stay on the same slot.
              */
             click = infoClick@{
-                player.soundPling()
-                player.sendMessage("You're the player: ${player.name}")
+                player.soundPling(2f, 2f)
+                player.sendMessage("§eYou're the player: §f${player.name}")
                 if (player.isFlying) {
+                    player.sendMessage("§aYou're flying! :D")
                     return@infoClick // Return can be used here if needed, since you define a name for your click. Example: click = clickName@ { ... }
                 }
-                player.sendMessage("You're not flying :c")
+                player.sendMessage("§cYou're not flying. :c")
             }
         }
     }

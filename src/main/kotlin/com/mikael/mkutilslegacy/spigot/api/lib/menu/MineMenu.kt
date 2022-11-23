@@ -7,6 +7,7 @@ import com.mikael.mkutilslegacy.spigot.api.*
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import com.mikael.mkutilslegacy.spigot.api.lib.MineListener
 import net.eduard.api.lib.modules.BukkitTimeHandler
+import net.eduard.api.lib.modules.Mine
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -282,7 +283,6 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     buttonId = 1 // reset count
                 }
                 if (button.icon != null) {
-                    var buttonSlot = button.effectiveSlot
                     if (autoAlignSkipLines.isNotEmpty()) {
                         if (lastSlot == 0) {
                             var lastSkip = 0
@@ -306,7 +306,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     ) {
                         lastSlot += 2
                     }
-                    buttonSlot = lastSlot
+                    val buttonSlot: Int = lastSlot
                     button.autoEffectiveSlot = buttonSlot
                     buttonId++
                     lastInv.setItem(buttonSlot, button.icon)
@@ -321,6 +321,38 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 }
                 menuPage.buttons.forEach { pageButton ->
                     pageButton.inventory = menuPage.inventory!!
+                    if (pageButton.isAnimated) {
+                        Mine.broadcast("Change delay: ${pageButton.changeFrameDelay}")
+                        pageButton.runAnimationTask = object : BukkitRunnable() {
+                            var lastId = 0
+                            override fun run() {
+                                pageButton.inventory?.let { buttonInv ->
+                                    if (lastId + 1 > pageButton.frames.size) {
+                                        lastId = 0
+                                    }
+                                    pageButton.icon = pageButton.frames[lastId]
+                                    lastId++
+
+                                    val currentAutoSlot = pageButton.autoEffectiveSlot
+                                    if (currentAutoSlot != null) {
+                                        buttonInv.setItem(currentAutoSlot, pageButton.icon)
+                                        player.updateInventory()
+                                        Mine.broadcast("Atualizando item para ID: ${lastId - 1} (auto)")
+                                    } else {
+                                        buttonInv.setItem(pageButton.effectiveSlot, pageButton.icon)
+                                        player.updateInventory()
+                                        Mine.broadcast("Atualizando item para ID: ${lastId - 1} (static)")
+                                    }
+
+                                    if (buttonInv.viewers.isEmpty()) {
+                                        Mine.broadcast("Cancelando timer")
+                                        cancel()
+                                        pageButton.runAnimationTask = null
+                                    }
+                                }
+                            }
+                        }.runTaskTimer(UtilsMain.instance, 0, pageButton.changeFrameDelay)
+                    }
                 }
             }
             buttonsToRegister.clear()
@@ -347,8 +379,39 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             playerPages.add(singlePage)
 
             for (button in buttonsToRegister) {
+                button.inventory = singlePage.inventory!!
                 if (button.icon != null) {
                     pageInventory.setItem(button.effectiveSlot, button.icon)
+                    if (button.isAnimated) {
+                        button.runAnimationTask = object : BukkitRunnable() {
+                            var lastId = 0
+                            override fun run() {
+                                button.inventory?.let { buttonInv ->
+                                    if (lastId + 1 > button.frames.size) {
+                                        lastId = 0
+                                    }
+                                    button.icon = button.frames[lastId]
+                                    lastId++
+
+                                    val currentAutoSlot = button.autoEffectiveSlot
+                                    if (currentAutoSlot != null) {
+                                        buttonInv.setItem(currentAutoSlot, button.icon)
+                                        player.updateInventory()
+                                    } else {
+                                        buttonInv.setItem(button.effectiveSlot, button.icon)
+                                        player.updateInventory()
+                                    }
+
+
+                                    if (buttonInv.viewers.isEmpty()) {
+                                        Mine.broadcast("Cancelando timer")
+                                        cancel()
+                                        button.runAnimationTask = null
+                                    }
+                                }
+                            }
+                        }.runTaskTimer(UtilsMain.instance, 0, button.changeFrameDelay)
+                    }
                     singlePage.buttons.add(button)
                 }
             }
@@ -398,6 +461,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      * @param changeFrameDelay the time to change between icons (frames). Defined in ticks (20 = 1s).
      * @param setup the [MenuButton] builder.
      * @return the built [MenuButton].
+     * @throws IllegalStateException if [changeFrameDelay] is less than 1.
      */
     fun animatedButton(
         buttonName: String? = null,
@@ -407,6 +471,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         changeFrameDelay: Long = 20,
         setup: (MenuButton.() -> Unit)
     ): MenuButton {
+        if (changeFrameDelay < 1) error("MenuButton property 'changeFrameDelay' cannot be less than 1")
         val newButton = if (buttonName != null) MenuButton(buttonName) else MenuButton()
         newButton.setup()
         newButton.fixed = fixed
@@ -414,26 +479,8 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             newButton.positionX = x
             newButton.positionY = y
         }
-        object : BukkitRunnable() {
-            override fun run() {
-                newButton.inventory?.let { buttonInv ->
-                    if (newButton.lastFrameId + 1 > newButton.frames.size) {
-                        newButton.lastFrameId = 0
-                    }
-                    newButton.icon = newButton.frames[newButton.lastFrameId]
-                    newButton.lastFrameId++
-
-                    val currentAutoSlot = newButton.autoEffectiveSlot
-                    if (currentAutoSlot != null) {
-                        buttonInv.setItem(currentAutoSlot, newButton.icon)
-                    } else {
-                        buttonInv.setItem(newButton.effectiveSlot, newButton.icon)
-                    }
-
-                    if (buttonInv.viewers.isEmpty()) cancel()
-                }
-            }
-        }.runTaskTimer(UtilsMain.instance, changeFrameDelay, changeFrameDelay)
+        newButton.changeFrameDelay = changeFrameDelay
+        newButton.isAnimated = true
         buttonsToRegister.add(newButton)
         return newButton
     }

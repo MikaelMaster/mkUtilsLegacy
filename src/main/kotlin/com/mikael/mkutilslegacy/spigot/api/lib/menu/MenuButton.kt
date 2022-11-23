@@ -5,6 +5,7 @@ import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.scheduler.BukkitTask
 
 open class MenuButton(var name: String) {
 
@@ -15,7 +16,8 @@ open class MenuButton(var name: String) {
     internal var fixed = false
 
     internal var isAnimated = false // Animated Button property
-    internal var lastFrameId = 0 // Animated Button property
+    internal var changeFrameDelay = 20L // Animated Button property
+    internal var runAnimationTask: BukkitTask? = null // Animated Button property
     var frames = mutableListOf<ItemStack>() // Animated Button property
 
     internal var inventory: Inventory? = null
