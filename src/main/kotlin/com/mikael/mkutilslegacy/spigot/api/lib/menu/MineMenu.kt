@@ -55,14 +55,14 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         }
     // Auto Align options - End
 
-    // Back and Skip Page buttons options - Start
-    var backPageButtonPosX = 0
-    var backPageButtonPosY = 1
-    var backPageButtonItem = MineItem(Material.ARROW).name("§aPage %page%")
-    var nextPageButtonPosX = 8
-    var nextPageButtonPosY = 1
-    var nextPageButtonItem = MineItem(Material.ARROW).name("§aPage %page%")
-    // Back and Skip Page buttons options - End
+    // Back and Next Page buttons options - Start
+    private var backPageButtonItem = MineItem(Material.ARROW).name("§aPage %page%")
+    private var backPageButtonPosX = 1
+    private var backPageButtonPosY = 1
+    private var nextPageButtonItem = MineItem(Material.ARROW).name("§aPage %page%")
+    private var nextPageButtonPosX = 9
+    private var nextPageButtonPosY = 1
+    // Back and Next Page buttons options - End
 
     // Menu Properties - End
 
@@ -157,48 +157,27 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      * Internal; Private.
      */
     private fun invokePageNextAndBackButtons(page: MenuPage) {
-        val inv = page.inventory ?: error("Page's inventory can't be null")
         if (page.hasBackPage) {
-            val backPageInv = page.backPage?.inventory ?: error("Menu previous page/inventory is null")
-            val backButton = MenuButton("back-page").apply {
-                autoEffectiveSlot = 0
-                fixed = true
-                icon = backPageButtonItem.clone().name(
-                    backPageButtonItem.getName().replace("%page%", "${page.backPage!!.pageId}", true)
-                )
+            val backPageInv = page.backPage?.inventory ?: error("Menu back page/inventory can't be null")
+            page.backPageButton = button("back-page", true, backPageButtonPosX, backPageButtonPosY) {
+                icon = backPageButtonItem.clone().name(nextPageButtonItem.getName().replace("%page%", "${page.backPage!!.pageId}", true))
                 click = click@{
                     val player = it.player
                     player.soundClick(2f, 2f)
                     player.openInventory(backPageInv)
                 }
             }
-            inv.setItem(
-                backButton.effectiveSlot,
-                backButton.icon
-            )
-            page.backPageButton = backButton
-            page.buttons.add(backButton)
         }
         if (page.hasNextPage) {
-            val nextPageInv = page.nextPage?.inventory ?: error("Menu next page/inventory is null")
-            val nextButton = MenuButton("next-page").apply {
-                autoEffectiveSlot = 8
-                fixed = true
-                icon = nextPageButtonItem.clone().name(
-                    nextPageButtonItem.getName().replace("%page%", "${page.nextPage!!.pageId}", true)
-                )
+            val nextPageInv = page.nextPage?.inventory ?: error("Menu next page/inventory can't be null")
+            page.nextPageButton = button("next-page", true, nextPageButtonPosX, nextPageButtonPosY) {
+                icon = nextPageButtonItem.clone().name(nextPageButtonItem.getName().replace("%page%", "${page.nextPage!!.pageId}", true))
                 click = click@{
                     val player = it.player
                     player.soundClick(2f, 2f)
                     player.openInventory(nextPageInv)
                 }
             }
-            inv.setItem(
-                nextButton.effectiveSlot,
-                nextButton.icon
-            )
-            page.nextPageButton = nextButton
-            page.buttons.add(nextButton)
         }
     }
 
@@ -241,6 +220,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         for (page in playerPages) {
             page.buttons.clear()
             page.inventory = null
+            page.menu = null
         }
         playerPages.clear()
         playerInventories.clear()
@@ -255,6 +235,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             var lastPage = MenuPage()
             lastPage.pageId = playerPages.size.plus(1)
             lastPage.inventory = lastInv
+            lastPage.menu = this@MineMenu
             playerPages.add(lastPage)
             playerInventories[playerPages.size] = lastInv
             var lastSlot = 0
@@ -269,11 +250,12 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                             title.replace("%page%", playerPages.size.plus(1).toString(), true)
                         )
                     val lp = lastPage
-                    lastPage.hasNextPage = true
+                    // lastPage.hasNextPage = true
                     lastPage = MenuPage()
                     lastPage.pageId = playerPages.size.plus(1)
                     lastPage.inventory = lastInv
-                    lastPage.hasBackPage = true
+                    lastPage.menu = this@MineMenu
+                    // lastPage.hasPreviousPage = true
                     lastPage.backPage = lp
                     lp.nextPage = lastPage
                     playerPages.add(lastPage)
@@ -321,7 +303,6 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 menuPage.buttons.forEach { pageButton ->
                     pageButton.inventory = menuPage.inventory!!
                     if (pageButton.isAnimated) {
-                        // Mine.broadcast("Change delay: ${pageButton.changeFrameDelay}")
                         pageButton.runAnimationTask = object : BukkitRunnable() {
                             var lastId = 0
                             override fun run() {
@@ -374,6 +355,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 )
             pageInventory.clear()
             singlePage.inventory = pageInventory
+            singlePage.menu = this@MineMenu
             playerInventories[pageToOpen] = pageInventory
             playerPages.add(singlePage)
 
@@ -419,6 +401,44 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             player.openedMineMenuPage = singlePage
             return pageInventory
         }
+    }
+
+    /**
+     * Sets up the following menu properties:
+     * - [backPageButtonItem]
+     * - [backPageButtonPosX]
+     * - [backPageButtonPosY]
+     *
+     * IMPORTANT: DON'T use this function inside a non-[isAutoAlignItems] - [MineMenu], or this will throw an [IllegalStateException] error.
+     *
+     * @param item the new [MineItem] to be set as [backPageButtonItem]. Use '%page%' in its name as replacer if you want.
+     * @param x the new [Int] to be set as [backPageButtonPosX]. Default: 1.
+     * @param y the new [Int] to be set as [backPageButtonPosY]. Default: 1.
+     * @throws IllegalStateException If [isAutoAlignItems] of this [MineMenu] is false.
+     */
+    fun setupBackButton(item: MineItem, x: Int = 1, y: Int = 1) {
+        backPageButtonItem = item.clone()
+        backPageButtonPosX = x
+        backPageButtonPosY = y
+    }
+
+    /**
+     * Sets up the following menu properties:
+     * - [nextPageButtonItem]
+     * - [nextPageButtonPosX]
+     * - [nextPageButtonPosY]
+     *
+     * IMPORTANT: DON'T use this function inside a non-[isAutoAlignItems] - [MineMenu], or this will throw an [IllegalStateException] error.
+     *
+     * @param item the new [MineItem] to be set as [nextPageButtonItem]. Use '%page%' in its name as replacer if you want.
+     * @param x the new [Int] to be set as [nextPageButtonPosX]. Default: 9.
+     * @param y the new [Int] to be set as [nextPageButtonPosY]. Default: 1.
+     * @throws IllegalStateException If [isAutoAlignItems] of this [MineMenu] is false.
+     */
+    fun setupNextButton(item: MineItem, x: Int = 9, y: Int = 1) {
+        nextPageButtonItem = item.clone()
+        nextPageButtonPosX = x
+        nextPageButtonPosY = y
     }
 
     /**
