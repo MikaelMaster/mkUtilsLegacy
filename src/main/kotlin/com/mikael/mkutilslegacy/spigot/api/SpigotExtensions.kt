@@ -406,7 +406,7 @@ fun Player.soundTP(volume: Float = 2f, speed: Float = 1f) {
  */
 fun Player.giveItem(item: ItemStack): Item? {
     val itemClone = item.clone()
-    if (itemClone.amount < 1) error("Cannot give an ItemStack with amount less than 1 (item amount: ${itemClone.amount})")
+    if (itemClone.amount !in 1..64) error("Cannot give an ItemStack with amount less than 1 or higher than 64 (item amount: ${itemClone.amount})")
     invSlot@ for (invItem in this.inventory.contents) {
         if (invItem == null) continue@invSlot
         val maxStackSize = invItem.type.maxStackSize
