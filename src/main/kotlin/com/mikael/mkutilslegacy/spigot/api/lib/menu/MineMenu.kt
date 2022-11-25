@@ -15,7 +15,6 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
-import org.bukkit.scheduler.BukkitRunnable
 
 /**
  * [MineMenu] util class
@@ -300,38 +299,33 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     menuPage.inventory!!.setItem(fixedButton.effectiveSlot, fixedButton.icon)
                     menuPage.buttons.add(fixedButton)
                 }
-                menuPage.buttons.forEach { pageButton ->
-                    pageButton.inventory = menuPage.inventory!!
-                    if (pageButton.isAnimated) {
-                        pageButton.runAnimationTask = object : BukkitRunnable() {
-                            var lastId = 0
-                            override fun run() {
-                                pageButton.inventory?.let { buttonInv ->
-                                    if (lastId + 1 > pageButton.frames.size) {
-                                        lastId = 0
-                                    }
-                                    pageButton.icon = pageButton.frames[lastId]
-                                    lastId++
+                menuPage.buttons.forEach { button ->
+                    button.inventory = menuPage.inventory!!
+                    if (button.isAnimated) {
+                        var lastId = 0
+                        button.runAnimationTask = UtilsMain.instance.syncTimer(0, button.changeFrameDelay) {
+                            button.inventory?.let { buttonInv ->
+                                if (lastId + 1 > button.frames.size) {
+                                    lastId = 0
+                                }
+                                button.icon = button.frames[lastId]
+                                lastId++
 
-                                    val currentAutoSlot = pageButton.autoEffectiveSlot
-                                    if (currentAutoSlot != null) {
-                                        buttonInv.setItem(currentAutoSlot, pageButton.icon)
-                                        player.updateInventory()
-                                        // Mine.broadcast("Atualizando item para ID: ${lastId - 1} (auto)")
-                                    } else {
-                                        buttonInv.setItem(pageButton.effectiveSlot, pageButton.icon)
-                                        player.updateInventory()
-                                        // Mine.broadcast("Atualizando item para ID: ${lastId - 1} (static)")
-                                    }
+                                val currentAutoSlot = button.autoEffectiveSlot
+                                if (currentAutoSlot != null) {
+                                    buttonInv.setItem(currentAutoSlot, button.icon)
+                                    player.updateInventory()
+                                } else {
+                                    buttonInv.setItem(button.effectiveSlot, button.icon)
+                                    player.updateInventory()
+                                }
 
-                                    if (buttonInv.viewers.isEmpty()) {
-                                        // Mine.broadcast("Cancelando timer")
-                                        cancel()
-                                        pageButton.runAnimationTask = null
-                                    }
+                                if (buttonInv.viewers.isEmpty()) {
+                                    button.runAnimationTask?.cancel()
+                                    button.runAnimationTask = null
                                 }
                             }
-                        }.runTaskTimer(UtilsMain.instance, 0, pageButton.changeFrameDelay)
+                        }
                     }
                 }
             }
@@ -364,33 +358,30 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 if (button.icon != null) {
                     pageInventory.setItem(button.effectiveSlot, button.icon)
                     if (button.isAnimated) {
-                        button.runAnimationTask = object : BukkitRunnable() {
-                            var lastId = 0
-                            override fun run() {
-                                button.inventory?.let { buttonInv ->
-                                    if (lastId + 1 > button.frames.size) {
-                                        lastId = 0
-                                    }
-                                    button.icon = button.frames[lastId]
-                                    lastId++
+                        var lastId = 0
+                        button.runAnimationTask = UtilsMain.instance.syncTimer(0, button.changeFrameDelay) {
+                            button.inventory?.let { buttonInv ->
+                                if (lastId + 1 > button.frames.size) {
+                                    lastId = 0
+                                }
+                                button.icon = button.frames[lastId]
+                                lastId++
 
-                                    val currentAutoSlot = button.autoEffectiveSlot
-                                    if (currentAutoSlot != null) {
-                                        buttonInv.setItem(currentAutoSlot, button.icon)
-                                        player.updateInventory()
-                                    } else {
-                                        buttonInv.setItem(button.effectiveSlot, button.icon)
-                                        player.updateInventory()
-                                    }
+                                val currentAutoSlot = button.autoEffectiveSlot
+                                if (currentAutoSlot != null) {
+                                    buttonInv.setItem(currentAutoSlot, button.icon)
+                                    player.updateInventory()
+                                } else {
+                                    buttonInv.setItem(button.effectiveSlot, button.icon)
+                                    player.updateInventory()
+                                }
 
-                                    if (buttonInv.viewers.isEmpty()) {
-                                        // Mine.broadcast("Cancelando timer")
-                                        cancel()
-                                        button.runAnimationTask = null
-                                    }
+                                if (buttonInv.viewers.isEmpty()) {
+                                    button.runAnimationTask?.cancel()
+                                    button.runAnimationTask = null
                                 }
                             }
-                        }.runTaskTimer(UtilsMain.instance, 0, button.changeFrameDelay)
+                        }
                     }
                     singlePage.buttons.add(button)
                 }
@@ -585,7 +576,11 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             if (player.openedMineMenu != this) return@runBlock
             val playerPages = pages[player] ?: return@runBlock
             val clickedPage = playerPages.firstOrNull { e.clickedInventory == it.inventory!! }
-            clickedPage?.buttons?.firstOrNull { e.slot == it.effectiveSlot }?.click?.invoke(e)
+            try {
+                clickedPage?.buttons?.firstOrNull { e.slot == it.effectiveSlot }?.click?.invoke(e)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
             if (clickedPage == null && canReceiveItems) return@runBlock
             e.isCancelled = true
         }

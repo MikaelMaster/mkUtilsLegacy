@@ -37,8 +37,9 @@ val Redis = RedisAPI
 
 /**
  * Key to sync MySQL async and sync updates.
+ * It's useful for plugins witch uses mkUtilsLegacy as dependency ([MKPlugin]).
+ *
  * DO NOT USE IT BY YOURSELF IF YOU DO NOT KNOW WHAT YOU ARE DOING.
- * Instead, use [syncMysql] and give the block code that will be executed using this sync key.
  *
  * @see syncMysql
  */
@@ -180,6 +181,13 @@ fun Int.isMultOf(multBy: Int): Boolean {
 }
 
 /**
+ * @return True if the given [Double] is multiple of [multBy]. Otherwise, false.
+ */
+fun Double.isMultOf(multBy: Double): Boolean {
+    return this % multBy == 0.0
+}
+
+/**
  * Formats a [Number] using the North America (US) format.
  *
  * Example:
@@ -189,7 +197,13 @@ fun Int.isMultOf(multBy: Int): Boolean {
  *
  * @return a [String] with the formatted value.
  */
-@Deprecated("Use { Number.formatValue() } instead.")
+@Deprecated(
+    "Use { Number.formatValue() } instead.", ReplaceWith(
+        "NumberFormat.getNumberInstance(Locale.US).format(this)",
+        "java.text.NumberFormat",
+        "java.util.Locale"
+    )
+)
 fun Number.formatEN(): String {
     return NumberFormat.getNumberInstance(Locale.US).format(this)
 }
@@ -325,6 +339,13 @@ fun String.mineColored(): String {
     return this.replace("&", "§")
 }
 
+/**
+ * This will return the given [String] 'split' in lines, following the given [lineLength].
+ *
+ * @param lineLength the max length if each [String] that will be returned. Default: 50.
+ * @return a new [List] of [String] with the lines broken using the given [lineLength].
+ * @author KoddyDev
+ */
 fun String.breakLines(lineLength: Int = 50): List<String> {
     val split = this.split(" ")
     val lines = mutableListOf<String>()
@@ -333,9 +354,8 @@ fun String.breakLines(lineLength: Int = 50): List<String> {
             lines.add(word)
             continue
         }
-
         val lastLine = lines.last()
-        if (lastLine.length + word.length > 25) {
+        if (lastLine.length + word.length > lineLength) {
             lines.add(word)
         } else {
             lines[lines.lastIndex] = "$lastLine $word"

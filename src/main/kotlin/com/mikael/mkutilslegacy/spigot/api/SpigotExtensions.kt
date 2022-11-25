@@ -230,6 +230,7 @@ fun <T : ItemStack> T.notBreakable(isUnbreakable: Boolean = true): T {
  * @param line the line string to spawn. If you give as null, the line will be empty.
  * @see World.newHologram
  */
+@Suppress("DEPRECATION")
 fun Location.newHologram(line: String?): ArmorStand {
     if (this.world == null) error("Cannot spawn a hologram on a unloaded world")
     return this.world!!.newHologram(this, line)
@@ -242,6 +243,7 @@ fun Location.newHologram(line: String?): ArmorStand {
  * @param lines the list of lines string to spawn. If you give as null, the line will be empty.
  * @see World.newHologram
  */
+@Suppress("DEPRECATION")
 fun Location.newHologram(toDown: Boolean, vararg lines: String?): List<ArmorStand> {
     if (this.world == null) error("Cannot spawn a hologram in a unloaded world")
     return this.world!!.newHologram(this, toDown, *lines)
@@ -284,6 +286,7 @@ fun World.newHologram(loc: Location, line: String?): ArmorStand {
  * @return A [List] of all spawned [ArmorStand] that compose the hologram.
  * @see ArmorStand
  */
+@Suppress("DEPRECATION")
 @Deprecated("Deprecated since mkUtilsLegacy 1.1.9; Use MineHologram util class instead.")
 fun World.newHologram(loc: Location, toDown: Boolean, vararg lines: String?): List<ArmorStand> {
     val holos = mutableListOf<ArmorStand>()
@@ -406,19 +409,17 @@ fun Player.giveItem(item: ItemStack): Item? {
     if (itemClone.amount < 1) error("Cannot give an ItemStack with amount less than 1 (item amount: ${itemClone.amount})")
     invSlot@ for (invItem in this.inventory.contents) {
         if (invItem == null) continue@invSlot
-        // check if itemClone is a stackable item
-        if (invItem.type.maxStackSize > 1) {
-            if (itemClone.isSimilar(invItem) && invItem.amount < 64) {
-                val sumAmount = invItem.amount + itemClone.amount
-                if (sumAmount <= 64) {
-                    invItem.amount += itemClone.amount
-                } else {
-                    invItem.amount = 64
-                    itemClone.amount = sumAmount - 64
-                    return this.giveItem(itemClone)
-                }
-                return null
+        val maxStackSize = invItem.type.maxStackSize
+        if (itemClone.isSimilar(invItem) && invItem.amount < maxStackSize) {
+            val sumAmount = invItem.amount + itemClone.amount
+            if (sumAmount <= maxStackSize) {
+                invItem.amount += itemClone.amount
+            } else {
+                invItem.amount = maxStackSize
+                itemClone.amount = sumAmount - maxStackSize
+                return this.giveItem(itemClone)
             }
+            return null
         } else {
             continue@invSlot
         }
@@ -661,7 +662,7 @@ inline fun Player.runCommand(
  * @param sendLoading if is to send a 'Loading...' message before try to load the Unit using async.
  * @param thing the block code to run using async and try catch.
  */
-@Deprecated("Deprecated since mkUtils v1.1; Use Player.runCommand instead, inside an Async Block.")
+@Deprecated("Deprecated since mkUtilsLegacy 1.0.9; Use Player.runCommand inside an Async Block instead.")
 inline fun Player.runCommandAsync(
     sendLoading: Boolean = true,
     errorMessage: String = "§cAn internal error occurred while executing this command.",
