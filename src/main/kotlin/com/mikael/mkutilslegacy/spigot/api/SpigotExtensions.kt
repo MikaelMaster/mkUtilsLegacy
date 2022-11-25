@@ -406,16 +406,21 @@ fun Player.giveItem(item: ItemStack): Item? {
     if (itemClone.amount < 1) error("Cannot give an ItemStack with amount less than 1 (item amount: ${itemClone.amount})")
     invSlot@ for (invItem in this.inventory.contents) {
         if (invItem == null) continue@invSlot
-        if (itemClone.isSimilar(invItem) && invItem.amount < 64) {
-            val sumAmount = invItem.amount + itemClone.amount
-            if (sumAmount <= 64) {
-                invItem.amount += itemClone.amount
-            } else {
-                invItem.amount = 64
-                itemClone.amount = sumAmount - 64
-                return this.giveItem(itemClone)
+        // check if itemClone is a stackable item
+        if (invItem.type.maxStackSize > 1) {
+            if (itemClone.isSimilar(invItem) && invItem.amount < 64) {
+                val sumAmount = invItem.amount + itemClone.amount
+                if (sumAmount <= 64) {
+                    invItem.amount += itemClone.amount
+                } else {
+                    invItem.amount = 64
+                    itemClone.amount = sumAmount - 64
+                    return this.giveItem(itemClone)
+                }
+                return null
             }
-            return null
+        } else {
+            continue@invSlot
         }
     }
     val slot = this.inventory.contents.withIndex().firstOrNull { it.value == null && it.index < 36 }
