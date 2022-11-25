@@ -38,7 +38,6 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     // Menu Properties - Start
 
     var isAutoUpdate = true // Auto update this menu
-    var canReceiveItems = false // If the menu can 'receive items' from the player inventory in some icons
 
     // Auto Align options - Start
     var isAutoAlignItems = false
@@ -159,7 +158,8 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         if (page.hasBackPage) {
             val backPageInv = page.backPage?.inventory ?: error("Menu back page/inventory can't be null")
             page.backPageButton = button("back-page", true, backPageButtonPosX, backPageButtonPosY) {
-                icon = backPageButtonItem.clone().name(nextPageButtonItem.getName().replace("%page%", "${page.backPage!!.pageId}", true))
+                icon = backPageButtonItem.clone()
+                    .name(nextPageButtonItem.getName().replace("%page%", "${page.backPage!!.pageId}", true))
                 click = click@{
                     val player = it.player
                     player.soundClick(2f, 2f)
@@ -170,7 +170,8 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         if (page.hasNextPage) {
             val nextPageInv = page.nextPage?.inventory ?: error("Menu next page/inventory can't be null")
             page.nextPageButton = button("next-page", true, nextPageButtonPosX, nextPageButtonPosY) {
-                icon = nextPageButtonItem.clone().name(nextPageButtonItem.getName().replace("%page%", "${page.nextPage!!.pageId}", true))
+                icon = nextPageButtonItem.clone()
+                    .name(nextPageButtonItem.getName().replace("%page%", "${page.nextPage!!.pageId}", true))
                 click = click@{
                     val player = it.player
                     player.soundClick(2f, 2f)
@@ -575,13 +576,14 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         player.runBlock {
             if (player.openedMineMenu != this) return@runBlock
             val playerPages = pages[player] ?: return@runBlock
-            val clickedPage = playerPages.firstOrNull { e.clickedInventory == it.inventory!! }
+            val clickedPage = playerPages.firstOrNull { e.clickedInventory == it.inventory!! } ?: return@runBlock
+            val clickedButton = clickedPage.buttons.firstOrNull { e.slot == it.effectiveSlot }
             try {
-                clickedPage?.buttons?.firstOrNull { e.slot == it.effectiveSlot }?.click?.invoke(e)
+                clickedButton?.click?.invoke(e)
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
-            if (clickedPage == null && canReceiveItems) return@runBlock
+            if (clickedButton != null && clickedButton.canReceiveItems) return@runBlock
             e.isCancelled = true
         }
     }
