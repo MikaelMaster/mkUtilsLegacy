@@ -113,7 +113,11 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
         player.runBlock {
             val cmdName = e.message.split(" ")[0].replace("/", "")
             if (cmdName != name && !aliases.contains(cmdName)) return@runBlock
-            executeCommand(player, Extra.getText(1, *e.message.split(" ").toTypedArray()).split(" "))
+            try {
+                executeCommand(player, Extra.getText(1, *e.message.split(" ").toTypedArray()).split(" "))
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
             e.isCancelled = true
         }
     }

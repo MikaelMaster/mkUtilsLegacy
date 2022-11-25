@@ -30,7 +30,6 @@ open class MenuButton(var name: String) {
             return y * 9 + positionX - 1
         }
 
-    var canReceiveItems = false
     var icon: ItemStack? = frames.firstOrNull() ?: MineItem(Material.BARRIER) // default icon = Barrier; it can be set to null (AIR)
     var click: ((InventoryClickEvent) -> Unit) = click@{ /* it = InventoryClickEvent */ } // default click = do nothing
 

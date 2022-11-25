@@ -38,6 +38,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     // Menu Properties - Start
 
     var isAutoUpdate = true // Auto update this menu
+    var canReceiveItems = false // If this menu will be able to 'receive' items
 
     // Auto Align options - Start
     var isAutoAlignItems = false
@@ -576,14 +577,14 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         player.runBlock {
             if (player.openedMineMenu != this) return@runBlock
             val playerPages = pages[player] ?: return@runBlock
-            val clickedPage = playerPages.firstOrNull { e.clickedInventory == it.inventory!! } ?: return@runBlock
-            val clickedButton = clickedPage.buttons.firstOrNull { e.slot == it.effectiveSlot }
+            if (this.canReceiveItems && !e.isShiftClick && e.rawSlot > this.lineAmount * 9 - 1) return@runBlock
+            val clickedPage = playerPages.firstOrNull { e.clickedInventory == it.inventory!! }
+            val clickedButton = clickedPage?.buttons?.firstOrNull { e.slot == it.effectiveSlot }
             try {
                 clickedButton?.click?.invoke(e)
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
-            if (clickedButton != null && clickedButton.canReceiveItems) return@runBlock
             e.isCancelled = true
         }
     }
