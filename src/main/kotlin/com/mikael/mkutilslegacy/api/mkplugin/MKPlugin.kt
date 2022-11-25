@@ -5,14 +5,20 @@ import com.mikael.mkutilslegacy.api.mkplugin.language.Translation
 import net.eduard.api.lib.plugin.IPluginInstance
 import java.util.*
 
+/**
+ * Represents a MK Plugin. Extends an [IPluginInstance].
+ *
+ * @author Mikael
+ */
 interface MKPlugin : IPluginInstance {
 
     /**
      * If this [MKPlugin] is free.
-     * If it's not, then [MKPluginSystem.requireActivation] will be called to this plugin.
      *
+     * @author Mikael
      * @see MKPluginSystem
      */
+    @Deprecated("Deprecated since mkUtilsLegacy 2.0.6; This is not used anymore for nothing.")
     val isFree: Boolean
 
     /**
@@ -21,12 +27,14 @@ interface MKPlugin : IPluginInstance {
      * Example: 'pt-br', 'en-us'.
      *
      * This will be used the get translations from [Translation].
+     * @author Mikael
      * @see LangSystem
      */
     var usingLanguage: String
 
     /**
-     * ?
+     * @author Mikael
+     * @see Locale
      */
     var regionFormatter: Locale
 
@@ -40,6 +48,8 @@ interface MKPlugin : IPluginInstance {
      * }
      *
      * @param msg the message to log.
+     * @author Mikael
      */
     fun log(msg: String)
+
 }

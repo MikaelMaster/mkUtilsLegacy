@@ -51,6 +51,7 @@ val syncMysqUpdatesKey = Any()
  *
  * @param thing the block code to execute using the [syncMysqUpdatesKey].
  * @return True if the block code has been executed with no error. Otherwise, false.
+ * @author Mikael
  * @see syncMysqUpdatesKey
  */
 @Deprecated("Deprecated; Use { synchronized(syncMysqUpdatesKey) { *code* } } instead.")
@@ -68,6 +69,7 @@ inline fun syncMysql(crossinline thing: (() -> Unit)): Boolean {
 
 /**
  * @return True if the plugin is running on Bungeecord (Waterfall, etc). Otherwise, false.
+ * @author Mikael
  */
 val isProxyServer get() = Hybrid.instance.isBungeecord
 
@@ -75,6 +77,7 @@ val isProxyServer get() = Hybrid.instance.isBungeecord
  * Transforms a [String]? into a [TextComponent].
  *
  * @return [TextComponent] with the given [String], or empty if null is given.
+ * @author Mikael
  * @see TextComponent
  */
 fun String?.toTextComponent(): TextComponent {
@@ -94,6 +97,7 @@ fun String?.toTextComponent(): TextComponent {
  * * MKjubs.{[String.formatPersonal]} phone. -> MKjubs' phone.
  *
  * @return the new [String] as a Personal format.
+ * @author Mikael
  */
 fun String.formatPersonal(): String {
     return if (this.last() == 's') "${this}'" else "${this}'s"
@@ -115,6 +119,7 @@ fun String.formatPersonal(): String {
  * - hey, Mikael! you here? -> Hey, Mikael! You here?
  *
  * @return the grammar-fixed [String].
+ * @author Mikael
  */
 fun String.fixGrammar(): String {
     val newTextBuilder = StringBuilder()
@@ -136,6 +141,7 @@ fun String.fixGrammar(): String {
  * Will return a [String] with "seconds" if the given [Int] is different from 1. Otherwise, it will return "second".
  *
  * @return a [String] with "seconds" or "second". Can be '-1' if the given [Int] is negative (-1, -2, etc).
+ * @author Mikael
  */
 fun Int.formatSecondWorld(): String {
     if (this < 0) return "-1"
@@ -144,6 +150,7 @@ fun Int.formatSecondWorld(): String {
 
 /**
  * @return a [String] with '§aEnabled' or '§cDisabled', following the given [Boolean].
+ * @author Mikael
  */
 fun Boolean.formatEnabledDisabled(colored: Boolean = true): String {
     val text = if (colored) {
@@ -156,6 +163,7 @@ fun Boolean.formatEnabledDisabled(colored: Boolean = true): String {
 
 /**
  * @return a [String] with '§aYes' or '§cNo', following the given [Boolean].
+ * @author Mikael
  */
 fun Boolean.formatYesNo(colored: Boolean = true): String {
     val text = if (colored) {
@@ -168,6 +176,7 @@ fun Boolean.formatYesNo(colored: Boolean = true): String {
 
 /**
  * @return a [String] with '§aON', '§cOFF' or the custom given texts, following the given [Boolean].
+ * @author Mikael
  */
 fun Boolean.formatOnOff(onText: String = "§aON", offText: String = "§cOFF"): String {
     return if (this) onText else offText
@@ -175,6 +184,7 @@ fun Boolean.formatOnOff(onText: String = "§aON", offText: String = "§cOFF"): S
 
 /**
  * @return True if the given [Int] is multiple of [multBy]. Otherwise, false.
+ * @author Mikael
  */
 fun Int.isMultOf(multBy: Int): Boolean {
     return this % multBy == 0
@@ -182,6 +192,7 @@ fun Int.isMultOf(multBy: Int): Boolean {
 
 /**
  * @return True if the given [Double] is multiple of [multBy]. Otherwise, false.
+ * @author Mikael
  */
 fun Double.isMultOf(multBy: Double): Boolean {
     return this % multBy == 0.0
@@ -196,6 +207,7 @@ fun Double.isMultOf(multBy: Double): Boolean {
  * * 1065 -> 1,065
  *
  * @return a [String] with the formatted value.
+ * @author Mikael
  */
 @Deprecated(
     "Use { Number.formatValue() } instead.", ReplaceWith(
@@ -218,6 +230,7 @@ fun Number.formatEN(): String {
  * * 1000.5 -> 1,000.50
  *
  * @return a [String] with the formatted value.
+ * @author Mikael
  */
 fun Number.formatValue(): String {
     val mkPlugin = if (isProxyServer) UtilsBungeeMain.instance else UtilsMain.instance
@@ -237,6 +250,7 @@ fun Number.formatValue(): String {
  * * 5d 10h 30m (seconds is not here because it's 0s)
  *
  * @return a formatted [String] with the duration. Can be '-1' if an invalid [Long] is given.
+ * @author Mikael
  */
 fun Long.formatDuration(): String {
     return if (this <= 0L) {
@@ -278,6 +292,7 @@ fun Long.formatDuration(): String {
  *
  * @return the built [StringBuilder] with a 'possible' JSON Object.
  * @throws IOException
+ * @author Mikael
  */
 fun URL.stream(): String {
     this.openStream().use { input ->
@@ -296,6 +311,7 @@ fun URL.stream(): String {
  * @return a [JsonObject] from the [URL].
  * @throws JsonIOException
  * @throws JsonSyntaxException
+ * @author Mikael
  * @see URL.stream
  * @see JsonParser.parse
  */
@@ -305,6 +321,7 @@ fun URL.getJson(): JsonObject {
 
 /**
  * @return The current server port ([Int]) running the given [MKPlugin].
+ * @author Mikael
  */
 val MKPlugin.serverPort: Int
     get() {
@@ -318,6 +335,7 @@ val MKPlugin.serverPort: Int
 
 /**
  * @return a new [String] [List] with all given elements replaced.
+ * @author Mikael
  * @see String.replace
  */
 fun List<String>.replaceAll(oldValue: String, newValue: String, ignoreCase: Boolean = false): List<String> {
@@ -333,6 +351,7 @@ fun List<String>.replaceAll(oldValue: String, newValue: String, ignoreCase: Bool
  * uses the Kotlin String Replace and ignore the next chars after '&' and '§'.
  *
  * @return a new [String] replacing all '&' to '§'.
+ * @author Mikael
  * @see String.replace
  */
 fun String.mineColored(): String {
@@ -344,6 +363,7 @@ fun String.mineColored(): String {
  *
  * @param lineLength the max length if each [String] that will be returned. Default: 50.
  * @return a new [List] of [String] with the lines broken using the given [lineLength].
+ * @author Mikael
  * @author KoddyDev
  */
 fun String.breakLines(lineLength: Int = 50): List<String> {
@@ -363,3 +383,18 @@ fun String.breakLines(lineLength: Int = 50): List<String> {
     }
     return lines
 }
+
+/**
+ * Please note that:
+ * - 1.0 = 100% of chance
+ * - 0.50 = 50% of chance
+ * - 0.05 = 5% of chance
+ *
+ * @return True if [Math.random] <= [Double]. Otherwise, false.
+ * @author Mikael
+ * @see Math.random
+ */
+fun Double.getProbability(): Boolean {
+    return Math.random() <= this
+}
+
