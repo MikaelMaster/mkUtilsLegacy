@@ -29,15 +29,14 @@ dependencies {
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
     api("redis.clients:jedis:4.3.1")
-    api("org.slf4j:slf4j-api:2.0.4")
-    api("org.slf4j:slf4j-log4j12:2.0.4")
-    api(files("C:\\Users\\Usuario\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar\\"))
+    api("org.slf4j:slf4j-api:2.0.5")
+    api("org.slf4j:slf4j-log4j12:2.0.5")
+    api(files("C:\\Users\\mikael.peixoto\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar\\"))
 }
 
 tasks {
     jar {
-        destinationDirectory
-            .set(file("C:\\Users\\Usuario\\Desktop\\Meus Plugins - Jars\\"))
+        destinationDirectory.set(file("C:\\Users\\mikael.peixoto\\Desktop\\Meus Plugins - Jars\\"))
     }
     compileJava {
         options.encoding = "UTF-8"
@@ -51,9 +50,7 @@ tasks {
     shadowJar {
         archiveVersion.set("2.0")
         archiveBaseName.set("mkUtilsLegacy")
-        destinationDirectory.set(
-            file("C:\\Users\\Usuario\\Desktop\\Meus Plugins - Jars\\")
-        )
+        destinationDirectory.set(file("C:\\Users\\mikael.peixoto\\Desktop\\Meus Plugins - Jars\\"))
     }
 }
 publishing {
