@@ -5,10 +5,9 @@ import com.google.gson.JsonParser
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.mkplugin.MKPluginData
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
-import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
-import com.mikael.mkutilslegacy.spigot.UtilsMain
+import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.hybrid.Hybrid
-import net.eduard.api.lib.kotlin.resolve
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
@@ -26,13 +25,21 @@ import java.util.concurrent.TimeUnit
  *
  * @see UtilsManager
  */
-val utilsmanager = resolve<UtilsManager>()
+@Deprecated(
+    "Call UtilsManager class instead.",
+    ReplaceWith("UtilsManager", "com.mikael.mkutilslegacy.api.UtilsManager")
+)
+val Manager = UtilsManager
 
 /**
  * [RedisAPI] class shortcut.
  *
  * @see RedisAPI
  */
+@Deprecated(
+    "Call RedisAPI class instead.",
+    ReplaceWith("RedisAPI", "com.mikael.mkutilslegacy.api.redis.RedisAPI")
+)
 val Redis = RedisAPI
 
 /**
@@ -233,7 +240,7 @@ fun Number.formatEN(): String {
  * @author Mikael
  */
 fun Number.formatValue(): String {
-    val mkPlugin = if (isProxyServer) UtilsBungeeMain.instance else UtilsMain.instance
+    val mkPlugin = if (isProxyServer) utilsBungeeMain else utilsMain
     return NumberFormat.getNumberInstance(mkPlugin.regionFormatter).format(this)
 }
 

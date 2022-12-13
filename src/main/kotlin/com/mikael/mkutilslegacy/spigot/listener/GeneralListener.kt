@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.spigot.listener
 
-import com.mikael.mkutilslegacy.api.Redis
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.spigot.UtilsMain
@@ -50,7 +49,7 @@ class GeneralListener : MineListener() {
         player.runBlock {
             val newPlayersList = mutableListOf<String>()
             Mine.getPlayers().forEach { newPlayersList.add(it.name) }
-            Redis.insertStringList("mkUtils", "BungeeAPI:Servers:${RedisBungeeAPI.spigotServerName}:Players", newPlayersList, false)
+            RedisAPI.insertStringList("mkUtils", "BungeeAPI:Servers:${RedisBungeeAPI.spigotServerName}:Players", newPlayersList, false)
         }
     }
 
@@ -62,7 +61,7 @@ class GeneralListener : MineListener() {
             val newPlayersList = mutableListOf<String>()
             Mine.getPlayers().forEach { newPlayersList.add(it.name) }
             newPlayersList.removeIf { it == player.name }
-            Redis.insertStringList("mkUtils", "BungeeAPI:Servers:${RedisBungeeAPI.spigotServerName}:Players", newPlayersList, false)
+            RedisAPI.insertStringList("mkUtils", "BungeeAPI:Servers:${RedisBungeeAPI.spigotServerName}:Players", newPlayersList, false)
         }
     }
 

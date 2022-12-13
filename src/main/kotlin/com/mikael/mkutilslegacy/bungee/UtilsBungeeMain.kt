@@ -9,7 +9,7 @@ import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
 import com.mikael.mkutilslegacy.api.toTextComponent
-import com.mikael.mkutilslegacy.api.utilsmanager
+import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
 import com.mikael.mkutilslegacy.bungee.command.BungeeVersionCommand
 import com.mikael.mkutilslegacy.bungee.listener.BungeeGeneralListener
 import net.eduard.api.lib.bungee.BungeeAPI
@@ -21,7 +21,6 @@ import net.eduard.api.lib.database.SQLManager
 import net.eduard.api.lib.hybrid.BungeeServer
 import net.eduard.api.lib.hybrid.Hybrid
 import net.eduard.api.lib.kotlin.register
-import net.eduard.api.lib.kotlin.resolvePut
 import net.eduard.api.lib.kotlin.store
 import net.eduard.api.lib.modules.Copyable
 import net.eduard.api.lib.storage.StorageAPI
@@ -32,6 +31,16 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+/**
+ * mkUtils (non-legacy for bungee) plugin main Bungee class.
+ *
+ * @author Mikael
+ * @author KoddyDev
+ * @author Eduard (EduardAPI)
+ *
+ * @see MKPlugin
+ * @see utilsBungeeMain
+ */
 class UtilsBungeeMain : Plugin(), MKPlugin {
     companion object {
         lateinit var instance: UtilsBungeeMain
@@ -46,7 +55,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     }
 
     override fun onEnable() {
-        instance = this@UtilsBungeeMain; manager = resolvePut(UtilsManager()) // Should be here
+        instance = this@UtilsBungeeMain // Should be here
         val loadStart = System.currentTimeMillis()
 
         log(LangSystem.getText(Translation.LOADING_STARTING))
@@ -94,10 +103,10 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
             }
 
             // MySQL queue updater timer
-            if (utilsmanager.sqlManager.hasConnection()) {
+            if (UtilsManager.sqlManager.hasConnection()) {
                 mySqlQueueUpdater = ProxyServer.getInstance().scheduler.schedule(this, queueUpdater@{
-                    if (!utilsmanager.sqlManager.hasConnection()) return@queueUpdater
-                    utilsmanager.sqlManager.runChanges()
+                    if (!UtilsManager.sqlManager.hasConnection()) return@queueUpdater
+                    UtilsManager.sqlManager.runChanges()
                 }, 1, 1, TimeUnit.SECONDS)
             }
         }, 1, TimeUnit.SECONDS)
@@ -110,7 +119,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         RedisBungeeAPI.proxyServerTask?.cancel()
         RedisAPI.finishConnection()
         mySqlQueueUpdater?.cancel()
-        utilsmanager.dbManager.closeConnection()
+        UtilsManager.dbManager.closeConnection()
 
         log(LangSystem.getText(Translation.UNLOADING_COMPLETE))
         MKPluginSystem.unregisterMKPlugin(this@UtilsBungeeMain)
@@ -137,8 +146,8 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         manager.sqlManager = SQLManager(config["Database", DBManager::class.java])
         if (manager.sqlManager.dbManager.isEnabled) {
             log("§eConnecting to MySQL database...")
-            utilsmanager.dbManager.openConnection()
-            if (!utilsmanager.sqlManager.hasConnection()) error("Cannot connect to MySQL database")
+            UtilsManager.dbManager.openConnection()
+            if (!UtilsManager.sqlManager.hasConnection()) error("Cannot connect to MySQL database")
             log("§aConnected to MySQL database!")
         } else {
             log("§cThe MySQL is not active on the config file. Some plugins and MK systems may not work correctly.")
@@ -189,7 +198,9 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         Command.MESSAGE_PERMISSION = "§cYou don't have permission to use this command." // EduardAPI
     }
 
+    @Deprecated("Deprecated since mkUtilsLegacy 2.0.6; This is not used anymore for nothing.")
     override val isFree: Boolean = true
+
     override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
     override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 

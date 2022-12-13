@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.api.redis
 
-import com.mikael.mkutilslegacy.api.Redis
 import com.mikael.mkutilslegacy.api.isProxyServer
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.client
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.clientConnection
@@ -15,6 +14,12 @@ import org.bukkit.scheduler.BukkitTask
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPubSub
 
+/**
+ * RedisBungee API class.
+ *
+ * @author Mikael
+ * @see RedisAPI
+ */
 object RedisBungeeAPI {
 
     /**
@@ -34,8 +39,8 @@ object RedisBungeeAPI {
             val connectionData =
                 if (isProxyServer) UtilsBungeeMain.instance.config["Redis", RedisConnectionData::class.java]
                 else UtilsMain.instance.config["Redis", RedisConnectionData::class.java]
-            val extraJedis = Redis.createExtraClient(connectionData)
-            Redis.connectExtraClient(extraJedis, connectionData)
+            val extraJedis = RedisAPI.createExtraClient(connectionData)
+            RedisAPI.connectExtraClient(extraJedis, connectionData)
             return extraJedis
         }
     }
@@ -48,7 +53,7 @@ object RedisBungeeAPI {
      * @see RedisAPI.getStringList
      */
     fun getSpigotServers(): List<String> {
-        return Redis.getStringList("mkUtils", "BungeeAPI:Servers")
+        return RedisAPI.getStringList("mkUtils", "BungeeAPI:Servers")
     }
 
     /**
@@ -96,8 +101,8 @@ object RedisBungeeAPI {
      * @see RedisAPI.getStringList
      */
     fun getOnlinePlayers(serverName: String): List<String> {
-        if (!Redis.client!!.exists("mkUtils:BungeeAPI:Servers:$serverName:Players")) return emptyList()
-        return Redis.getStringList("mkUtils", "BungeeAPI:Servers:$serverName:Players")
+        if (!RedisAPI.client!!.exists("mkUtils:BungeeAPI:Servers:$serverName:Players")) return emptyList()
+        return RedisAPI.getStringList("mkUtils", "BungeeAPI:Servers:$serverName:Players")
     }
 
     /**
@@ -111,12 +116,12 @@ object RedisBungeeAPI {
      * @throws IllegalStateException if the [RedisAPI] [client] or the [clientConnection] is null.
      */
     fun connectToServer(playerName: String, serverName: String): Boolean {
-        return Redis.sendEvent("mkUtils:BungeeAPI:Event:ConnectPlayer", "${playerName};${serverName}")
+        return RedisAPI.sendEvent("mkUtils:BungeeAPI:Event:ConnectPlayer", "${playerName};${serverName}")
     }
 
     fun kickPlayer(playerName: String, kickReason: String): Boolean {
         if (kickReason.contains(";")) error("kickReason cannot contains ';' because of internal separator")
-        return Redis.sendEvent("mkUtils:BungeeAPI:Event:KickPlayer", "${playerName};${kickReason}")
+        return RedisAPI.sendEvent("mkUtils:BungeeAPI:Event:KickPlayer", "${playerName};${kickReason}")
     }
 
     /**
@@ -131,7 +136,7 @@ object RedisBungeeAPI {
      */
     fun sendMessage(playerName: String, message: String): Boolean {
         if (message.contains(";")) error("message cannot contains ';' because of internal separator")
-        return Redis.sendEvent("mkUtils:BungeeAPI:Event:SendMsgToPlayer", "${playerName};${message}")
+        return RedisAPI.sendEvent("mkUtils:BungeeAPI:Event:SendMsgToPlayer", "${playerName};${message}")
     }
 
     /**
@@ -143,7 +148,7 @@ object RedisBungeeAPI {
      * @see getOnlinePlayers(serverName)
      */
     fun getPlayerAmount(serverName: String): Int {
-        if (!Redis.client!!.exists("mkUtils:BungeeAPI:Servers:$serverName:Players")) return -1
+        if (!RedisAPI.client!!.exists("mkUtils:BungeeAPI:Servers:$serverName:Players")) return -1
         return getOnlinePlayers(serverName).size
     }
 
@@ -169,9 +174,10 @@ object RedisBungeeAPI {
      * @throws IllegalStateException if the [RedisAPI] [client] or the [clientConnection] is null.
      * @see RedisAPI.sendEvent
      */
+    @Deprecated("bypassPerm param is not ignored; use kickPlayer method without it instead.")
     fun kickPlayer(playerName: String, kickReason: String, bypassPerm: String? = "none"): Boolean {
         if (kickReason.contains(";")) error("kickReason cannot contains ';' because of internal separator")
-        return Redis.sendEvent("mkUtils:BungeeAPI:Event:KickPlayer", "${playerName};${kickReason}")
+        return RedisAPI.sendEvent("mkUtils:BungeeAPI:Event:KickPlayer", "${playerName};${kickReason}")
     }
 
     /**

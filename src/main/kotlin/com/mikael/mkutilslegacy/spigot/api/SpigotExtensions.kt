@@ -1,5 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.api
 
+import com.mikael.mkutilslegacy.api.UtilsManager
 import com.mikael.mkutilslegacy.api.formatPersonal
 import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.spigot.UtilsMain
@@ -27,6 +28,13 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
 
+/**
+ * Shortcut to get the [UtilsMain.instance].
+ *
+ * @return the [UtilsMain.instance].
+ */
+val utilsMain get() = UtilsMain.instance
+
 // MineBook extra functions - Start
 /**
  * Opens the [book] to the given [Player].
@@ -36,6 +44,7 @@ import java.util.*
  * @see MineBook.open
  */
 fun Player.openMineBook(book: MineBook) {
+    UtilsManager
     book.open(this)
 }
 // MineBook extra functions - End

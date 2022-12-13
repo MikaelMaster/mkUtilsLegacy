@@ -1,9 +1,17 @@
 package com.mikael.mkutilslegacy.bungee.api
 
 import com.mikael.mkutilslegacy.api.toTextComponent
+import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import net.eduard.api.lib.hybrid.ISender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.connection.ProxiedPlayer
+
+/**
+ * Shortcut to get the [UtilsBungeeMain.instance].
+ *
+ * @return the [UtilsBungeeMain.instance].
+ */
+val utilsBungeeMain get() = UtilsBungeeMain.instance
 
 /**
  * Use in a proxy command to run the Unit using a try catch. If any error occur,
