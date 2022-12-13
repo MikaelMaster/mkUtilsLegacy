@@ -198,14 +198,11 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         Command.MESSAGE_PERMISSION = "§cYou don't have permission to use this command." // EduardAPI
     }
 
-    @Deprecated("Deprecated since mkUtilsLegacy 2.0.6; This is not used anymore for nothing.")
-    override val isFree: Boolean = true
-
     override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
     override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
-    override fun log(msg: String) {
-        ProxyServer.getInstance().console.sendMessage("§b[${systemName}] §f${msg}".toTextComponent())
+    override fun log(vararg msg: String) {
+        ProxyServer.getInstance().console.sendMessage(*msg.map { it.toTextComponent() }.toTypedArray())
     }
 
     override fun getPlugin(): Any {

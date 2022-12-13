@@ -13,27 +13,16 @@ import java.util.*
 interface MKPlugin : IPluginInstance {
 
     /**
-     * If this [MKPlugin] is free.
-     *
-     * @author Mikael
-     * @see MKPluginSystem
-     */
-    @Deprecated("Deprecated since mkUtilsLegacy 2.0.6; This is not used anymore for nothing.")
-    val isFree: Boolean
-
-    /**
      * The current 'selected' language.
      *
      * Example: 'pt-br', 'en-us'.
      *
      * This will be used the get translations from [Translation].
-     * @author Mikael
      * @see LangSystem
      */
     var usingLanguage: String
 
     /**
-     * @author Mikael
      * @see Locale
      */
     var regionFormatter: Locale
@@ -41,15 +30,18 @@ interface MKPlugin : IPluginInstance {
     /**
      * Use to log plugin messages to console.
      *
-     * Example: {
-     *  override fun log(msg: String) {
-     *   Bukkit.getConsoleSender().sendMessage("§b[${systemName}] §f${msg}")
-     *   }
-     * }
+     * Example for Spigot: {
+     *  override fun log(vararg msg: String) {
+     *      Bukkit.getConsoleSender().sendMessage(msg)
+     *  }
      *
-     * @param msg the message to log.
-     * @author Mikael
+     * Example for Bungee: {
+     *  override fun log(vararg msg: String) {
+     *      ProxyServer.getInstance().console.sendMessage(*msg.map { it.toTextComponent() }.toTypedArray())
+     *  }
+     *
+     * @param msg the messages to log.
      */
-    fun log(msg: String)
+    fun log(vararg msg: String)
 
 }
