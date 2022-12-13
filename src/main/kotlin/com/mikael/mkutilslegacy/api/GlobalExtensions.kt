@@ -365,6 +365,10 @@ fun String.mineColored(): String {
     return this.replace("&", "§")
 }
 
+fun List<String>.mineColored(): List<String> {
+    return this.map { it.mineColored() }.toList()
+}
+
 /**
  * This will return the given [String] 'split' in lines, following the given [lineLength].
  *
