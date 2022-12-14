@@ -158,7 +158,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     private fun invokePageNextAndBackButtons(page: MenuPage) {
         if (page.hasBackPage) {
             val backPageInv = page.backPage?.inventory ?: error("Menu back page/inventory can't be null")
-            page.backPageButton = button("back-page", true, backPageButtonPosX, backPageButtonPosY) {
+            page.backPageButton = button("back-page", backPageButtonPosX, backPageButtonPosY) {
                 icon = backPageButtonItem.clone()
                     .name(nextPageButtonItem.getName().replace("%page%", "${page.backPage!!.pageId}", true))
                 click = click@{
@@ -170,7 +170,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         }
         if (page.hasNextPage) {
             val nextPageInv = page.nextPage?.inventory ?: error("Menu next page/inventory can't be null")
-            page.nextPageButton = button("next-page", true, nextPageButtonPosX, nextPageButtonPosY) {
+            page.nextPageButton = button("next-page", nextPageButtonPosX, nextPageButtonPosY) {
                 icon = nextPageButtonItem.clone()
                     .name(nextPageButtonItem.getName().replace("%page%", "${page.nextPage!!.pageId}", true))
                 click = click@{
@@ -437,26 +437,30 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     /**
      * Creates a new button inside the menu.
      *
+     * IMPORTANT: if the param [x] and [y] is not set, the button will automatically
+     * be an auto-align button. Otherwise, the button will follow the given [x] and [y]
+     * ignoring the auto align buttons 'option'.
+     *
      * @param buttonName the button name. Can be null.
-     * @param fixed if this button will be auto align or not.
-     * @param x the icon X position. Let it as null if [fixed] is false.
-     * @param y the icon Y position. Let it as null if [fixed] is false.
+     * @param x the icon X position. Default: null. (If null the button will be auto align)
+     * @param y the icon Y position. Default: null. (If null the button will be auto align)
      * @param setup the [MenuButton] builder.
      * @return the built [MenuButton].
      */
     fun button(
         buttonName: String? = null,
-        fixed: Boolean = !isAutoAlignItems,
-        x: Int = 1,
-        y: Int = 1,
+        x: Int? = null,
+        y: Int? = null,
         setup: (MenuButton.() -> Unit)
     ): MenuButton {
         val newButton = if (buttonName != null) MenuButton(buttonName) else MenuButton()
         newButton.setup()
-        newButton.fixed = fixed
-        if (fixed) {
+        if (x != null && y != null) {
+            newButton.fixed = true
             newButton.positionX = x
             newButton.positionY = y
+        } else {
+            newButton.fixed = false
         }
         buttonsToRegister.add(newButton)
         return newButton
@@ -465,10 +469,13 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     /**
      * Creates a new animated [MenuButton] inside the menu.
      *
+     * IMPORTANT: if the param [x] and [y] is not set, the button will automatically
+     * be an auto-align button. Otherwise, the button will follow the given [x] and [y]
+     * ignoring the auto align buttons 'option'.
+     *
      * @param buttonName the button name. Can be null.
-     * @param fixed if this button will be auto align or not.
-     * @param x the icon X position. Let it as null if [fixed] is false.
-     * @param y the icon Y position. Let it as null if [fixed] is false.
+     * @param x the icon X position. Default: null. (If null the button will be auto align)
+     * @param y the icon Y position. Default: null. (If null the button will be auto align)
      * @param changeFrameDelay the time to change between icons (frames). Defined in ticks (20 = 1s).
      * @param setup the [MenuButton] builder.
      * @return the built [MenuButton].
@@ -476,19 +483,20 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      */
     fun animatedButton(
         buttonName: String? = null,
-        fixed: Boolean = !isAutoAlignItems,
-        x: Int = 1,
-        y: Int = 1,
+        x: Int? = null,
+        y: Int? = null,
         changeFrameDelay: Long = 20,
         setup: (MenuButton.() -> Unit)
     ): MenuButton {
         if (changeFrameDelay < 1) error("MenuButton property 'changeFrameDelay' cannot be less than 1")
         val newButton = if (buttonName != null) MenuButton(buttonName) else MenuButton()
         newButton.setup()
-        newButton.fixed = fixed
-        if (fixed) {
+        if (x != null && y != null) {
+            newButton.fixed = true
             newButton.positionX = x
             newButton.positionY = y
+        } else {
+            newButton.fixed = false
         }
         newButton.changeFrameDelay = changeFrameDelay
         newButton.isAnimated = true
@@ -499,13 +507,13 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     /**
      * Creates a new [MenuButton] inside this menu with will be built using async.
      *
-     * This will process the code inside [setup] using async, then
-     * will update the button using its data once it's complete.
+     * IMPORTANT: if the param [x] and [y] is not set, the button will automatically
+     * be an auto-align button. Otherwise, the button will follow the given [x] and [y]
+     * ignoring the auto align buttons 'option'.
      *
      * @param buttonName the button name. Can be null.
-     * @param fixed if this button will be auto align or not.
-     * @param x the icon X position. Let it as null if [fixed] is false.
-     * @param y the icon Y position. Let it as null if [fixed] is false.
+     * @param x the icon X position. Default: null. (If null the button will be auto align)
+     * @param y the icon Y position. Default: null. (If null the button will be auto align)
      * @param setup the [MenuButton] builder.
      * @return the built [MenuButton]. This button will be changed once [setup] is complete run using async.
      * @see [BukkitTimeHandler.asyncDelay]
@@ -513,17 +521,18 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      */
     fun asyncButton(
         buttonName: String? = null,
-        fixed: Boolean = !isAutoAlignItems,
-        x: Int = 1,
-        y: Int = 1,
+        x: Int? = null,
+        y: Int? = null,
         setup: (MenuButton.() -> Unit)
     ): MenuButton {
         val newButton = if (buttonName != null) MenuButton(buttonName) else MenuButton()
         newButton.icon = MineItem(Material.STAINED_GLASS_PANE).data(7).name("§8Loading...")
-        newButton.fixed = fixed
-        if (fixed) {
+        if (x != null && y != null) {
+            newButton.fixed = true
             newButton.positionX = x
             newButton.positionY = y
+        } else {
+            newButton.fixed = false
         }
         buttonsToRegister.add(newButton)
         UtilsMain.instance.asyncDelay(1) {

@@ -65,8 +65,11 @@ class SinglePageExampleMenu : MineMenu("Cool Example Menu :D", 6) {
         /**
          * Now, let's create a [button].
          * The buttonName can be set how you want. Don't use spaces. use - instead.
+         *
+         * The parameters [x] and [y] by default is null.
+         * If you let them null, the button will follow the [isAutoAlignItems] 'option'.
          */
-        button("info-paper", true, 5, 3) {
+        button("info-paper", 5, 3) {
 
             /**
              * Here, you'll set the menu button icon.
