@@ -30,7 +30,7 @@ class GeneralListener : MineListener() {
      * Invincible Entity System.
      */
 
-    val invincibleEntities = mutableSetOf<Entity>()
+    internal val invincibleEntities = mutableSetOf<Entity>()
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onEntityDamage(e: EntityDamageEvent) {

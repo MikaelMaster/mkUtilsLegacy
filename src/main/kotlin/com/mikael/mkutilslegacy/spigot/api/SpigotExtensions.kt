@@ -10,6 +10,7 @@ import com.mikael.mkutilslegacy.spigot.api.lib.hooks.Vault
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MineMenu
+import com.mikael.mkutilslegacy.spigot.listener.GeneralListener
 import net.eduard.api.lib.game.ItemBuilder
 import net.eduard.api.lib.kotlin.mineSendActionBar
 import net.eduard.api.lib.kotlin.mineSendTitle
@@ -177,7 +178,52 @@ fun ItemStack.toMineItem(): MineItem {
 }
 
 /**
- * @return True if this entity is a peceful entity. Otherwise, false.
+ * This will disable the AI of the given [Entity].
+ * An entity with the AI disabled will do nothing, don't even move.
+ *
+ * WARNING: There is *NO WAY to activate the entity's AI again*. (This will be added in the future)
+ *
+ * @return the given [Entity], now with the AI disabled.
+ * @see MineReflect.disableAI
+ */
+fun Entity.disableAI(): Entity {
+    MineReflect.disableAI(this)
+    return this
+}
+
+/**
+ * Note: Deprecated because some entities don't work well with this function, and may throw errors.
+ * You should use your own method instead.
+ *
+ * @return the given [Entity], now invincible.
+ * @see Entity.isInvincible
+ */
+@Deprecated("Deprecated since mkUtilsLegacy v1.1.0; Use your own method instead.")
+fun Entity.setInvincible(isInvincible: Boolean): Entity {
+    if (isInvincible) {
+        GeneralListener.instance.invincibleEntities.add(this)
+    } else {
+        GeneralListener.instance.invincibleEntities.remove(this)
+    }
+    return this
+}
+
+/**
+ * @return True if [GeneralListener.invincibleEntities] contains the given [Entity]. Otherwise, false.
+ * @see Entity.setInvincible
+ */
+@Deprecated(
+    "Deprecated since mkUtilsLegacy 2.1.0; Entity.setInvincible() is deprecated.", ReplaceWith(
+        "GeneralListener.instance.invincibleEntities.contains(this)",
+        "com.mikael.mkutilslegacy.spigot.listener.GeneralListener"
+    )
+)
+val Entity.isInvincible: Boolean get() = GeneralListener.instance.invincibleEntities.contains(this)
+
+/**
+ * Important: This function is not 100% tested and *MAY NOT work well with some entities*.
+ *
+ * @return True if this entity is a peaceful entity. Otherwise, false.
  */
 val Entity.isPeaceful: Boolean
     get() {
@@ -221,7 +267,7 @@ fun Inventory.hasAmountOfItem(needed: ItemStack, neededAmount: Int): Boolean {
 }
 
 /**
- * Make an ItemStack and similars not breakable.
+ * Make an ItemStack and similar not breakable.
  *
  * @param isUnbreakable if the item will be or not unbreakable. By default, True.
  * @return The new not breakable [ItemStack].
