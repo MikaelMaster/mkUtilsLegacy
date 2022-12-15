@@ -157,26 +157,29 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      */
     private fun invokePageNextAndBackButtons(page: MenuPage) {
         if (page.hasBackPage) {
-            val backPageInv = page.backPage?.inventory ?: error("Menu back page/inventory can't be null")
+            val backPageId = page.pageId - 1
             page.backPageButton = button("back-page", backPageButtonPosX, backPageButtonPosY) {
-                icon = backPageButtonItem.clone()
-                    .name(nextPageButtonItem.getName().replace("%page%", "${page.backPage!!.pageId}", true))
+                icon = backPageButtonItem.clone().name(
+                    backPageButtonItem.getName()
+                        .replace("%page%", "$backPageId", true)
+                )
                 click = click@{
                     val player = it.player
                     player.soundClick(2f, 2f)
-                    player.openInventory(backPageInv)
+                    open(player, backPageId)
                 }
             }
         }
         if (page.hasNextPage) {
-            val nextPageInv = page.nextPage?.inventory ?: error("Menu next page/inventory can't be null")
+            val nextPageId = page.pageId + 1
             page.nextPageButton = button("next-page", nextPageButtonPosX, nextPageButtonPosY) {
-                icon = nextPageButtonItem.clone()
-                    .name(nextPageButtonItem.getName().replace("%page%", "${page.nextPage!!.pageId}", true))
+                icon = nextPageButtonItem.clone().name(
+                    nextPageButtonItem.getName().replace("%page%", "$nextPageId", true)
+                )
                 click = click@{
                     val player = it.player
                     player.soundClick(2f, 2f)
-                    player.openInventory(nextPageInv)
+                    open(player, nextPageId)
                 }
             }
         }
@@ -251,12 +254,10 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                             title.replace("%page%", playerPages.size.plus(1).toString(), true)
                         )
                     val lp = lastPage
-                    // lastPage.hasNextPage = true
                     lastPage = MenuPage()
                     lastPage.pageId = playerPages.size.plus(1)
                     lastPage.inventory = lastInv
                     lastPage.menu = this@MineMenu
-                    // lastPage.hasPreviousPage = true
                     lastPage.backPage = lp
                     lp.nextPage = lastPage
                     playerPages.add(lastPage)
@@ -568,11 +569,13 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         if (e.player !is Player) return
         val player = e.player as Player
         player.runBlock {
+            // if (player.openedMineMenu != this) return@runBlock // Useless ?
             val playerPages = pages[player] ?: return@runBlock
             if (!playerPages.any { e.inventory == it.inventory!! }) return@runBlock
             if (playerPages.any { it.nextPage != null && it.nextPage!!.inventory == player.openInventory }) {
                 pages.remove(player)
                 inventories.remove(player)
+                return@runBlock
             }
             player.openedMineMenu = null // MenuSystem.openedMenu.remove(player)
             player.openedMineMenuPage = null // MenuSystem.openedPage.remove(player)

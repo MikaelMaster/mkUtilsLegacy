@@ -11,10 +11,10 @@ open class MenuPage {
 
     var backPageButton: MenuButton? = null
     var backPage: MenuPage? = null
-    val hasBackPage get() = backPage?.inventory != null
+    val hasBackPage get() = backPage != null
 
     var nextPageButton: MenuButton? = null
     var nextPage: MenuPage? = null
-    val hasNextPage get() = nextPage?.inventory != null
+    val hasNextPage get() = nextPage != null
 
 }
