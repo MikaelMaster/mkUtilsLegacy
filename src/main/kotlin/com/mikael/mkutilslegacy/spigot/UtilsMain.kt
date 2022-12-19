@@ -279,7 +279,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         if (config.getBoolean("MenuAPI.autoUpdateMenus")) {
             AutoUpdateMenusTask().syncTimer()
         }
-        PlayerTargetAtPlayerTask().syncTimer()
+        PlayerTargetAtPlayerTask().asyncTimer()
     }
 
     private fun resetScoreboards() { // EduardAPI
