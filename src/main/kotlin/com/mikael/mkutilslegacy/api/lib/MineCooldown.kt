@@ -6,12 +6,12 @@ import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 
 /**
- * [MineCooldown] util class (can be used on ProxyServer and BukkitServer)
+ * [MineCooldown] util class (Hybrid - can be used on ProxyServer and BukkitServer)
  *
  * This class represents a 'Delay Manager', 'Cooldown Manager' or just a 'Simple Cooldown'.
  *
  * To create/invoke a new MineItem you can use:
- * - val clw = MineCooldown(ticks: [Long]) -> 20 ticks = 1s. So, with '20' as parameter, you'll create an 1-second delay.
+ * - val clw = MineCooldown(ticks: [Long]) -> 20 ticks = 1s. *So, with '20' as parameter, you'll create an 1-second delay.*
  *
  * Then, you can use clw.apply { *code* } to set your custom [messageOnCooldown] for example.
  * Important: Inside [messageOnCooldown] use the placeholder '%time' to get the seconds.
@@ -21,14 +21,27 @@ import org.bukkit.Bukkit
  * - clw.cooldown(playerName: [String]) { *code to be executed under delay* }
  *
  * If you ask for the function again, and the delay is still runnning, the player will receive the [messageOnCooldown] automatically.
+ * Remember that if [messageOnCooldown] is null ([noMessages]) the player will receive nothing.
  *
  * @param duration the cooldown duration (in ticks) to create a new MineCooldown. 20 ticks = 1s.
  * @author Mikael
  */
 class MineCooldown(var duration: Long) {
 
+    /**
+     * The message sent to players during the cooldown.
+     *
+     * Default: "§cPlease wait §e%times §cto use this again.".
+     */
     var messageOnCooldown: String? = "§cPlease wait §e%times §cto use this again."
 
+    /**
+     * Sets the [messageOnCooldown] to null.
+     * Then, No message will be sent to players during cooldown.
+     *
+     * This is usefully to very small delays.
+     * For example: Delay 5-tick a ClickEvent.
+     */
     fun noMessages() {
         messageOnCooldown = null
     }
