@@ -145,7 +145,7 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
-    fun setGlow(glowed: Boolean): MineItem {
+    fun glowed(glowed: Boolean): MineItem {
         if(glowed) {
             addEnchant(EnchantGlow.getGlow(), 1)
         }
