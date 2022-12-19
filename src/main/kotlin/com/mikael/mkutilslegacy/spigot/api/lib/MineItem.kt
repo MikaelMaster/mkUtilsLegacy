@@ -38,6 +38,12 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
     constructor(material: Material) : this(ItemStack(material))
     constructor(material: Material, amount: Int) : this(ItemStack(material, amount))
 
+    /**
+     * Sets the name of this [MineItem].
+     *
+     * @param name the new name? to be set. Can be null.
+     * @return this [MineItem].
+     */
     fun name(name: String? = null): MineItem {
         val meta = this.itemMeta ?: return this
         meta.displayName = name
@@ -45,10 +51,19 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * @return this [MineItem] name.
+     */
     fun getName(): String {
         return if (this.hasItemMeta()) if (this.itemMeta!!.hasDisplayName()) this.itemMeta!!.displayName else "" else ""
     }
 
+    /**
+     * Sets the lore of this [MineItem].
+     *
+     * @param lore the new lore to be set.
+     * @return this [MineItem].
+     */
     fun lore(vararg lore: String): MineItem {
         val meta = this.itemMeta ?: return this
         meta.lore = lore.toList()
@@ -56,6 +71,12 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * Sets the lore of this [MineItem].
+     *
+     * @param lore the new lore to be set.
+     * @return this [MineItem].
+     */
     fun lore(lore: List<String>): MineItem {
         val meta = this.itemMeta ?: return this
         meta.lore = lore
@@ -63,6 +84,12 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * Adds lines to this [MineItem] lore.
+     *
+     * @param lines the lines to be added.
+     * @return this [MineItem].
+     */
     fun addLore(vararg lines: String): MineItem {
         val meta = this.itemMeta ?: return this
         val newLore = mutableListOf<String>(); newLore.addAll(getLore())
@@ -72,6 +99,12 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * Adds lines to this [MineItem] lore.
+     *
+     * @param lines the lines to be added.
+     * @return this [MineItem].
+     */
     fun addLore(lines: List<String>): MineItem {
         val meta = this.itemMeta ?: return this
         val newLore = mutableListOf<String>(); newLore.addAll(getLore())
@@ -81,6 +114,11 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * Clears this [MineItem] lore.
+     *
+     * @return this [MineItem].
+     */
     fun clearLore(): MineItem {
         val meta = this.itemMeta ?: return this
         meta.lore = listOf()
@@ -88,25 +126,54 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * @return this [MineItem] lore.
+     */
     fun getLore(): List<String> {
         return if (this.hasItemMeta()) if (this.itemMeta!!.hasLore()) this.itemMeta!!.lore!! else emptyList() else emptyList()
     }
 
+    /**
+     * Sets the type of this [MineItem].
+     *
+     * @param material the new [Material] for this [MineItem].
+     * @return this [MineItem].
+     */
     fun type(material: Material): MineItem {
         this.type = material
         return this
     }
 
+    /**
+     * Sets the data of this [MineItem].
+     *
+     * IMPORTANT: the 'DATA' means the [ItemStack.durability]. So, the given [data] is converted to short.
+     *
+     * @param data the new data for this [MineItem].
+     * @return this [MineItem].
+     */
     fun data(data: Int): MineItem {
         this.durability = data.toShort() // durability = material data
         return this
     }
 
+    /**
+     * Sets the amount of this [MineItem].
+     *
+     * @param amount the new amount for this [MineItem].
+     * @return this [MineItem].
+     */
     fun amount(amount: Int): MineItem {
         this.amount = amount
         return this
     }
 
+    /**
+     * Adds the given [flags] to this [MineItem].
+     *
+     * @param flags the [ItemFlag](s) to be added.
+     * @return this [MineItem].
+     */
     fun addFlags(vararg flags: ItemFlag): MineItem {
         val meta = this.itemMeta ?: return this
         meta.addItemFlags(*flags)
@@ -114,6 +181,11 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * Adds all [ItemFlag]s to this [MineItem].
+     *
+     * @return this [MineItem].
+     */
     fun addAllFlags(): MineItem {
         val meta = this.itemMeta ?: return this
         meta.addItemFlags(*ItemFlag.values())
@@ -121,6 +193,12 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * Removes the given [ItemFlag] from this [MineItem].
+     *
+     * @param flag the [ItemFlag] to be removed.
+     * @return this [MineItem].
+     */
     fun removeFlag(flag: ItemFlag): MineItem {
         val meta = this.itemMeta ?: return this
         meta.removeItemFlags(flag)
@@ -128,6 +206,12 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+
+    /**
+     * Removes all the [ItemFlag]s from this [MineItem].
+     *
+     * @return this [MineItem].
+     */
     fun removeFlags(): MineItem {
         val meta = this.itemMeta ?: return this
         meta.removeItemFlags(*ItemFlag.values())
@@ -135,31 +219,51 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * Adds the given [Enchantment] to this [MineItem].
+     *
+     * @param enchant the [Enchantment] to be added.
+     * @return this [MineItem].
+     */
     fun addEnchant(enchant: Enchantment, level: Int): MineItem {
         this.addUnsafeEnchantment(enchant, level)
         return this
     }
 
+    /**
+     * Removes the given [Enchantment] from this [MineItem].
+     *
+     * @param enchant the [Enchantment] to be removed.
+     * @return this [MineItem].
+     */
     fun removeEnchant(enchant: Enchantment): MineItem {
         this.removeEnchantment(enchant)
         return this
     }
 
-    fun glowed(glowed: Boolean): MineItem {
-        if(glowed) {
-            addEnchant(EnchantGlow.getGlow(), 1)
-        } else {
-            if(enchantments.containsKey(EnchantGlow.getGlow())) {
-                removeEnchant(EnchantGlow.getGlow())
-            }
-        }
-
-        return this
-    }
-
+    /**
+     * Clears all the [Enchantment]s of this [MineItem].
+     *
+     * @return this [MineItem].
+     */
     fun clearEnchants(): MineItem {
         for (enchant in this.enchantments.keys) {
             this.removeEnchantment(enchant)
+        }
+        return this
+    }
+
+    /**
+     * Sets the [EnchantGlow] of this [MineItem].
+     *
+     * @param glowed if this item will be glowed or not.
+     * @return this [MineItem].
+     */
+    fun glowed(glowed: Boolean): MineItem {
+        if (glowed) {
+            addEnchant(EnchantGlow.getGlow(), 1)
+        } else {
+            removeEnchant(EnchantGlow.getGlow())
         }
         return this
     }
@@ -181,6 +285,11 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
     }
 
     /**
+     * @return a [com.mikael.mkutilslegacy.spigot.api.lib.MineNBT.Item] givin this [MineItem] as 'baseItem'.
+     */
+    val nbtItem get() = MineNBT.Item(this)
+
+    /**
      * @return a clone of this [MineItem].
      * @see ItemStack.clone
      */
@@ -190,6 +299,15 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
 
     // Change Custom Item Properties Functions
 
+    /**
+     * Sets the color os this [MineItem].
+     *
+     * This should only be used when the [MineItem.getType] is something
+     * that can have a color like a [Material.LEATHER_CHESTPLATE].
+     *
+     * @param color the new [Color] to be set.
+     * @return this [MineItem].
+     */
     fun color(color: Color): MineItem { // Change Item Color
         if (!this.type.name.contains("LEATHER")) {
             this.type = Material.LEATHER_CHESTPLATE
@@ -201,6 +319,14 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * Sets the potion effect of this [MineItem].
+     *
+     * This should only be used when the [MineItem.getType] is a [Material.POTION].
+     *
+     * @param effect the new [PotionEffect] to be set.
+     * @return this [MineItem].
+     */
     fun potion(effect: PotionEffect): MineItem { // Change Item Potion Effect
         if (this.type != Material.POTION) {
             this.type = Material.POTION
@@ -213,6 +339,14 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * Sets the entity type of this [MineItem].
+     *
+     * This should only be used when the [MineItem.getType] is a [Material.MOB_SPAWNER].
+     *
+     * @param type the new [EntityType] to be set.
+     * @return this [MineItem].
+     */
     fun spawnerType(type: EntityType): MineItem { // Change Item Spawner Type
         this.type = Material.MOB_SPAWNER
         if (this.itemMeta == null) return this
@@ -224,14 +358,30 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
-    val nbt = MineNBT.Item(this)
-
+    /**
+     * The current URL being use in this [MineItem].
+     *
+     * @see getSkinURL
+     */
     private var skinURL: String? = null // Custom Skull Skin
 
+    /**
+     * @return the [skinURL].
+     */
     fun getSkinURL(): String? {
         return skinURL
     }
 
+    /**
+     * Sets the Skull 'Owner' of this [MineItem].
+     *
+     * This should only be used when the [MineItem.getType] is a [Material.SKULL_ITEM].
+     *
+     * Note: When this is set, the [SkullType.PLAYER] will be set as the type.
+     *
+     * @param skullName the new Skull 'Owner' to be set.
+     * @return this [MineItem].
+     */
     fun skull(skullName: String): MineItem { // Custom Skull Name
         this.type = Material.SKULL_ITEM; this.data(SkullType.PLAYER.ordinal)
         if (this.itemMeta == null) return this
@@ -241,6 +391,10 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * @see skin
+     * @see skinId
+     */
     private fun texture(textureBase64: String): MineItem { // Custom Skull Texture
         this.type = Material.SKULL_ITEM; this.data(SkullType.PLAYER.ordinal)
         if (this.itemMeta == null) return this
@@ -258,6 +412,14 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    /**
+     * Sets the Skin URL of this [MineItem].
+     *
+     * This should only be used when the [MineItem.getType] is a [Material.SKULL_ITEM].
+     *
+     * @param skinUrl the new Skin URL to be set.
+     * @return this [MineItem].
+     */
     fun skin(skinUrl: String): MineItem { // Custom Skull Skin
         this.skinURL = skinUrl
         val encodedData =
@@ -265,6 +427,9 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return texture(String(encodedData)) // DON'T CHANGE IT! '.toString()' will NOT work
     }
 
+    /**
+     * @see skin
+     */
     fun skinId(skinId: String): MineItem { // Custom Skull Skin ID
         return this.skin("https://textures.minecraft.net/texture/${skinId}")
     }
