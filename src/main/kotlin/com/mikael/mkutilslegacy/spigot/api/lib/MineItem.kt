@@ -3,6 +3,7 @@ package com.mikael.mkutilslegacy.spigot.api.lib
 import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
+import net.eduard.api.lib.game.EnchantGlow
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.SkullType
@@ -144,6 +145,14 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         return this
     }
 
+    fun setGlow(glowed: Boolean): MineItem {
+        if(glowed) {
+            addEnchant(EnchantGlow.getGlow(), 1)
+        }
+
+        return this
+    }
+
     fun clearEnchants(): MineItem {
         for (enchant in this.enchantments.keys) {
             this.removeEnchantment(enchant)
@@ -210,6 +219,8 @@ open class MineItem(item: ItemStack) : ItemStack(item) {
         this.itemMeta = meta
         return this
     }
+
+    val nbt = MineNBT.Item(this)
 
     private var skinURL: String? = null // Custom Skull Skin
 
