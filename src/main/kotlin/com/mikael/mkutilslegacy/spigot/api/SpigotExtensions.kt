@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.spigot.api
 
-import com.mikael.mkutilslegacy.api.UtilsManager
 import com.mikael.mkutilslegacy.api.formatPersonal
 import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.spigot.UtilsMain
@@ -45,7 +44,6 @@ val utilsMain get() = UtilsMain.instance
  * @see MineBook.open
  */
 fun Player.openMineBook(book: MineBook) {
-    UtilsManager
     book.open(this)
 }
 // MineBook extra functions - End
@@ -117,17 +115,22 @@ var Player.openedMineMenuPage: MenuPage?
  * Cashes the given [Player] client. USE WITH MODERATION!
  */
 fun Player.crashClient() {
-    UtilsMain.instance.log("§c[Player Crasher] §eCrashing player ${this.name.formatPersonal()} client.")
-    MineReflect.sendPacket(
-        this, PacketPlayOutExplosion(
-            Double.MAX_VALUE,
-            Double.MAX_VALUE,
-            Double.MAX_VALUE,
-            Float.MAX_VALUE,
-            Collections.emptyList(),
-            Vec3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
+    utilsMain.log("§c[Player Crasher] §eCrashing player ${this.name.formatPersonal()} client.")
+    try {
+        MineReflect.sendPacket(
+            this, PacketPlayOutExplosion(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE,
+                Double.MAX_VALUE,
+                Float.MAX_VALUE,
+                Collections.emptyList(),
+                Vec3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
+            )
         )
-    )
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+        utilsMain.log("§c[Player Crasher] §cAn internal error occurred while crashing a player.")
+    }
 }
 
 /**
@@ -544,7 +547,7 @@ inline fun Player.asyncLoading(
 ) {
     val runStart = System.currentTimeMillis()
     var step = 0
-    val runnable = UtilsMain.instance.syncTimer(0, 2) {
+    val runnable = utilsMain.syncTimer(0, 2) {
         when (step) {
             0 -> {
                 this.actionBar("§a∎§7∎∎∎∎")
@@ -568,7 +571,7 @@ inline fun Player.asyncLoading(
         }
         if (step == 4) step = 0 else step++
     }
-    UtilsMain.instance.asyncTask {
+    utilsMain.asyncTask {
         try {
             thing.invoke()
         } catch (ex: Exception) {
@@ -576,7 +579,7 @@ inline fun Player.asyncLoading(
             this.soundNo()
             this.sendMessage(errorMessage)
         } finally {
-            UtilsMain.instance.syncTask {
+            utilsMain.syncTask {
                 runnable.cancel()
                 this.actionBar("§a∎∎∎∎∎ §8${(System.currentTimeMillis() - runStart).toInt().formatValue()}ms")
             }
@@ -599,7 +602,7 @@ inline fun Player.syncLoading(
     val runStart = System.currentTimeMillis()
     var step = 0
     var animating = true
-    UtilsMain.instance.asyncTask {
+    utilsMain.asyncTask {
         while (animating) {
             when (step) {
                 0 -> {
@@ -626,7 +629,7 @@ inline fun Player.syncLoading(
             Thread.sleep(100)
         }
     }
-    UtilsMain.instance.syncDelay(5) {
+    utilsMain.syncDelay(5) {
         try {
             thing.invoke()
         } catch (ex: Exception) {
@@ -724,7 +727,7 @@ inline fun Player.runCommandAsync(
     crossinline thing: () -> (Unit)
 ) {
     if (sendLoading) this.sendMessage("§eLoading...")
-    UtilsMain.instance.asyncTask {
+    utilsMain.asyncTask {
         try {
             thing.invoke()
         } catch (ex: Exception) {
@@ -800,7 +803,7 @@ fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true
     var ticksDelay = 1L
 
     for (i in 0..steps) {
-        UtilsMain.instance.syncDelay(ticksDelay) {
+        utilsMain.syncDelay(ticksDelay) {
             if (horse.passenger == null) {
                 horse.passenger = this
             }
@@ -810,7 +813,7 @@ fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true
         }
     }
 
-    UtilsMain.instance.syncDelay(steps + 1L) {
+    utilsMain.syncDelay(steps + 1L) {
         horse.remove()
     }
 }
