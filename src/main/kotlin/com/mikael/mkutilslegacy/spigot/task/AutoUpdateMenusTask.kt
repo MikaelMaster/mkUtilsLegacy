@@ -1,6 +1,7 @@
 package com.mikael.mkutilslegacy.spigot.task
 
 import com.mikael.mkutilslegacy.spigot.UtilsMain
+import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.openedMineMenu
 import net.eduard.api.lib.manager.TimeManager
 import net.eduard.api.lib.menu.getMenu
@@ -20,9 +21,8 @@ class AutoUpdateMenusTask : TimeManager(UtilsMain.instance.config.getLong("MenuA
             }
         }
 
-        for (player in Mine.getPlayers()) { // mkUtils new Menu System
+        for ((player, menu) in MenuSystem.openedMenu) { // mkUtils new Menu System
             try {
-                val menu = player.openedMineMenu ?: continue
                 if (!menu.isAutoUpdate) continue
                 val pageOpened = menu.getPageOpened(player) ?: continue
                 menu.open(player, pageOpened)

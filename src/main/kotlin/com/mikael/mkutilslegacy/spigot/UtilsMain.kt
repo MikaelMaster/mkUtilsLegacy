@@ -106,7 +106,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         Vault.onEnable()
 
         log(LangSystem.getText(Translation.LOADING_SYSTEMS))
-        prepareDebugs(); prepareMySQL(); prepareRedis();
+        prepareDebugs(); prepareMySQL(); prepareRedis()
 
         // Commands
         VersionCommand().registerCommand(this)
