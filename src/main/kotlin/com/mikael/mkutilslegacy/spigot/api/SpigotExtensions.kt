@@ -25,6 +25,7 @@ import org.bukkit.entity.*
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.util.Vector
 import java.util.*
 
@@ -113,6 +114,10 @@ var Player.openedMineMenuPage: MenuPage?
 
 /**
  * Cashes the given [Player] client. USE WITH MODERATION!
+ *
+ * This will send a packet to the player ([MineReflect.sendPacket]) using parameters
+ * with no-sense values like [Double.MAX_VALUE] in the size of the explosion ([PacketPlayOutExplosion]).
+ * And this 'crazy' values will crash the player client.
  */
 fun Player.crashClient() {
     utilsMain.log("§c[Player Crasher] §eCrashing player ${this.name.formatPersonal()} client.")
@@ -123,7 +128,7 @@ fun Player.crashClient() {
                 Double.MAX_VALUE,
                 Double.MAX_VALUE,
                 Float.MAX_VALUE,
-                Collections.emptyList(),
+                emptyList(),
                 Vec3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
             )
         )
@@ -146,6 +151,17 @@ fun Ageable.formatAgeText(): String {
  */
 val InventoryClickEvent.player get() = this.whoClicked as Player
 
+/**
+ * Adds lines to the given [ItemStack].
+ *
+ * Note: If you're using mkUtils, prefer use [MineItem] instead of [ItemStack].
+ *
+ * So, then use [MineItem.addLore]. You can transform an [ItemStack] to a Mine Item using [ItemStack.toMineItem].
+ *
+ * @param lines the lines of string to add.
+ * @return the given [ItemStack] with the new lines added.
+ * @see ItemMeta.setLore
+ */
 fun <T : ItemStack> T.addLore(vararg lines: String): T {
     val meta = this.itemMeta!!
     if (meta.lore == null) meta.lore = emptyList()
@@ -270,10 +286,11 @@ fun Inventory.hasAmountOfItem(needed: ItemStack, neededAmount: Int): Boolean {
 }
 
 /**
- * Make an ItemStack and similar not breakable.
+ * Turns the given [ItemStack] not breakable.
  *
  * @param isUnbreakable if the item will be or not unbreakable. By default, True.
  * @return The new not breakable [ItemStack].
+ * @see ItemMeta.Spigot.isUnbreakable
  */
 fun <T : ItemStack> T.notBreakable(isUnbreakable: Boolean = true): T {
     val meta = itemMeta!!
@@ -362,11 +379,13 @@ fun World.newHologram(loc: Location, toDown: Boolean, vararg lines: String?): Li
 }
 
 /**
- * Runs an 'blood' effect on a [Player]'s body.
+ * Runs a 'blood' effect on a [Player]'s body.
  *
- * @param allBody if is to spawn the 'blood' particle on player Head AND Foot. False = 'blood' particle JUST on player Head.
+ * @param allBody if is to spawn the 'blood' particle on player Head AND Foot. If false the 'blood' particle will be spawned JUST on [Player.getEyeLocation].
  * @return True if the player is not dead, and the effect was played. Otherwise, false.
  * @see World.playEffect
+ * @see Effect.STEP_SOUND
+ * @see Material.REDSTONE_BLOCK (as breaked block, using STEP_SOUND effect)
  */
 fun Player.bloodEffect(allBody: Boolean = false): Boolean {
     if (this.isDead) return false

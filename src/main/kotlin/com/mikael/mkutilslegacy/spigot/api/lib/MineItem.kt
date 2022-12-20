@@ -4,6 +4,7 @@ import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import net.eduard.api.lib.game.EnchantGlow
+import net.eduard.api.lib.storage.StorageAPI
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.SkullType
@@ -24,18 +25,39 @@ import java.util.*
  *
  * This class represents an [ItemStack].
  *
+ * IMPORTANT:
+ *
+ * * A [MineItem] should NOT be used in *val*s to save data.
+ * * So, if you have a data class that have a *val* saving an Item, use [ItemStack] instead.
+ * * Use [MineItem] just as a constructor, since this can be given as an [ItemStack] in functions.
+ * * The [StorageAPI] does not support save [MineItem]s yet. So, you can also use [ItemStack] to save items in storages. ([MineItem.toItemStack])
+ *
  * To create/invoke a new MineItem you can use:
  * - MineItem(item: [ItemStack])
  * - MineItem(material: [Material])
  * - MineItem(material: [Material], amount: [Int])
  *
- * @param item the [ItemStack] to create a new MineItem. You can also use the other constructors above.
+ * @param item the [ItemStack] to create a new [MineItem]. *You can also use the others constructors below.*
  * @author Mikael
  * @see ItemStack
+ * @see MineNBT.Item
  */
 open class MineItem(item: ItemStack) : ItemStack(item) {
 
+    /**
+     * Note: If you use this instead the method that asks for amount,
+     * the new created [MineItem] will have *1* as amount.
+     *
+     * @param material the [Material] to create a new [MineItem].
+     * @return a new [MineItem].
+     */
     constructor(material: Material) : this(ItemStack(material))
+
+    /**
+     * @param material the [Material] to create a new [MineItem].
+     * @param amount the amount ([Int] between 1 and 64) that the [MineItem] will have.
+     * @return a new [MineItem].
+     */
     constructor(material: Material, amount: Int) : this(ItemStack(material, amount))
 
     /**
