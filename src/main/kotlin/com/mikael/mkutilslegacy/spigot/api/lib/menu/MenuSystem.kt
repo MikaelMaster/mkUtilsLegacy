@@ -4,6 +4,14 @@ import com.mikael.mkutilslegacy.spigot.api.openedMineMenu
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 
+/**
+ * The [MineMenu] System.
+ *
+ * @author Mikael
+ * @see MineMenu
+ * @see MenuPage
+ * @see MenuButton
+ */
 object MenuSystem {
 
     /**

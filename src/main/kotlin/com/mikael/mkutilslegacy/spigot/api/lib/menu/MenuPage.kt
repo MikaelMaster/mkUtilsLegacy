@@ -2,6 +2,11 @@ package com.mikael.mkutilslegacy.spigot.api.lib.menu
 
 import org.bukkit.inventory.Inventory
 
+/**
+ * Represents a [MineMenu] page.
+ *
+ * @see MineMenu
+ */
 open class MenuPage {
 
     var pageId = 1
