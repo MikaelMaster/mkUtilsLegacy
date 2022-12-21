@@ -36,6 +36,7 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
 
         /**
          * @return all registered [MineCommand]s.
+         * @see registeredMineCommands
          */
         fun getRegisteredMineCommands(): List<MineCommand> {
             return registeredMineCommands
@@ -88,7 +89,7 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
     }
 
     /**
-     * Unregister this [MineCommand].
+     * Unregisters this [MineCommand].
      */
     open fun unregisterCommand() {
         unregisterListener()

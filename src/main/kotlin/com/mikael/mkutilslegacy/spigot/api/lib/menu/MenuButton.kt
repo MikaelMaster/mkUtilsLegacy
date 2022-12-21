@@ -11,6 +11,7 @@ import org.bukkit.scheduler.BukkitTask
  * Represents a [MenuPage] button.
  *
  * @param name the name/id of this button.
+ * @author Mikael
  * @see MineMenu
  * @see MenuPage
  */

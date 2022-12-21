@@ -15,19 +15,23 @@ import org.bukkit.inventory.Inventory
 object MenuSystem {
 
     /**
-     * Registered [MineMenu]s.
+     * All registered [MineMenu]s.
+     *
      * @see MineMenu.registerMenu
      */
     val registeredMenus = mutableSetOf<MineMenu>()
 
     /**
      * All [Player]s with a [MineMenu] opened.
+     *
      * @see Player.openedMineMenu
      */
     val openedMenu = mutableMapOf<Player, MineMenu>()
 
     /**
-     * All [Player]s with a [MenuPage] opened. It means the player is also with a [MineMenu] opened.
+     * All [Player]s with a [MenuPage] opened.
+     * It means the player is also with a [MineMenu] opened.
+     *
      * @see Player.openedMineMenuPage
      */
     val openedPage = mutableMapOf<Player, MenuPage>()
