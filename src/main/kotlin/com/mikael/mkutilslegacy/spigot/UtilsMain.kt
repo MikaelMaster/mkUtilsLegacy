@@ -48,6 +48,9 @@ import java.util.*
 /**
  * mkUtilsLegacy plugin main Spigot class.
  *
+ * Special thanks to Eduard-- (*https://github.com/EduardMaster*).
+ * This project uses EduardAPI codes and methods.
+ *
  * @author Mikael
  * @author KoddyDev
  * @author Eduard (EduardAPI)
