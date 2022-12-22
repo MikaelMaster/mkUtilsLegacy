@@ -6,7 +6,7 @@ import net.eduard.api.lib.plugin.IPluginInstance
 import java.util.*
 
 /**
- * Represents a MK Plugin. Extends an [IPluginInstance].
+ * Represents an MK Plugin. Extends an [IPluginInstance].
  *
  * @author Mikael
  */
