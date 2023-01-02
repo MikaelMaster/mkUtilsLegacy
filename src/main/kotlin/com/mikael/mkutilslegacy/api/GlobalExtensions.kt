@@ -2,6 +2,7 @@ package com.mikael.mkutilslegacy.api
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.mikael.mkutilslegacy.api.lib.MineSmartText
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.mkplugin.MKPluginData
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
@@ -83,16 +84,61 @@ val isProxyServer get() = Hybrid.instance.isBungeecord
 /**
  * Transforms a [String]? into a [TextComponent].
  *
+ * @param markNull if the given value is null and this is true, the text used will NOT be "", so "null" will be used.
  * @return [TextComponent] with the given [String], or empty if null is given.
  * @author Mikael
  * @see TextComponent
  */
-fun String?.toTextComponent(): TextComponent {
+@Deprecated("Deprecated since mkUtilsLeagcy 2.1.5 (bungee 1.2.8); Use MineSmartText instead.")
+fun String?.toTextComponent(markNull: Boolean = false): TextComponent {
     return if (this != null) {
         TextComponent(this)
     } else {
-        TextComponent("")
+        TextComponent(if (markNull) "null" else  "")
     }
+}
+
+/**
+ * Transforms a [String]? into a [MineSmartText].
+ *
+ * @param markNull if the given value is null and this is true, the text used will NOT be "", so "null" will be used.
+ * @return a new [MineSmartText] using the given [String] as the base element. If null is given,
+ * an empty string ("") will be given as param to create the [MineSmartText].
+ * @author Mikael
+ * @see MineSmartText
+ */
+fun String?.toMineSmartText(markNull: Boolean = false): MineSmartText {
+    return if (this != null) {
+        MineSmartText(this)
+    } else {
+        MineSmartText(if (markNull) "null" else  "")
+    }
+}
+
+/**
+ * Transforms a [List] of [String]? into a [MineSmartText].
+ *
+ * @return a new [MineSmartText] using the given [List] of [String] as the base element. If null is given in a line,
+ * this line will be SKIPPED and IGNORED.
+ * @author Mikael
+ * @see MineSmartText
+ * @see MineSmartText.setTextAsLines
+ */
+fun List<String?>.toMineSmartText(): MineSmartText {
+    val mineText = MineSmartText("TextLine")
+    mineText.setTextAsLines(this.filterNotNull())
+    return mineText
+}
+
+/**
+ * Transforms a [TextComponent] into a [MineSmartText].
+ *
+ * @return a new [MineSmartText] using the given [TextComponent] as the base element.
+ * @author Mikael
+ * @see MineSmartText
+ */
+fun TextComponent.toMineSmartText(): MineSmartText {
+    return MineSmartText(this)
 }
 
 /**
