@@ -8,7 +8,6 @@ import com.mikael.mkutilslegacy.api.redis.RedisAPI.createClient
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.createExtraClient
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.usedRedisConnectionData
 import com.mikael.mkutilslegacy.api.toMineSmartText
-import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import net.eduard.api.lib.modules.Mine

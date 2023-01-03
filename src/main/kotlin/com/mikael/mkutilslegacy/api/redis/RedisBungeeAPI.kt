@@ -5,7 +5,6 @@ import com.mikael.mkutilslegacy.api.redis.RedisAPI.client
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.clientConnection
 import com.mikael.mkutilslegacy.api.syncMysqUpdatesKey
 import com.mikael.mkutilslegacy.api.toMineSmartText
-import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import net.eduard.api.lib.modules.Extra

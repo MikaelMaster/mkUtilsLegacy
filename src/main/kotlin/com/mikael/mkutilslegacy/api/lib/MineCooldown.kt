@@ -2,7 +2,6 @@ package com.mikael.mkutilslegacy.api.lib
 
 import com.mikael.mkutilslegacy.api.isProxyServer
 import com.mikael.mkutilslegacy.api.toMineSmartText
-import com.mikael.mkutilslegacy.api.toTextComponent
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 

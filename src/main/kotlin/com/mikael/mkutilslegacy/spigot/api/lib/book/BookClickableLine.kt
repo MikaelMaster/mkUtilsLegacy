@@ -1,7 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.api.lib.book
 
 import com.mikael.mkutilslegacy.api.toMineSmartText
-import com.mikael.mkutilslegacy.api.toTextComponent
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
