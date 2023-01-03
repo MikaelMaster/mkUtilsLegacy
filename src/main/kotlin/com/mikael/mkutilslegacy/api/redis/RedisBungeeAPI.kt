@@ -4,6 +4,7 @@ import com.mikael.mkutilslegacy.api.isProxyServer
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.client
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.clientConnection
 import com.mikael.mkutilslegacy.api.syncMysqUpdatesKey
+import com.mikael.mkutilslegacy.api.toMineSmartText
 import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
@@ -239,12 +240,12 @@ object RedisBungeeAPI {
                         if (channel == "mkUtils:BungeeAPI:Event:KickPlayer") {
                             val data = message.split(";")
                             val player = ProxyServer.getInstance().getPlayer(data[0]) ?: return
-                            player.disconnect(Extra.getText(1, *data.toTypedArray()).toTextComponent())
+                            player.disconnect(Extra.getText(1, *data.toTypedArray()).toMineSmartText())
                         }
                         if (channel == "mkUtils:BungeeAPI:Event:SendMsgToPlayer") {
                             val data = message.split(";")
                             val player = ProxyServer.getInstance().getPlayer(data[0]) ?: return
-                            player.sendMessage(Extra.getText(1, *data.toTypedArray()).toTextComponent())
+                            player.sendMessage(Extra.getText(1, *data.toTypedArray()).toMineSmartText())
                         }
                         if (channel == "mkUtils:BungeeAPI:Event:ServerPowerAction") {
                             if (!UtilsBungeeMain.instance.config.getBoolean("RedisBungeeAPI.logSpigotServersPowerActions")) return

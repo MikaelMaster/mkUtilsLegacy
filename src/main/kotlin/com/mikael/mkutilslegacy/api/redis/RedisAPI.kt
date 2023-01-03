@@ -7,6 +7,7 @@ import com.mikael.mkutilslegacy.api.redis.RedisAPI.connectExtraClient
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.createClient
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.createExtraClient
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.usedRedisConnectionData
+import com.mikael.mkutilslegacy.api.toMineSmartText
 import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
@@ -113,7 +114,7 @@ object RedisAPI {
                     return true
                 } catch (ex: Exception) {
                     for (playerLoop in ProxyServer.getInstance().players) {
-                        playerLoop.disconnect("§c[${UtilsBungeeMain.instance.systemName}] An internal error occurred. :c".toTextComponent())
+                        playerLoop.disconnect("§c[${UtilsBungeeMain.instance.systemName}] An internal error occurred. :c".toMineSmartText())
                     }
                     error("Cannot reconnect to redis server, disconnecting players. Error: ${ex.stackTrace}")
                 }

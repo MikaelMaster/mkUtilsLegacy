@@ -8,6 +8,7 @@ import com.mikael.mkutilslegacy.api.mkplugin.language.Translation
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
+import com.mikael.mkutilslegacy.api.toMineSmartText
 import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
 import com.mikael.mkutilslegacy.bungee.command.BungeeVersionCommand
@@ -205,7 +206,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
     override fun log(vararg msg: String) {
-        ProxyServer.getInstance().console.sendMessage(*msg.map { it.toTextComponent() }.toTypedArray())
+        ProxyServer.getInstance().console.sendMessage(*msg.map { it.toMineSmartText() }.toTypedArray())
     }
 
     override fun getPlugin(): Any {
