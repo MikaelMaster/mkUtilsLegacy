@@ -31,9 +31,9 @@ class MineCooldown(var duration: Long) {
     /**
      * The message sent to players during the cooldown.
      *
-     * Default: "§cPlease wait §e%times §cto use this again.".
+     * Default: "§cPlease wait §e%time%s §cto use this again.".
      */
-    var messageOnCooldown: String? = "§cPlease wait §e%times §cto use this again."
+    var messageOnCooldown: String? = "§cPlease wait §e%time%s §cto use this again."
 
     /**
      * Sets the [messageOnCooldown] to null.
@@ -78,10 +78,10 @@ class MineCooldown(var duration: Long) {
         messageOnCooldown?.let {
             if (isProxyServer) {
                 ProxyServer.getInstance().getPlayer(playerName)
-                    ?.sendMessage(it.replace("%time", "${getCooldown(playerName)}").toTextComponent())
+                    ?.sendMessage(it.replace("%time%", "${getCooldown(playerName)}").toTextComponent())
             } else {
                 Bukkit.getOnlinePlayers().firstOrNull { player -> player.name == playerName }
-                    ?.sendMessage(it.replace("%time", "${getCooldown(playerName)}"))
+                    ?.sendMessage(it.replace("%time%", "${getCooldown(playerName)}"))
             }
         }
     }
