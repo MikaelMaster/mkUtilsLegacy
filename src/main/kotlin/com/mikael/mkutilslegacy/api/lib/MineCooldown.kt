@@ -1,7 +1,7 @@
 package com.mikael.mkutilslegacy.api.lib
 
 import com.mikael.mkutilslegacy.api.isProxyServer
-import com.mikael.mkutilslegacy.api.toMineSmartText
+import com.mikael.mkutilslegacy.api.toTextComponent
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
 
@@ -78,7 +78,7 @@ class MineCooldown(var duration: Long) {
         messageOnCooldown?.let {
             if (isProxyServer) {
                 ProxyServer.getInstance().getPlayer(playerName)
-                    ?.sendMessage(it.replace("%time", "${getCooldown(playerName)}").toMineSmartText())
+                    ?.sendMessage(it.replace("%time", "${getCooldown(playerName)}").toTextComponent())
             } else {
                 Bukkit.getOnlinePlayers().firstOrNull { player -> player.name == playerName }
                     ?.sendMessage(it.replace("%time", "${getCooldown(playerName)}"))

@@ -1,6 +1,6 @@
 package com.mikael.mkutilslegacy.bungee.api
 
-import com.mikael.mkutilslegacy.api.toMineSmartText
+import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import net.eduard.api.lib.hybrid.ISender
 import net.md_5.bungee.api.ProxyServer
@@ -50,7 +50,7 @@ inline fun ProxiedPlayer.runCommand(
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
-        this.sendMessage(errorMessage.toMineSmartText())
+        this.sendMessage(errorMessage.toTextComponent())
         false
     }
 }
@@ -71,7 +71,7 @@ inline fun ProxiedPlayer.runBlock(
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
-        this.sendMessage(errorMessage.toMineSmartText())
+        this.sendMessage(errorMessage.toTextComponent())
         false
     }
 }
@@ -84,8 +84,8 @@ inline fun ProxiedPlayer.runBlock(
 fun ProxiedPlayer.title(title: String?, subtitle: String?, fadeIn: Int = 10, stay: Int = 20 * 2, fadeOut: Int = 10) {
     val proxyTitle = ProxyServer.getInstance().createTitle()
     proxyTitle.reset()
-    proxyTitle.title(title.toMineSmartText())
-    proxyTitle.title(subtitle.toMineSmartText())
+    proxyTitle.title(title.toTextComponent())
+    proxyTitle.title(subtitle.toTextComponent())
     proxyTitle.fadeIn(fadeIn)
     proxyTitle.stay(stay)
     proxyTitle.fadeOut(fadeOut)
