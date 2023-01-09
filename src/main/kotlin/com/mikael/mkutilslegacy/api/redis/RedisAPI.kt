@@ -101,6 +101,9 @@ object RedisAPI {
         return true
     }
 
+    /**
+     * Verify/flushes the connection with the Redis server.
+     */
     private fun flushConnection(): Boolean {
         if (!testPing()) {
             if (isProxyServer) {
@@ -138,7 +141,7 @@ object RedisAPI {
     }
 
     /**
-     * Verify if a data existis on the Redis server.
+     * Verify if a data exists on the Redis server.
      *
      * @param key the key to verify if the value existis.
      * @return True if the data existis. Otherwise, false.
@@ -159,11 +162,32 @@ object RedisAPI {
      * @return True if the insert was completed. Otherwise, false.
      * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
      */
+    @Deprecated("Deprecated since mkUtilsLegacy 2.1.7; Use insert method without givin a Plugin.")
     fun insert(plugin: IPluginInstance, key: String, value: Any): Boolean {
         if (!isInitialized()) error("Cannot insert any data to a null redis server")
         return try {
             if (!flushConnection()) error("RedisAPI main client connection is broken")
             client!!.set("${plugin.systemName}:${key}", value.toString())
+            true
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            false
+        }
+    }
+
+    /**
+     * Inserts a data into redis server using the given [key] and [value].
+     *
+     * @param key the key to push the value.
+     * @param value the value to be pushed into redis server. The value will always be converted to string.
+     * @return True if the insert was completed. Otherwise, false.
+     * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
+     */
+    fun insert(key: String, value: Any): Boolean {
+        if (!isInitialized()) error("Cannot insert any data to a null redis server")
+        return try {
+            if (!flushConnection()) error("RedisAPI main client connection is broken")
+            client!!.set(key, value.toString())
             true
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -181,6 +205,7 @@ object RedisAPI {
      * @return True if the insert was completed. Otherwise, false.
      * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
      */
+    @Deprecated("Deprecated since mkUtilsLegacy 2.1.7; Use insert method without givin a Plugin.")
     fun insertStringList(
         plugin: IPluginInstance,
         key: String,
@@ -220,6 +245,7 @@ object RedisAPI {
      * @return True if the insert was completed. Otherwise, false.
      * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
      */
+    @Deprecated("Deprecated since mkUtilsLegacy 2.1.7; Use insert method without givin a Plugin.")
     fun insertStringList(
         pluginName: String,
         key: String,
@@ -242,6 +268,43 @@ object RedisAPI {
                 if (index != stringList.size.minus(1)) stringBuilder.append(";")
             }
             client!!.set("${pluginName}:${key}", stringBuilder.toString())
+            true
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            false
+        }
+    }
+
+    /**
+     * Inserts a String List into the redis server using the given [key] and [stringList].
+     *
+     * @param key the key to push the value.
+     * @param stringList the String List to be pushed into redis server.
+     * @param useExistingData if is to use the existing redis list data. If you want to send this list with just the given `stringList`, mark this as false.
+     * @return True if the insert was completed. Otherwise, false.
+     * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
+     */
+    fun insertStringList(
+        key: String,
+        stringList: MutableList<String>,
+        useExistingData: Boolean = true
+    ): Boolean {
+        if (!isInitialized()) error("Cannot insert any data to a null redis server")
+        return try {
+            if (!flushConnection()) error("RedisAPI main client connection is broken")
+            if (useExistingData) {
+                if (existis(key)) {
+                    for (string in getStringList(key)) {
+                        stringList.add(string)
+                    }
+                }
+            }
+            val stringBuilder = StringBuilder()
+            for ((index, string) in stringList.withIndex()) {
+                stringBuilder.append(string)
+                if (index != stringList.size.minus(1)) stringBuilder.append(";")
+            }
+            client!!.set(key, stringBuilder.toString())
             true
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -273,6 +336,7 @@ object RedisAPI {
      * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
      * @throws NullPointerException if the data retorned is null.
      */
+    @Deprecated("Deprecated since mkUtilsLegacy 2.1.7; Use insert method without givin a Plugin.")
     fun getStringList(plugin: IPluginInstance, key: String): List<String> {
         if (!isInitialized()) error("Cannot get any data from a null redis server")
         if (!flushConnection()) error("RedisAPI main client connection is broken")
@@ -289,6 +353,7 @@ object RedisAPI {
      * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
      * @throws NullPointerException if the data retorned is null.
      */
+    @Deprecated("Deprecated since mkUtilsLegacy 2.1.7; Use insert method without givin a Plugin.")
     fun getStringList(pluginName: String, key: String): List<String> {
         if (!isInitialized()) error("Cannot get any data from a null redis server")
         if (!flushConnection()) error("RedisAPI main client connection is broken")
@@ -297,7 +362,22 @@ object RedisAPI {
     }
 
     /**
-     * Returns a Int from redis server using the given [key].
+     * Returns a String List from redis server using the given [key].
+     *
+     * @param key the key to search on redis server for a data.
+     * @return A String List from the redis server.
+     * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
+     * @throws NullPointerException if the data retorned is null.
+     */
+    fun getStringList(key: String): List<String> {
+        if (!isInitialized()) error("Cannot get any data from a null redis server")
+        if (!flushConnection()) error("RedisAPI main client connection is broken")
+        if (!existis(key)) return emptyList()
+        return client!!.get(key).split(";").filter { it.isNotEmpty() }
+    }
+
+    /**
+     * Returns an Int from redis server using the given [key].
      *
      * @param plugin the plugin instance owner of the data.
      * @param key the key to search on redis server for a data.
