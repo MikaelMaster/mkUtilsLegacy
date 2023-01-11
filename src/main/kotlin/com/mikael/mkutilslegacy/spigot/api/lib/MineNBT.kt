@@ -13,10 +13,10 @@ import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack
 object MineNBT {
 
     /**
-     * @param mineItem the [MineItem] to be used as a base.
+     * @param baseItem the [MineItem] to be used as a base.
      */
-    class Item(mineItem: MineItem) {
-        private val nmsItem: net.minecraft.server.v1_8_R3.ItemStack = CraftItemStack.asNMSCopy(mineItem.toItemStack())
+    class Item(baseItem: MineItem) {
+        private val nmsItem: net.minecraft.server.v1_8_R3.ItemStack = CraftItemStack.asNMSCopy(baseItem.toItemStack())
         private var itemCompound = if (nmsItem.hasTag()) nmsItem.tag else NBTTagCompound()
 
         fun setString(key: String, value: String): MineItem {

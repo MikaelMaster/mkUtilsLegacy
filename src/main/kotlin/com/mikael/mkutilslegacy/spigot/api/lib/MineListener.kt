@@ -19,21 +19,51 @@ import org.bukkit.plugin.java.JavaPlugin
  */
 open class MineListener : Listener {
 
-    var isRegistered: Boolean = false
-    var ownerPlugin: MKPlugin? = null
+    // Properties - Start
 
+    /**
+     * The [MKPlugin] holder (owner) of this [MineListener].
+     */
+    private var ownerPlugin: MKPlugin? = null
+
+    /**
+     * @return the [MKPlugin]? holding (owner) of this [MineListener]. Can be null
+     * if this listener is not registered yet.
+     */
+    fun getOwnerPlugin(): MKPlugin? {
+        return ownerPlugin
+    }
+
+    /**
+     * Note: If [ownerPlugin] is NOT null, means that this [MineListener] is registered.
+     * If it's null, means this listener is not yet registered.
+     *
+     * @return True if the [ownerPlugin] is not null. Otherwise, false.
+     */
+    val isRegistered get() = ownerPlugin != null
+
+    // Properties - End
+
+    /**
+     * Registers this [MineListener].
+     *
+     * @param plugin the [MKPlugin] holder (owner) of this listener.
+     */
     open fun registerListener(plugin: MKPlugin) {
         unregisterListener()
         Bukkit.getPluginManager().registerEvents(this, plugin.plugin as JavaPlugin)
         this.ownerPlugin = plugin
-        this.isRegistered = true
     }
 
+    /**
+     * Unregisters this [MineListener].
+     *
+     * Note: If this listener isn't registered yet ([isRegistered]) nothing will happen.
+     */
     fun unregisterListener() {
         if (!isRegistered) return
         HandlerList.unregisterAll(this)
         this.ownerPlugin = null
-        this.isRegistered = false
     }
 
 }

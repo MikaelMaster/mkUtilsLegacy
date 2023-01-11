@@ -562,6 +562,8 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
 
     /**
      * Listeners section.
+     *
+     * @see MineListener
      */
 
     @EventHandler(priority = EventPriority.HIGHEST)

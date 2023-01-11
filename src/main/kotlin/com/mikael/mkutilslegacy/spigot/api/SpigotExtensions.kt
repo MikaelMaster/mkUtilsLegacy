@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.spigot.api
 
-import com.mikael.mkutilslegacy.api.UtilsManager
 import com.mikael.mkutilslegacy.api.formatPersonal
 import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.spigot.UtilsMain
@@ -26,6 +25,7 @@ import org.bukkit.entity.*
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.util.Vector
 import java.util.*
 
@@ -45,7 +45,6 @@ val utilsMain get() = UtilsMain.instance
  * @see MineBook.open
  */
 fun Player.openMineBook(book: MineBook) {
-    UtilsManager
     book.open(this)
 }
 // MineBook extra functions - End
@@ -115,19 +114,28 @@ var Player.openedMineMenuPage: MenuPage?
 
 /**
  * Cashes the given [Player] client. USE WITH MODERATION!
+ *
+ * This will send a packet to the player ([MineReflect.sendPacket]) using parameters
+ * with no-sense values like [Double.MAX_VALUE] in the size of the explosion ([PacketPlayOutExplosion]).
+ * And this 'crazy' values will crash the player client.
  */
 fun Player.crashClient() {
-    UtilsMain.instance.log("§c[Player Crasher] §eCrashing player ${this.name.formatPersonal()} client.")
-    MineReflect.sendPacket(
-        this, PacketPlayOutExplosion(
-            Double.MAX_VALUE,
-            Double.MAX_VALUE,
-            Double.MAX_VALUE,
-            Float.MAX_VALUE,
-            Collections.emptyList(),
-            Vec3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
+    utilsMain.log("§c[Player Crasher] §eCrashing player ${this.name.formatPersonal()} client.")
+    try {
+        MineReflect.sendPacket(
+            this, PacketPlayOutExplosion(
+                Double.MAX_VALUE,
+                Double.MAX_VALUE,
+                Double.MAX_VALUE,
+                Float.MAX_VALUE,
+                emptyList(),
+                Vec3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
+            )
         )
-    )
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+        utilsMain.log("§c[Player Crasher] §cAn internal error occurred while crashing a player.")
+    }
 }
 
 /**
@@ -143,6 +151,17 @@ fun Ageable.formatAgeText(): String {
  */
 val InventoryClickEvent.player get() = this.whoClicked as Player
 
+/**
+ * Adds lines to the given [ItemStack].
+ *
+ * Note: If you're using mkUtils, prefer use [MineItem] instead of [ItemStack].
+ *
+ * So, then use [MineItem.addLore]. You can transform an [ItemStack] to a Mine Item using [ItemStack.toMineItem].
+ *
+ * @param lines the lines of string to add.
+ * @return the given [ItemStack] with the new lines added.
+ * @see ItemMeta.setLore
+ */
 fun <T : ItemStack> T.addLore(vararg lines: String): T {
     val meta = this.itemMeta!!
     if (meta.lore == null) meta.lore = emptyList()
@@ -267,10 +286,11 @@ fun Inventory.hasAmountOfItem(needed: ItemStack, neededAmount: Int): Boolean {
 }
 
 /**
- * Make an ItemStack and similar not breakable.
+ * Turns the given [ItemStack] not breakable.
  *
  * @param isUnbreakable if the item will be or not unbreakable. By default, True.
  * @return The new not breakable [ItemStack].
+ * @see ItemMeta.Spigot.isUnbreakable
  */
 fun <T : ItemStack> T.notBreakable(isUnbreakable: Boolean = true): T {
     val meta = itemMeta!!
@@ -359,11 +379,13 @@ fun World.newHologram(loc: Location, toDown: Boolean, vararg lines: String?): Li
 }
 
 /**
- * Runs an 'blood' effect on a [Player]'s body.
+ * Runs a 'blood' effect on a [Player]'s body.
  *
- * @param allBody if is to spawn the 'blood' particle on player Head AND Foot. False = 'blood' particle JUST on player Head.
+ * @param allBody if is to spawn the 'blood' particle on player Head AND Foot. If false the 'blood' particle will be spawned JUST on [Player.getEyeLocation].
  * @return True if the player is not dead, and the effect was played. Otherwise, false.
  * @see World.playEffect
+ * @see Effect.STEP_SOUND
+ * @see Material.REDSTONE_BLOCK (as breaked block, using STEP_SOUND effect)
  */
 fun Player.bloodEffect(allBody: Boolean = false): Boolean {
     if (this.isDead) return false
@@ -544,7 +566,7 @@ inline fun Player.asyncLoading(
 ) {
     val runStart = System.currentTimeMillis()
     var step = 0
-    val runnable = UtilsMain.instance.syncTimer(0, 2) {
+    val runnable = utilsMain.syncTimer(0, 2) {
         when (step) {
             0 -> {
                 this.actionBar("§a∎§7∎∎∎∎")
@@ -568,7 +590,7 @@ inline fun Player.asyncLoading(
         }
         if (step == 4) step = 0 else step++
     }
-    UtilsMain.instance.asyncTask {
+    utilsMain.asyncTask {
         try {
             thing.invoke()
         } catch (ex: Exception) {
@@ -576,7 +598,7 @@ inline fun Player.asyncLoading(
             this.soundNo()
             this.sendMessage(errorMessage)
         } finally {
-            UtilsMain.instance.syncTask {
+            utilsMain.syncTask {
                 runnable.cancel()
                 this.actionBar("§a∎∎∎∎∎ §8${(System.currentTimeMillis() - runStart).toInt().formatValue()}ms")
             }
@@ -599,7 +621,7 @@ inline fun Player.syncLoading(
     val runStart = System.currentTimeMillis()
     var step = 0
     var animating = true
-    UtilsMain.instance.asyncTask {
+    utilsMain.asyncTask {
         while (animating) {
             when (step) {
                 0 -> {
@@ -626,7 +648,7 @@ inline fun Player.syncLoading(
             Thread.sleep(100)
         }
     }
-    UtilsMain.instance.syncDelay(5) {
+    utilsMain.syncDelay(5) {
         try {
             thing.invoke()
         } catch (ex: Exception) {
@@ -724,7 +746,7 @@ inline fun Player.runCommandAsync(
     crossinline thing: () -> (Unit)
 ) {
     if (sendLoading) this.sendMessage("§eLoading...")
-    UtilsMain.instance.asyncTask {
+    utilsMain.asyncTask {
         try {
             thing.invoke()
         } catch (ex: Exception) {
@@ -800,7 +822,7 @@ fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true
     var ticksDelay = 1L
 
     for (i in 0..steps) {
-        UtilsMain.instance.syncDelay(ticksDelay) {
+        utilsMain.syncDelay(ticksDelay) {
             if (horse.passenger == null) {
                 horse.passenger = this
             }
@@ -810,7 +832,7 @@ fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true
         }
     }
 
-    UtilsMain.instance.syncDelay(steps + 1L) {
+    utilsMain.syncDelay(steps + 1L) {
         horse.remove()
     }
 }

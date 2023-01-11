@@ -48,6 +48,9 @@ import java.util.*
 /**
  * mkUtilsLegacy plugin main Spigot class.
  *
+ * Special thanks to Eduard-- (*https://github.com/EduardMaster*).
+ * This project uses EduardAPI codes and methods.
+ *
  * @author Mikael
  * @author KoddyDev
  * @author Eduard (EduardAPI)
@@ -106,7 +109,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         Vault.onEnable()
 
         log(LangSystem.getText(Translation.LOADING_SYSTEMS))
-        prepareDebugs(); prepareMySQL(); prepareRedis();
+        prepareDebugs(); prepareMySQL(); prepareRedis()
 
         // Commands
         VersionCommand().registerCommand(this)
@@ -279,7 +282,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         if (config.getBoolean("MenuAPI.autoUpdateMenus")) {
             AutoUpdateMenusTask().syncTimer()
         }
-        PlayerTargetAtPlayerTask().syncTimer()
+        PlayerTargetAtPlayerTask().asyncTimer()
     }
 
     private fun resetScoreboards() { // EduardAPI
@@ -361,9 +364,9 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
     override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
-    override fun log(vararg msgs: String) {
-        msgs.forEach {
-            Bukkit.getConsoleSender().sendMessage("§b[mkUtilsLegacy] §f$it")
+    override fun log(vararg msg: String) {
+        msg.forEach {
+            Bukkit.getConsoleSender().sendMessage("§b[${systemName}] §f${it}")
         }
     }
 

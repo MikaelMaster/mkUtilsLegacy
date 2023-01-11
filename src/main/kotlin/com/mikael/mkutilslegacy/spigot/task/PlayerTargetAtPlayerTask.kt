@@ -6,7 +6,7 @@ import net.eduard.api.lib.kotlin.mineCallEvent
 import net.eduard.api.lib.manager.TimeManager
 import net.eduard.api.lib.modules.Mine
 
-class PlayerTargetAtPlayerTask : TimeManager(20L) {
+internal class PlayerTargetAtPlayerTask : TimeManager(20L) {
 
     override fun run() {
         for (player in Mine.getPlayers()) {

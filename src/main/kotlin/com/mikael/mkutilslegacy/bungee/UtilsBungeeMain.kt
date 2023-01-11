@@ -34,6 +34,9 @@ import java.util.concurrent.TimeUnit
 /**
  * mkUtils (non-legacy for bungee) plugin main Bungee class.
  *
+ * Special thanks to Eduard-- (*https://github.com/EduardMaster*).
+ * This project uses EduardAPI codes and methods.
+ *
  * @author Mikael
  * @author KoddyDev
  * @author Eduard (EduardAPI)
@@ -47,7 +50,6 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     }
 
     private var mySqlQueueUpdater: ScheduledTask? = null
-    lateinit var manager: UtilsManager
     lateinit var config: Config
 
     init {
@@ -59,7 +61,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         val loadStart = System.currentTimeMillis()
 
         log(LangSystem.getText(Translation.LOADING_STARTING))
-        manager.mkUtilsVersion = this.description.version
+        UtilsManager.mkUtilsVersion = this.description.version
         prepareStorageAPI() // EduardAPI
         HybridTypes // {static} # Hybrid types - Load
         store<RedisConnectionData>()
@@ -143,8 +145,8 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     }
 
     private fun prepareMySQL() {
-        manager.sqlManager = SQLManager(config["Database", DBManager::class.java])
-        if (manager.sqlManager.dbManager.isEnabled) {
+        UtilsManager.sqlManager = SQLManager(config["Database", DBManager::class.java])
+        if (UtilsManager.sqlManager.dbManager.isEnabled) {
             log("§eConnecting to MySQL database...")
             UtilsManager.dbManager.openConnection()
             if (!UtilsManager.sqlManager.hasConnection()) error("Cannot connect to MySQL database")
@@ -179,9 +181,9 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         )
         config.add(
             "Region.Language",
-            "en_us",
+            "en-us",
             "The language to be used by mkUtilsLegacy and all MK Plugins.",
-            "Languages available at moment: 'en_us' & 'pt_br'. DON'T PUT A DIFFERENT VALUE!"
+            "Languages available at moment: 'en-us' & 'pt_br'. DON'T PUT A DIFFERENT VALUE!"
         )
         config.add(
             "Region.RegionFormatter",
@@ -201,9 +203,9 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
     override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
-    override fun log(vararg msgs: String) {
-        msgs.forEach {
-            ProxyServer.getInstance().console.sendMessage("§b[mkUtilsProxy] §f$it".toTextComponent())
+    override fun log(vararg msg: String) {
+        msg.forEach {
+            ProxyServer.getInstance().console.sendMessage("§b[${systemName}] §f${it}".toTextComponent())
         }
     }
 
