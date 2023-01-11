@@ -201,8 +201,10 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
     override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
-    override fun log(vararg msg: String) {
-        ProxyServer.getInstance().console.sendMessage(*msg.map { it.toTextComponent() }.toTypedArray())
+    override fun log(vararg msgs: String) {
+        msgs.forEach {
+            ProxyServer.getInstance().console.sendMessage("§b[mkUtilsProxy] §f$it".toTextComponent())
+        }
     }
 
     override fun getPlugin(): Any {

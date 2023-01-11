@@ -361,8 +361,10 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
     override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
 
-    override fun log(vararg msg: String) {
-        Bukkit.getConsoleSender().sendMessage(msg)
+    override fun log(vararg msgs: String) {
+        msgs.forEach {
+            Bukkit.getConsoleSender().sendMessage("§b[mkUtilsLegacy] §f$it")
+        }
     }
 
     override fun getPlugin(): Any {
