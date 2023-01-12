@@ -105,6 +105,7 @@ open class MineHologram(vararg var lines: String?) {
                 loc.add(0.0, 0.3, 0.0)
             }
         }
+        spawnedLines.addAll(holos)
         return this
     }
 
