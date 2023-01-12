@@ -49,6 +49,8 @@ open class MineHologram(vararg val lines: String?) {
      * @return this [MineHologram].
      */
     fun spawn(player: Player, loc: Location, toDown: Boolean = true): MineHologram {
+        lastSpawnLoc = loc.clone()
+        lastWasToDown = toDown
         val holos = mutableListOf<Hologram>()
         var location: Location = loc
         for (line in lines) {
@@ -67,8 +69,6 @@ open class MineHologram(vararg val lines: String?) {
             }
         }
         spawnedPlayerLines[player] = holos
-        lastSpawnLoc = loc
-        lastWasToDown = toDown
         return this
     }
 
@@ -76,6 +76,8 @@ open class MineHologram(vararg val lines: String?) {
      * @return this [MineHologram].
      */
     fun spawn(loc: Location, toDown: Boolean = true): MineHologram {
+        lastSpawnLoc = loc.clone()
+        lastWasToDown = toDown
         val holos = mutableListOf<ArmorStand>()
         var location: Location = loc
         for (line in lines) {
@@ -101,8 +103,6 @@ open class MineHologram(vararg val lines: String?) {
                 loc.add(0.0, 0.3, 0.0)
             }
         }
-        lastSpawnLoc = loc
-        lastWasToDown = toDown
         return this
     }
 
