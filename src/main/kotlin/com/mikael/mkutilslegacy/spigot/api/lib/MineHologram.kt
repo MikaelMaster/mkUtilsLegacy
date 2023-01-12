@@ -1,6 +1,7 @@
 package com.mikael.mkutilslegacy.spigot.api.lib
 
 import com.mikael.mkutilslegacy.spigot.api.chunk
+import com.mikael.mkutilslegacy.spigot.api.disableAI
 import net.eduard.api.lib.abstraction.Hologram
 import org.bukkit.Location
 import org.bukkit.entity.ArmorStand
@@ -9,9 +10,10 @@ import org.bukkit.entity.Player
 /**
  * [MineHologram] util class
  *
- * With this util class you can create 'player-holograms'. In other words, create/show holograms just for specific players.
+ * With this util class can also create 'player-holograms' and 'global-holograms'.
+ * In other words, create/show holograms just for specific players.
  *
- * The 'player-holograms' functions uses [net.minecraft.server.v1_8_R3]! (NMS 1.8_R3)
+ * The 'player-holograms' functions uses [net.minecraft.server.v1_8_R3]! (EduardAPI [Hologram] NMS API)
  *
  * To create/invoke a new MineHologram you can use:
  * - MineHologram(vararg lines: [String]?) -> MineHologram("Line 1", "Line 2", null, "Line 4") -> 'null' will be an empty line.
@@ -19,10 +21,14 @@ import org.bukkit.entity.Player
  * @author KoddyDev
  * @author Mikael
  * @see ArmorStand
+ * @see Hologram
  */
-open class MineHologram(private vararg val lines: String?) {
+open class MineHologram(vararg var lines: String?) {
     private val spawnedLines = mutableListOf<ArmorStand>()
     private val spawnedPlayerLines = mutableMapOf<Player, MutableList<Hologram>>()
+
+    private var lastSpawnLoc: Location? = null
+    private var lastWasToDown: Boolean? = null
 
     /**
      * @return all spawned lines of this hologram (List<[ArmorStand]>). Only lines spawned for ALL players will be returned.
@@ -32,9 +38,18 @@ open class MineHologram(private vararg val lines: String?) {
     }
 
     /**
+     * @return all spawned per-player lines of this hologram (Map<[Player], MutableList<[Hologram]>>). Only PER-PLAYER lines will be returned.
+     */
+    fun getAllSpawnedPlayerLines(): Map<Player, MutableList<Hologram>> {
+        return spawnedPlayerLines
+    }
+
+    /**
      * @return this [MineHologram].
      */
     fun spawn(player: Player, loc: Location, toDown: Boolean = true): MineHologram {
+        lastSpawnLoc = loc.clone()
+        lastWasToDown = toDown
         val holos = mutableListOf<Hologram>()
         var location: Location = loc
         for (line in lines) {
@@ -60,6 +75,8 @@ open class MineHologram(private vararg val lines: String?) {
      * @return this [MineHologram].
      */
     fun spawn(loc: Location, toDown: Boolean = true): MineHologram {
+        lastSpawnLoc = loc.clone()
+        lastWasToDown = toDown
         val holos = mutableListOf<ArmorStand>()
         var location: Location = loc
         for (line in lines) {
@@ -68,6 +85,7 @@ open class MineHologram(private vararg val lines: String?) {
             }
             val holo = loc.world!!.spawn(location, ArmorStand::class.java)
             holo.setGravity(false)
+            holo.disableAI()
             holo.isVisible = false
             holo.isSmall = true
             holo.isMarker = false
@@ -85,12 +103,14 @@ open class MineHologram(private vararg val lines: String?) {
                 loc.add(0.0, 0.3, 0.0)
             }
         }
+        spawnedLines.addAll(holos)
         return this
     }
 
     /**
+     * This will remove all spawned lines for the given [player]. (If this hologram was not set per-player nothing will happen)
      *
-     * @param player the [Player] to hide (despawn) this hologram. If the player is NULL, [despawn] will be called.
+     * @param player the [Player] to hide this hologram. If the player is NULL, [despawn] (with none as param) will be called.
      * @return this [MineHologram].
      */
     fun despawn(player: Player? = null): MineHologram {
@@ -104,7 +124,7 @@ open class MineHologram(private vararg val lines: String?) {
     }
 
     /**
-     * This will remove (despawn) all [spawnedLines].
+     * This will remove all [spawnedLines] of this hologram. (Per-player holograms will not be removed using this function)
      *
      * @return this [MineHologram].
      */
@@ -120,22 +140,21 @@ open class MineHologram(private vararg val lines: String?) {
     }
 
     /**
-
-    /**
-     * Remove a Hologram
+     * Updates this hologram lines for the given [player], using the given [lines].
      *
-     * @author KoddyDev
-     * @return [Boolean] if removed
+     * @param player the [Player]? to update this hologram. If null, the global lines (not per-player) will be updated, to everyone.
+     * @return this [MineHologram].
      */
-    fun remove(): Boolean {
-        holos.forEach { stand ->
-            if(!stand.chunk.isLoaded) stand.chunk.load()
-            if(!stand.isDead) stand.remove()
+    fun update(player: Player? = null): MineHologram {
+        val loc = lastSpawnLoc ?: error("MineHologram Last Spawn Loc was not defined; Can't update this hologram.")
+        val isToDown = lastWasToDown ?: error("MineHologram Last IsToDown was not defined; Can't update this hologram.")
+        if (player == null) {
+            despawn()
+            spawn(loc, isToDown)
+        } else {
+            despawn(player)
+            spawn(player, loc, isToDown)
         }
-        holos.clear()
-
-        return true
+        return this
     }
-
-     */
 }
