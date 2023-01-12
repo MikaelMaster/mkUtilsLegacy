@@ -205,6 +205,7 @@ object RedisAPI {
      * @return True if the insert was completed. Otherwise, false.
      * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
      */
+    @Suppress("DEPRECATION")
     @Deprecated("Deprecated since mkUtilsLegacy 2.1.7; Use insert method without givin a Plugin.")
     fun insertStringList(
         plugin: IPluginInstance,
@@ -245,6 +246,7 @@ object RedisAPI {
      * @return True if the insert was completed. Otherwise, false.
      * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
      */
+    @Suppress("DEPRECATION")
     @Deprecated("Deprecated since mkUtilsLegacy 2.1.7; Use insert method without givin a Plugin.")
     fun insertStringList(
         pluginName: String,
@@ -319,12 +321,26 @@ object RedisAPI {
      * @param key the key to search on redis server for a data.
      * @return A String from the redis server.
      * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
-     * @throws NullPointerException if the data retorned is null.
+     * @throws NullPointerException if the data returned is null.
      */
     fun getString(plugin: IPluginInstance, key: String): String {
         if (!isInitialized()) error("Cannot get any data from a null redis server")
         if (!flushConnection()) error("RedisAPI main client connection is broken")
         return client!!.get("${plugin.systemName}:${key}")
+    }
+
+    /**
+     * Returns a String from redis server using the given [key].
+     *
+     * @param key the key to search on redis server for a data.
+     * @return A String from the redis server.
+     * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
+     * @throws NullPointerException if the data returned is null.
+     */
+    fun getString(key: String): String {
+        if (!isInitialized()) error("Cannot get any data from a null redis server")
+        if (!flushConnection()) error("RedisAPI main client connection is broken")
+        return client!!.get(key)
     }
 
     /**
@@ -381,14 +397,28 @@ object RedisAPI {
      *
      * @param plugin the plugin instance owner of the data.
      * @param key the key to search on redis server for a data.
-     * @return A Int from the redis server.
+     * @return An Int from the redis server.
      * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
-     * @throws NumberFormatException if the retorned data is null or is not a Int.
+     * @throws NumberFormatException if the retorned data is null or is not an Int.
      */
     fun getInt(plugin: IPluginInstance, key: String): Int {
         if (!isInitialized()) error("Cannot get any data from a null redis server")
         if (!flushConnection()) error("RedisAPI main client connection is broken")
         return client!!.get("${plugin.systemName}:${key}").toInt()
+    }
+
+    /**
+     * Returns an Int from redis server using the given [key].
+     *
+     * @param key the key to search on redis server for a data.
+     * @return An Int from the redis server.
+     * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
+     * @throws NumberFormatException if the returned data is null or is not an Int.
+     */
+    fun getInt(key: String): Int {
+        if (!isInitialized()) error("Cannot get any data from a null redis server")
+        if (!flushConnection()) error("RedisAPI main client connection is broken")
+        return client!!.get(key).toInt()
     }
 
     /**
@@ -407,6 +437,20 @@ object RedisAPI {
     }
 
     /**
+     * Returns a Double from redis server using the given [key].
+     *
+     * @param key the key to search on redis server for a data.
+     * @return A Double from the redis server.
+     * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
+     * @throws NumberFormatException if the returned data is null or is not a Double.
+     */
+    fun getDouble(key: String): Double {
+        if (!isInitialized()) error("Cannot get any data from a null redis server")
+        if (!flushConnection()) error("RedisAPI main client connection is broken")
+        return client!!.get(key).toDouble()
+    }
+
+    /**
      * Returns a Long from redis server using the given [key].
      *
      * @param plugin the plugin instance owner of the data.
@@ -419,6 +463,35 @@ object RedisAPI {
         if (!isInitialized()) error("Cannot get any data from a null redis server")
         if (!flushConnection()) error("RedisAPI main client connection is broken")
         return client!!.get("${plugin.systemName}:${key}").toLong()
+    }
+
+    /**
+     * Returns a Long from redis server using the given [key].
+     *
+     * @param key the key to search on redis server for a data.
+     * @return A Long from the redis server.
+     * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
+     * @throws NumberFormatException if the returned data is null or is not a Long.
+     */
+    fun getLong(key: String): Long {
+        if (!isInitialized()) error("Cannot get any data from a null redis server")
+        if (!flushConnection()) error("RedisAPI main client connection is broken")
+        return client!!.get(key).toLong()
+    }
+
+    /**
+     * This will return a value for the given [key] transformed into the given [typeClass].
+     *
+     * @param key the key to search on redis server for a data.
+     * @return A Data as [typeClass] from the redis server.
+     * @throws IllegalStateException if the Redis [client] or the [clientConnection] is null.
+     * @throws ClassCastException if the returned value cannot be transformed into the given [typeClass].
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <C : Any> getDataAs(typeClass: Class<C>, key: String): C {
+        if (!isInitialized()) error("Cannot get any data from a null redis server")
+        if (!flushConnection()) error("RedisAPI main client connection is broken")
+        return client!!.get(key) as C
     }
 
     /**
