@@ -2,6 +2,7 @@ package com.mikael.mkutilslegacy.spigot.api
 
 import com.mikael.mkutilslegacy.api.formatPersonal
 import com.mikael.mkutilslegacy.api.formatValue
+import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
@@ -10,7 +11,6 @@ import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MineMenu
 import com.mikael.mkutilslegacy.spigot.listener.GeneralListener
-import net.eduard.api.lib.game.ItemBuilder
 import net.eduard.api.lib.kotlin.mineSendActionBar
 import net.eduard.api.lib.kotlin.mineSendTitle
 import net.eduard.api.lib.kotlin.sendTitle
@@ -118,9 +118,12 @@ var Player.openedMineMenuPage: MenuPage?
  * This will send a packet to the player ([MineReflect.sendPacket]) using parameters
  * with no-sense values like [Double.MAX_VALUE] in the size of the explosion ([PacketPlayOutExplosion]).
  * And this 'crazy' values will crash the player client.
+ *
+ * @param plugin the [MKPlugin] that wants to crash the given [Player].
+ * @return True of the 'crash-packet' was successfully sent. Otherwise, false.
  */
-fun Player.crashClient() {
-    utilsMain.log("§c[Player Crasher] §eCrashing player ${this.name.formatPersonal()} client.")
+fun Player.crashClient(plugin: MKPlugin): Boolean {
+    utilsMain.log("§c[Player Crasher] §eCrashing player ${this.name.formatPersonal()} client. (Request by plugin: ${plugin.systemName})")
     try {
         MineReflect.sendPacket(
             this, PacketPlayOutExplosion(
@@ -134,15 +137,9 @@ fun Player.crashClient() {
         )
     } catch (ex: Exception) {
         ex.printStackTrace()
-        utilsMain.log("§c[Player Crasher] §cAn internal error occurred while crashing a player.")
+        utilsMain.log("§c[Player Crasher] §cAn internal error occurred while crashing a player. (Request by plugin: ${plugin.systemName})")
     }
-}
-
-/**
- * @return if [Ageable.isAdult] 'Adult' else 'Baby'.
- */
-fun Ageable.formatAgeText(): String {
-    return if (this.isAdult) "Adult" else "Baby"
+    return true
 }
 
 /**
@@ -177,15 +174,14 @@ fun <T : ItemStack> T.addLore(vararg lines: String): T {
     return this
 }
 
+var AGEABLE_FORMAT_AGE_TEXT_ADULT = "Adult"
+var AGEABLE_FORMAT_AGE_TEXT_BABY = "Baby"
+
 /**
- * Deprecated in favor of new mkUtils [MineItem], a new class to manage and use [ItemStack]s.
- *
- * @return A new [ItemBuilder] cloning the given [ItemStack].
- * @see ItemBuilder
+ * @return if [Ageable.isAdult] '[AGEABLE_FORMAT_AGE_TEXT_ADULT]' else '[AGEABLE_FORMAT_AGE_TEXT_BABY]'.
  */
-@Deprecated("Deprecated since mkUtils v1.1", ReplaceWith("ItemBuilder(this)", "net.eduard.api.lib.game.ItemBuilder"))
-fun ItemStack.toItemBuilder(): ItemBuilder {
-    return ItemBuilder(this)
+fun Ageable.formatAgeText(): String {
+    return if (this.isAdult) AGEABLE_FORMAT_AGE_TEXT_ADULT else AGEABLE_FORMAT_AGE_TEXT_BABY
 }
 
 /**
@@ -217,7 +213,6 @@ fun Entity.disableAI(): Entity {
  * @return the given [Entity], now invincible.
  * @see Entity.isInvincible
  */
-@Deprecated("Deprecated since mkUtilsLegacy v1.1.0; Use your own method instead.")
 fun Entity.setInvincible(isInvincible: Boolean): Entity {
     if (isInvincible) {
         GeneralListener.instance.invincibleEntities.add(this)
@@ -231,12 +226,6 @@ fun Entity.setInvincible(isInvincible: Boolean): Entity {
  * @return True if [GeneralListener.invincibleEntities] contains the given [Entity]. Otherwise, false.
  * @see Entity.setInvincible
  */
-@Deprecated(
-    "Deprecated since mkUtilsLegacy 2.1.0; Entity.setInvincible() is deprecated.", ReplaceWith(
-        "GeneralListener.instance.invincibleEntities.contains(this)",
-        "com.mikael.mkutilslegacy.spigot.listener.GeneralListener"
-    )
-)
 val Entity.isInvincible: Boolean get() = GeneralListener.instance.invincibleEntities.contains(this)
 
 /**
@@ -297,85 +286,6 @@ fun <T : ItemStack> T.notBreakable(isUnbreakable: Boolean = true): T {
     meta.spigot().isUnbreakable = isUnbreakable
     itemMeta = meta
     return this
-}
-
-/**
- * Extra of see also: (loc: Location, vararg lines: String?): ArmorStand
- *
- * @param line the line string to spawn. If you give as null, the line will be empty.
- * @see World.newHologram
- */
-@Suppress("DEPRECATION")
-fun Location.newHologram(line: String?): ArmorStand {
-    if (this.world == null) error("Cannot spawn a hologram on a unloaded world")
-    return this.world!!.newHologram(this, line)
-}
-
-/**
- * Extra of see also: (loc: Location, toDown: Boolean, vararg lines: String?): List<ArmorStand>
- *
- * @param toDown if the holograms should be spawned from up to down, or from down to up.
- * @param lines the list of lines string to spawn. If you give as null, the line will be empty.
- * @see World.newHologram
- */
-@Suppress("DEPRECATION")
-fun Location.newHologram(toDown: Boolean, vararg lines: String?): List<ArmorStand> {
-    if (this.world == null) error("Cannot spawn a hologram in a unloaded world")
-    return this.world!!.newHologram(this, toDown, *lines)
-}
-
-/**
- * Spawn a new hologram with just one line.
- *
- * @param loc the location to spawn the holograms.
- * @param line the line string to spawn. If you give as null, the line will be empty.
- * @return The spawned [ArmorStand] that compose this hologram.
- * @see ArmorStand
- */
-@Deprecated("Deprecated since mkUtilsLegacy 1.1.9; Use MineHologram util class instead.")
-fun World.newHologram(loc: Location, line: String?): ArmorStand {
-    if (!loc.chunk.isLoaded) {
-        loc.chunk.load(true)
-    }
-    val holo = loc.world!!.spawn(loc, ArmorStand::class.java)
-    holo.setGravity(false)
-    holo.isVisible = false
-    holo.isSmall = true
-    holo.isMarker = false
-    if (line != null) {
-        holo.isCustomNameVisible = true
-        holo.customName = line
-    } else {
-        holo.isCustomNameVisible = false
-        holo.customName = "§r" // empty line
-    }
-    return holo
-}
-
-/**
- * Spawn a new hologram with multiple lines.
- *
- * @param loc the location to spawn the holograms.
- * @param toDown if the holograms should be spawned from up to down, or from down to up.
- * @param lines the list of lines string to spawn. If you give as null, the line will be empty.
- * @return A [List] of all spawned [ArmorStand] that compose the hologram.
- * @see ArmorStand
- */
-@Suppress("DEPRECATION")
-@Deprecated("Deprecated since mkUtilsLegacy 1.1.9; Use MineHologram util class instead.")
-fun World.newHologram(loc: Location, toDown: Boolean, vararg lines: String?): List<ArmorStand> {
-    val holos = mutableListOf<ArmorStand>()
-    var location: Location = loc
-    for (line in lines) {
-        val holo = this.newHologram(location, line)
-        holos.add(holo)
-        location = if (toDown) {
-            loc.subtract(0.0, 0.3, 0.0)
-        } else {
-            loc.add(0.0, 0.3, 0.0)
-        }
-    }
-    return holos
 }
 
 /**
@@ -555,15 +465,16 @@ fun Player.giveArmorSet(
     return droppedArmor
 }
 
+var PLAYER_RUN_BLOCK_ERROR_MSG = "§cAn internal error occurred while executing something to you."
+
 /**
  * Runs a loading animation to the player using the main thread (sync), while execute the given [thing] using async.
  *
+ * Uses [PLAYER_RUN_BLOCK_ERROR_MSG] to send the player a message if an error occur.
+ *
  * @param thing the block code to run using async, try catch and the load animation.
  */
-inline fun Player.asyncLoading(
-    errorMessage: String = "§cAn internal error occurred while executing something to you.",
-    crossinline thing: (() -> Unit)
-) {
+inline fun Player.asyncLoading(crossinline thing: (() -> Unit)) {
     val runStart = System.currentTimeMillis()
     var step = 0
     val runnable = utilsMain.syncTimer(0, 2) {
@@ -596,7 +507,7 @@ inline fun Player.asyncLoading(
         } catch (ex: Exception) {
             ex.printStackTrace()
             this.soundNo()
-            this.sendMessage(errorMessage)
+            this.sendMessage(PLAYER_RUN_BLOCK_ERROR_MSG)
         } finally {
             utilsMain.syncTask {
                 runnable.cancel()
@@ -610,14 +521,13 @@ inline fun Player.asyncLoading(
  * Runs a loading animation to the player using an async thread, while execute the given [thing] using sync (main thread).
  *
  * Please note that the given [thing] will be run 5 ticks (approximately 250ms) after the function ram.
- * This is to avoid animation internal erros.
+ * This is to avoid actionbar-animation internal errors.
+ *
+ * Uses [PLAYER_RUN_BLOCK_ERROR_MSG] to send the player a message if an error occur.
  *
  * @param thing the block code to run using the main thread (sync), try catch and the load animation.
  */
-inline fun Player.syncLoading(
-    errorMessage: String = "§cAn internal error occurred while executing something to you.",
-    crossinline thing: (() -> Unit)
-) {
+inline fun Player.syncLoading(crossinline thing: (() -> Unit)) {
     val runStart = System.currentTimeMillis()
     var step = 0
     var animating = true
@@ -654,7 +564,7 @@ inline fun Player.syncLoading(
         } catch (ex: Exception) {
             ex.printStackTrace()
             this.soundNo()
-            this.sendMessage(errorMessage)
+            this.sendMessage(PLAYER_RUN_BLOCK_ERROR_MSG)
         } finally {
             animating = false
             this.actionBar("§a∎∎∎∎∎ §8${(System.currentTimeMillis() - runStart).toInt().formatValue()}ms")
@@ -664,25 +574,26 @@ inline fun Player.syncLoading(
 
 /**
  * Use it anywhere to run the Unit using a try catch. If any error occur,
- * the given [Player] will receive a message saying that an error occurred..
+ * the given [Player] will receive a message saying that an error occurred.
+ *
+ * Uses [PLAYER_RUN_BLOCK_ERROR_MSG] to send the player a message if an error occur.
  *
  * @param thing the block code to run using try catch.
  * @return True if the block code was run with no errors. Otherwise, false.
  */
-inline fun Player.runBlock(
-    errorMessage: String = "§cAn internal error occurred while executing something to you.",
-    crossinline thing: (() -> Unit)
-): Boolean {
+inline fun Player.runBlock(crossinline thing: (() -> Unit)): Boolean {
     return try {
         thing.invoke()
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
         this.soundNo()
-        this.sendMessage(errorMessage)
+        this.sendMessage(PLAYER_RUN_BLOCK_ERROR_MSG)
         false
     }
 }
+
+var RUN_COMMAND_ERROR_MSG = "§cAn internal error occurred while executing this command."
 
 /**
  * Use in a command to run the Unit using a try catch. If any error occur,
@@ -690,22 +601,21 @@ inline fun Player.runBlock(
  *
  * If the given [CommandSender] is a [Player], [Player.runCommand] will be called internally.
  *
+ * Uses [RUN_COMMAND_ERROR_MSG] to send the command sender a message if an error occur.
+ *
  * @param thing the block code to run using try catch.
  * @return True if the block code was run with no errors. Otherwise, false.
  */
-inline fun CommandSender.runCommand(
-    errorMessage: String = "§cAn internal error occurred while executing this command.",
-    crossinline thing: (() -> Unit)
-): Boolean {
+inline fun CommandSender.runCommand(crossinline thing: (() -> Unit)): Boolean {
     if (this is Player) {
-        return this.runCommand(errorMessage, thing)
+        return this.runCommand(thing)
     }
     return try {
         thing.invoke()
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
-        this.sendMessage(errorMessage)
+        this.sendMessage(RUN_COMMAND_ERROR_MSG)
         false
     }
 }
@@ -714,46 +624,20 @@ inline fun CommandSender.runCommand(
  * Use in a command to run the Unit using a try catch. If any error occur,
  * the given [Player] will receive a message saying that an error occurred.
  *
+ * Uses [RUN_COMMAND_ERROR_MSG] to send the player a message if an error occur.
+ *
  * @param thing the block code to run using try catch.
  * @return True if the block code was run with no errors. Otherwise, false.
  */
-inline fun Player.runCommand(
-    errorMessage: String = "§cAn internal error occurred while executing this command.",
-    crossinline thing: (() -> Unit)
-): Boolean {
+inline fun Player.runCommand(crossinline thing: (() -> Unit)): Boolean {
     return try {
         thing.invoke()
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
         this.soundNo()
-        this.sendMessage(errorMessage)
+        this.sendMessage(RUN_COMMAND_ERROR_MSG)
         false
-    }
-}
-
-/**
- * Use in a command to run the Unit using async and a try catch. If any error occur,
- * the player will receive a message telling he that an error has been occured.
- *
- * @param sendLoading if is to send a 'Loading...' message before try to load the Unit using async.
- * @param thing the block code to run using async and try catch.
- */
-@Deprecated("Deprecated since mkUtilsLegacy 1.0.9; Use Player.runCommand inside an Async Block instead.")
-inline fun Player.runCommandAsync(
-    sendLoading: Boolean = true,
-    errorMessage: String = "§cAn internal error occurred while executing this command.",
-    crossinline thing: () -> (Unit)
-) {
-    if (sendLoading) this.sendMessage("§eLoading...")
-    utilsMain.asyncTask {
-        try {
-            thing.invoke()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            this.soundNo()
-            this.sendMessage(errorMessage)
-        }
     }
 }
 
@@ -794,10 +678,14 @@ fun Player.actionBar(msg: String) {
  */
 @Suppress("DEPRECATION")
 fun Player.clearTitle() {
-    this.resetTitle() // Just ignore the deprecated
+    this.resetTitle()
 }
 
-fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true) {
+/**
+ * In-dev; Not done yet.
+ */
+@Deprecated("In-dev; Not done yet.")
+internal fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true) {
     val from = this.location
     val velocity = Vector(0, 0, 0)
 
@@ -834,17 +722,22 @@ fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true
 
     utilsMain.syncDelay(steps + 1L) {
         horse.remove()
+
     }
 }
 
-fun Player.moveTo(toMovePlayer: Location, xzForce: Double = 4.0, yForce: Double = 1.0, soundEffect: Boolean = true) {
-    val speed = toMovePlayer.toVector().subtract(this.location.toVector()).normalize().multiply(xzForce)
+/**
+ * This will 'launch' to the given [targetLoc] using the given parameters.
+ *
+ * @see Vector
+ * @see Player.setVelocity
+ */
+fun Player.moveTo(targetLoc: Location, xzForce: Double = 4.0, yForce: Double = 1.0, soundEffect: Boolean = true) {
+    val speed = targetLoc.toVector().subtract(this.location.toVector()).normalize().multiply(xzForce)
     speed.y = yForce
-
     if (soundEffect) {
         this.playSound(this.location, Sound.FIREWORK_LAUNCH, 2f, 2f)
     }
-
     this.velocity = speed
 }
 

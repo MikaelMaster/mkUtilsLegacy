@@ -3,8 +3,6 @@ package com.mikael.mkutilslegacy.api
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
-import com.mikael.mkutilslegacy.api.mkplugin.MKPluginData
-import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.hybrid.Hybrid
@@ -21,28 +19,6 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
- * [UtilsManager] class shortcut.
- *
- * @see UtilsManager
- */
-@Deprecated(
-    "Call UtilsManager class instead.",
-    ReplaceWith("UtilsManager", "com.mikael.mkutilslegacy.api.UtilsManager")
-)
-val Manager = UtilsManager
-
-/**
- * [RedisAPI] class shortcut.
- *
- * @see RedisAPI
- */
-@Deprecated(
-    "Call RedisAPI class instead.",
-    ReplaceWith("RedisAPI", "com.mikael.mkutilslegacy.api.redis.RedisAPI")
-)
-val Redis = RedisAPI
-
-/**
  * Key to sync MySQL async and sync updates.
  * It's useful for plugins witch uses mkUtilsLegacy as dependency ([MKPlugin]).
  *
@@ -51,28 +27,6 @@ val Redis = RedisAPI
  * @see syncMysql
  */
 val syncMysqUpdatesKey = Any()
-
-/**
- * Use it to sync updates in mysql that interact with a local list/map to save a [MKPluginData].
- * You can call this function in a main or async thread, everything will be sync as the same.
- *
- * @param thing the block code to execute using the [syncMysqUpdatesKey].
- * @return True if the block code has been executed with no error. Otherwise, false.
- * @author Mikael
- * @see syncMysqUpdatesKey
- */
-@Deprecated("Deprecated; Use { synchronized(syncMysqUpdatesKey) { *code* } } instead.")
-inline fun syncMysql(crossinline thing: (() -> Unit)): Boolean {
-    synchronized(syncMysqUpdatesKey) {
-        return try {
-            thing.invoke()
-            true
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            false
-        }
-    }
-}
 
 /**
  * @return True if the plugin is running on Bungeecord (Waterfall, etc). Otherwise, false.
@@ -98,6 +52,8 @@ fun String?.toTextComponent(markNull: Boolean = false): TextComponent {
 
 /**
  * You can use this to format something as yours (Personal).
+ *
+ * THIS FUNCTION WAS BUILT FOR English US language and may not make sense in others languages.
  *
  * Example:
  *
@@ -145,49 +101,66 @@ fun String.fixGrammar(): String {
     return newTextBuilder.toString()
 }
 
+var FORMAT_SECOND_WORLD_TEXT_SINGLE = "second"
+var FORMAT_SECOND_WORLD_TEXT_MULTI = "seconds"
+
 /**
- * Will return a [String] with "seconds" if the given [Int] is different from 1. Otherwise, it will return "second".
+ * Will return a [String] with '[FORMAT_SECOND_WORLD_TEXT_MULTI]' if the given [Int] is different from 1. Otherwise, it will return '[FORMAT_SECOND_WORLD_TEXT_SINGLE]'.
  *
  * @return a [String] with "seconds" or "second". Can be '-1' if the given [Int] is negative (-1, -2, etc).
  * @author Mikael
  */
 fun Int.formatSecondWorld(): String {
     if (this < 0) return "-1"
-    return if (this != 1) return "seconds" else "second"
+    return if (this == 1) return FORMAT_SECOND_WORLD_TEXT_SINGLE else FORMAT_SECOND_WORLD_TEXT_MULTI
 }
 
+var FORMAT_ENABLED_DISABLED_TEXT_ENABLED = "Enabled"
+var FORMAT_ENABLED_DISABLED_TEXT_DISABLED = "Disabled"
+
 /**
- * @return a [String] with '§aEnabled' or '§cDisabled', following the given [Boolean].
+ * @return a [String] with '[FORMAT_ENABLED_DISABLED_TEXT_ENABLED]' or '[FORMAT_ENABLED_DISABLED_TEXT_DISABLED]', following the given [Boolean].
  * @author Mikael
  */
 fun Boolean.formatEnabledDisabled(colored: Boolean = true): String {
     val text = if (colored) {
-        if (this) "§aEnabled" else "§cDisabled"
+        if (this) "§a${FORMAT_ENABLED_DISABLED_TEXT_ENABLED}" else "§c${FORMAT_ENABLED_DISABLED_TEXT_DISABLED}"
     } else {
-        if (this) "Enabled" else "Disabled"
+        if (this) FORMAT_ENABLED_DISABLED_TEXT_ENABLED else FORMAT_ENABLED_DISABLED_TEXT_DISABLED
     }
     return text
 }
 
+var FORMAT_YES_NO_TEXT_YES = "Yes"
+var FORMAT_YES_NO_TEXT_NO = "No"
+
 /**
- * @return a [String] with '§aYes' or '§cNo', following the given [Boolean].
+ * @return a [String] with '[FORMAT_YES_NO_TEXT_YES]' or '[FORMAT_YES_NO_TEXT_NO]', following the given [Boolean].
  * @author Mikael
  */
 fun Boolean.formatYesNo(colored: Boolean = true): String {
     val text = if (colored) {
-        if (this) "§aYes" else "§cNo"
+        if (this) "§a${FORMAT_YES_NO_TEXT_YES}" else "§c${FORMAT_YES_NO_TEXT_NO}"
     } else {
-        if (this) "Yes" else "No"
+        if (this) FORMAT_YES_NO_TEXT_YES else FORMAT_YES_NO_TEXT_NO
     }
     return text
 }
 
+var FORMAT_ON_OFF_TEXT_ON = "ON"
+var FORMAT_ON_OFF_TEXT_OFF = "OFF"
+
 /**
- * @return a [String] with '§aON', '§cOFF' or the custom given texts, following the given [Boolean].
+ * @return a [String] with '[FORMAT_ON_OFF_TEXT_ON]' or '[FORMAT_ON_OFF_TEXT_OFF]' following the given [Boolean].
  * @author Mikael
  */
-fun Boolean.formatOnOff(onText: String = "§aON", offText: String = "§cOFF"): String {
-    return if (this) onText else offText
+fun Boolean.formatOnOff(colored: Boolean = true): String {
+    val text = if (colored) {
+        if (this) "§a${FORMAT_ON_OFF_TEXT_ON}" else "§c${FORMAT_ON_OFF_TEXT_OFF}"
+    } else {
+        if (this) FORMAT_ON_OFF_TEXT_ON else FORMAT_ON_OFF_TEXT_OFF
+    }
+    return text
 }
 
 /**
@@ -204,28 +177,6 @@ fun Int.isMultOf(multBy: Int): Boolean {
  */
 fun Double.isMultOf(multBy: Double): Boolean {
     return this % multBy == 0.0
-}
-
-/**
- * Formats a [Number] using the North America (US) format.
- *
- * Example:
- *
- * * 1000 -> 1,000
- * * 1065 -> 1,065
- *
- * @return a [String] with the formatted value.
- * @author Mikael
- */
-@Deprecated(
-    "Use { Number.formatValue() } instead.", ReplaceWith(
-        "NumberFormat.getNumberInstance(Locale.US).format(this)",
-        "java.text.NumberFormat",
-        "java.util.Locale"
-    )
-)
-fun Number.formatEN(): String {
-    return NumberFormat.getNumberInstance(Locale.US).format(this)
 }
 
 /**

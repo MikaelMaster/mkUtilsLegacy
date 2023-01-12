@@ -1,18 +1,15 @@
 package com.mikael.mkutilslegacy.spigot.api.lib
 
 import com.mikael.mkutilslegacy.spigot.api.chunk
-import com.mikael.mkutilslegacy.spigot.api.newHologram
 import net.eduard.api.lib.abstraction.Hologram
 import org.bukkit.Location
-import org.bukkit.World
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 
 /**
  * [MineHologram] util class
  *
- * This class was created to replace [World.newHologram] (both functions) of 'SpigotExtensions.kt'.
- * With this util class you can also create 'player-holograms'. In other words, create/show holograms just for specific players.
+ * With this util class you can create 'player-holograms'. In other words, create/show holograms just for specific players.
  *
  * The 'player-holograms' functions uses [net.minecraft.server.v1_8_R3]! (NMS 1.8_R3)
  *

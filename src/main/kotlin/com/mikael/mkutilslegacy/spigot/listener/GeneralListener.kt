@@ -21,7 +21,7 @@ class GeneralListener : MineListener() {
     init {
         instance = this@GeneralListener
 
-        UtilsMain.instance.syncTimer(20 * 3, 20 * 3) { // Invincible Entity System timer
+        UtilsMain.instance.syncTimer(20 * 3, 20 * 3) { // Invincible Entity System auto remover
             invincibleEntities.removeIf { it.isDead }
         }
     }

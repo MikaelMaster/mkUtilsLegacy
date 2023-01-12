@@ -6,7 +6,7 @@ import net.eduard.api.lib.hybrid.ISender
 
 class BungeeVersionCommand : Command("mkutilsproxy", "mkutilsbungee") {
 
-    private val versionMsg get() = "§a${UtilsBungeeMain.instance.systemName} §ev${UtilsBungeeMain.instance.description.version} §f- §bdeveloped with §c❤ §bby Mikael."
+    private val versionMsg get() = "§a${UtilsBungeeMain.instance.systemName} §ev${UtilsBungeeMain.instance.description.version} §f- §bdeveloped with §c❤ §bby Mikael with help of Eduard and Koddy."
 
     init {
         usage = "/mkutilsproxy"

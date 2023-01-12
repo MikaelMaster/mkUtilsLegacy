@@ -2,6 +2,7 @@ package com.mikael.mkutilslegacy.bungee.api
 
 import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
+import com.mikael.mkutilslegacy.spigot.api.RUN_COMMAND_ERROR_MSG
 import net.eduard.api.lib.hybrid.ISender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.connection.ProxiedPlayer
@@ -13,23 +14,25 @@ import net.md_5.bungee.api.connection.ProxiedPlayer
  */
 val utilsBungeeMain get() = UtilsBungeeMain.instance
 
+var PROXY_RUN_COMMAND_ERROR_MSG = "§c[Proxy] An internal error occurred while executing this command."
+
 /**
  * Use in a proxy command to run the Unit using a try catch. If any error occur,
  * the given [ISender] (can be the Console) will receive a message saying that an error occurred.
+ *
+ * Uses [PROXY_RUN_COMMAND_ERROR_MSG] to send the player a message if an error occur.
  *
  * @param thing the block code to run using try catch.
  * @return True if the block code was run with no errors. Otherwise, false.
  */
 inline fun ISender.runCommand(
-    errorMessage: String = "§c[Proxy] An internal error occurred while executing this command.",
-    crossinline thing: (() -> Unit)
-): Boolean {
+    crossinline thing: (() -> Unit)): Boolean {
     return try {
         thing.invoke()
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
-        this.sendMessage(errorMessage)
+        this.sendMessage(PROXY_RUN_COMMAND_ERROR_MSG)
         false
     }
 }
@@ -38,40 +41,40 @@ inline fun ISender.runCommand(
  * Use in a proxy command to run the Unit using a try catch. If any error occur,
  * the given [ProxiedPlayer] will receive a message saying that an error occurred.
  *
+ * Uses [PROXY_RUN_COMMAND_ERROR_MSG] to send the player a message if an error occur.
+ *
  * @param thing the block code to run using try catch.
  * @return True if the block code was run with no errors. Otherwise, false.
  */
-inline fun ProxiedPlayer.runCommand(
-    errorMessage: String = "§c[Proxy] An internal error occurred while executing this command.",
-    crossinline thing: (() -> Unit)
-): Boolean {
+inline fun ProxiedPlayer.runCommand(crossinline thing: (() -> Unit)): Boolean {
     return try {
         thing.invoke()
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
-        this.sendMessage(errorMessage.toTextComponent())
+        this.sendMessage(RUN_COMMAND_ERROR_MSG.toTextComponent())
         false
     }
 }
+
+var PROXY_PLAYER_RUN_BLOCK_ERROR_MSG = "§c[Proxy] An internal error occurred while executing something to you."
 
 /**
  * Use it anywhere to run the Unit using a try catch. If any error occur,
  * the given [ProxiedPlayer] will receive a message saying that an error occurred.
  *
+ * Uses [PROXY_PLAYER_RUN_BLOCK_ERROR_MSG] to send the player a message if an error occur.
+ *
  * @param thing the block code to run using try catch.
  * @return True if the block code was run with no errors. Otherwise, false.
  */
-inline fun ProxiedPlayer.runBlock(
-    errorMessage: String = "§c[Proxy] An internal error occurred while executing something to you.",
-    crossinline thing: (() -> Unit)
-): Boolean {
+inline fun ProxiedPlayer.runBlock(crossinline thing: (() -> Unit)): Boolean {
     return try {
         thing.invoke()
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
-        this.sendMessage(errorMessage.toTextComponent())
+        this.sendMessage(PROXY_PLAYER_RUN_BLOCK_ERROR_MSG.toTextComponent())
         false
     }
 }

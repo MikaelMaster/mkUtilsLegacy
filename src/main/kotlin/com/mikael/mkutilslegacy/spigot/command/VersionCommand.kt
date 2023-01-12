@@ -6,10 +6,11 @@ import org.bukkit.command.CommandSender
 
 class VersionCommand : MineCommand("mkutils", "mkutilslegacy") {
 
-    private val versionMsg get() = "§a${UtilsMain.instance.systemName} §ev${UtilsMain.instance.description.version} §f- §bdeveloped with §c❤ §bby Mikael."
+    private val versionMsg get() = "§a${UtilsMain.instance.systemName} §ev${UtilsMain.instance.description.version} §f- §bdeveloped with §c❤ §bby Mikael with help of Eduard and Koddy."
 
     init {
         usage = "/mkutils"
+        permission = null
         permissionMessage = versionMsg
     }
 
