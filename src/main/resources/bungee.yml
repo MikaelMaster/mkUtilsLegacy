@@ -1,5 +1,5 @@
 name: mkUtilsProxy
 description: mkUtilsProxy is a lib for plugins development. By Mikael with help of Eduard and Koddy.
-version: 3.0.0
+version: 3.0.1
 authors: [ Mikael, Eduard, Koddy ]
 main: com.mikael.mkutilslegacy.bungee.UtilsBungeeMain

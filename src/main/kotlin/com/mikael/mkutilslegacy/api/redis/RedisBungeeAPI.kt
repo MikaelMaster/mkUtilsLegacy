@@ -53,7 +53,7 @@ object RedisBungeeAPI {
      * @see RedisAPI.getStringList
      */
     fun getSpigotServers(): List<String> {
-        return RedisAPI.getStringList("mkUtils", "BungeeAPI:Servers")
+        return RedisAPI.getStringList("mkUtils:BungeeAPI:Servers")
     }
 
     /**
@@ -102,7 +102,7 @@ object RedisBungeeAPI {
      */
     fun getOnlinePlayers(serverName: String): List<String> {
         if (!RedisAPI.client!!.exists("mkUtils:BungeeAPI:Servers:$serverName:Players")) return emptyList()
-        return RedisAPI.getStringList("mkUtils", "BungeeAPI:Servers:$serverName:Players")
+        return RedisAPI.getStringList("mkUtils:BungeeAPI:Servers:$serverName:Players")
     }
 
     /**
@@ -129,14 +129,20 @@ object RedisBungeeAPI {
      *
      * @param playerName the player that will receive the given [message].
      * @param message the message to send to the given [playerName].
+     * @param neededPermission the permission that the player will NEED to have in order to receive the given [message].
+     * If nothing is given, the player will receive the message ignoring the permission check.
      * @return True if the request has been sent with success. Otherwise, false.
      * @throws IllegalStateException if the given [message] contains the character ';'.
      * @throws IllegalStateException if the [RedisAPI] [client] or the [clientConnection] is null.
      * @see RedisAPI.sendEvent
      */
-    fun sendMessage(playerName: String, message: String): Boolean {
+    fun sendMessage(playerName: String, message: String, neededPermission: String = "nullperm"): Boolean {
         if (message.contains(";")) error("message cannot contains ';' because of internal separator")
-        return RedisAPI.sendEvent("mkUtils:BungeeAPI:Event:SendMsgToPlayer", "${playerName};${message}")
+        if (neededPermission.contains(";")) error("neededPermission cannot contains ';' because of internal separator")
+        return RedisAPI.sendEvent(
+            "mkUtils:BungeeAPI:Event:SendMsgToPlayer",
+            "${playerName};${message};${neededPermission}"
+        )
     }
 
     /**
@@ -244,7 +250,10 @@ object RedisBungeeAPI {
                         if (channel == "mkUtils:BungeeAPI:Event:SendMsgToPlayer") {
                             val data = message.split(";")
                             val player = ProxyServer.getInstance().getPlayer(data[0]) ?: return
-                            player.sendMessage(Extra.getText(1, *data.toTypedArray()).toTextComponent())
+                            val neededPermission = data[2]
+                            if (neededPermission == "nullperm" || player.hasPermission(neededPermission)) {
+                                player.sendMessage(data[1].toTextComponent()) // data[1] = message
+                            }
                         }
                         if (channel == "mkUtils:BungeeAPI:Event:ServerPowerAction") {
                             if (!UtilsBungeeMain.instance.config.getBoolean("RedisBungeeAPI.logSpigotServersPowerActions")) return
