@@ -302,7 +302,6 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
     private fun reloadConfigs() {
         // config.setHeader("mkUtils v${description.version} config file.") // It's bugged
-        config["", Location::class.java]
         config.add(
             "Database",
             DBManager(),
