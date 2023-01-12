@@ -1,6 +1,7 @@
 package com.mikael.mkutilslegacy.spigot.api.lib
 
 import com.mikael.mkutilslegacy.spigot.api.chunk
+import com.mikael.mkutilslegacy.spigot.api.disableAI
 import com.mikael.mkutilslegacy.spigot.api.newHologram
 import net.eduard.api.lib.abstraction.Hologram
 import org.bukkit.Location
@@ -24,7 +25,7 @@ import org.bukkit.entity.Player
  * @see ArmorStand
  * @see Hologram
  */
-open class MineHologram(vararg val lines: String?) {
+open class MineHologram(vararg var lines: String?) {
     private val spawnedLines = mutableListOf<ArmorStand>()
     private val spawnedPlayerLines = mutableMapOf<Player, MutableList<Hologram>>()
 
@@ -86,6 +87,7 @@ open class MineHologram(vararg val lines: String?) {
             }
             val holo = loc.world!!.spawn(location, ArmorStand::class.java)
             holo.setGravity(false)
+            holo.disableAI()
             holo.isVisible = false
             holo.isSmall = true
             holo.isMarker = false
