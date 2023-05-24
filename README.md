@@ -28,4 +28,4 @@ This is not only a lib, so you'll need to run the plugin shadow jar (mkUtilsLega
 
 This plugin/lib is developed by Mikael (MikaelMaster, TheSrMK, SrMK) and Vinícius (Koddy, KoddyDev). This project uses EduardAPI's (https://github.com/EduardMaster/EduardAPI) some code parts (credits to Eduard (EduardMaster).
 
-- Mikael
+- by Mikael, 2023/05
