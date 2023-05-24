@@ -4,7 +4,9 @@ package com.mikael.mkutilslegacy.spigot.api.npc.npc_1_8_R3
 
 import com.mikael.mkutilslegacy.spigot.api.toCenterLocation
 import com.mikael.mkutilslegacy.spigot.api.toPlayerLoc
-import net.minecraft.server.v1_8_R3.*
+import net.minecraft.server.v1_8_R3.EntityArmorStand
+import net.minecraft.server.v1_8_R3.Pathfinder
+import net.minecraft.server.v1_8_R3.PathfinderNormal
 import org.bukkit.Location
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity

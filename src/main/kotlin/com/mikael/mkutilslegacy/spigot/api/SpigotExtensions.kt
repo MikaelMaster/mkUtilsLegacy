@@ -46,7 +46,6 @@ import org.bukkit.util.Vector
 import org.json.JSONObject
 import java.awt.Image
 import java.awt.image.BufferedImage
-import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
 
