@@ -9,7 +9,7 @@ An utils plugin/lib for Minecraft Kotlin developers. (For legacy Minecraft versi
 - RedisBungeeAPI (All)
 - BungeeExtensions (Proxy-side)
 - ProxyCommand (Proxy-side)
-- ProxyListener (Prox-side)
+- ProxyListener (Proxy-side)
 - SpigotExtensions (Spigot-side)
 - MineCommand (Spigot-side)
 - MineListener *including a lot of Custom Events* (Spigot-side)
