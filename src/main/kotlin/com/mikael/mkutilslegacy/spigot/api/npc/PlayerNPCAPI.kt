@@ -7,7 +7,6 @@ import com.mikael.mkutilslegacy.spigot.api.npc.enums.NPCTextBalloonState
 import com.mikael.mkutilslegacy.spigot.api.npc.listener.NPCSystemListener
 import com.mikael.mkutilslegacy.spigot.api.npc.npc_1_8_R3.PlayerNPC_1_8_R3
 import com.mikael.mkutilslegacy.spigot.api.soundClick
-import net.eduard.api.lib.modules.Mine
 import org.bukkit.World
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
@@ -27,6 +26,7 @@ import java.util.*
  * @author Mikael
  * @see PlayerNPC
  */
+@Suppress("WARNINGS")
 object PlayerNPCAPI {
 
     /**
@@ -165,7 +165,6 @@ object PlayerNPCAPI {
     // Extra Section - End
 
     private var lookAtNearbyTask: BukkitTask? = null
-    private var npcUpdaterTask: BukkitTask? = null
 
     /**
      * Internal; Should be run in [UtilsMain] onEnable.
@@ -178,14 +177,7 @@ object PlayerNPCAPI {
                 val nearbyPlayer =
                     npcPlayer.getNearbyEntities(5.0, 5.0, 5.0).filterIsInstance<Player>().firstOrNull { !isNPC(it) }
                         ?: continue
-                npc.lookAt(nearbyPlayer.location, Mine.getPlayers())
-            }
-        }
-        npcUpdaterTask = UtilsMain.instance.syncTimer(5, 5) {
-            for (npc in npcs.values.filter { it.isSpawned() && it.shouldLookNearbyPlayers }) {
-                npc.holders.forEach {
-                    npc.updateFor(it)
-                }
+                npc.lookAt(nearbyPlayer.location, npc.holders.toList())
             }
         }
     }
@@ -195,11 +187,8 @@ object PlayerNPCAPI {
      */
     internal fun onDisable() {
         lookAtNearbyTask?.cancel(); lookAtNearbyTask = null
-        npcUpdaterTask?.cancel(); lookAtNearbyTask = null
-        nickHiders.forEach { it.value.remove() }
-        nickHiders.clear()
-        headExtraHolos.values.forEach { it.despawn() }
-        headExtraHolos.clear()
+        nickHiders.values.forEach { it.remove() }; nickHiders.clear()
+        headExtraHolos.values.forEach { it.despawn() }; headExtraHolos.clear()
     }
 
 }

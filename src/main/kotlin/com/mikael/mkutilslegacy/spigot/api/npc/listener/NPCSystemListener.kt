@@ -127,7 +127,7 @@ class NPCSystemListener : MineListener() {
         val player = e.player
         player.runBlock {
             val clicked = e.rightClicked ?: return@runBlock
-            if (e.rightClicked !is Player) return@runBlock // Player here is equivalent to a PlayerNPC
+            if (clicked !is Player) return@runBlock // Player here is equivalent to a PlayerNPC
             val npc = PlayerNPCAPI.npcs[clicked.uniqueId] ?: return@runBlock
             val click = npcsClick[npc] ?: return@runBlock
             if (clickCooldown.cooldown(player.name)) {
