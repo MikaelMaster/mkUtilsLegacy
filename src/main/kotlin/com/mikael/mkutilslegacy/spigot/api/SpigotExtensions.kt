@@ -49,7 +49,6 @@ import java.awt.image.BufferedImage
 import kotlin.math.ceil
 import kotlin.math.floor
 
-
 /**
  * Shortcut to get the [UtilsMain.instance].
  *
