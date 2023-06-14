@@ -362,9 +362,9 @@ object RedisBungeeAPI {
                         val data = message.split(";")
                         when (channel) {
                             "mkUtils:RedisBungeeAPI:Event:PlaySoundToPlayer" -> {
-                                val player = Bukkit.getPlayer(data[0]) ?: return
+                                val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
                                 player.runBlock {
-                                    val soundToPlay = Sound.valueOf(data[1].uppercase())
+                                    val soundToPlay = Sound.valueOf(data[1].uppercase()) // data[1] = soundName
                                     val volume = data[2].toFloat()
                                     val pitch = data[3].toFloat()
                                     player.playSound(player.location, soundToPlay, volume, pitch)
@@ -372,19 +372,19 @@ object RedisBungeeAPI {
                             }
 
                             "mkUtils:RedisBungeeAPI:Event:SendActionBarToPlayer" -> {
-                                val player = Bukkit.getPlayer(data[0]) ?: return
+                                val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
                                 player.runBlock {
-                                    player.actionBar(data[1])
+                                    player.actionBar(data[1]) // data[1] = message
                                 }
                             }
 
                             "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToPlayer" -> {
-                                val player = Bukkit.getPlayer(data[0]) ?: return
+                                val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
                                 UtilsMain.instance.syncTask {
                                     player.runBlock {
                                         val target = Bukkit.getPlayer(data[1]) ?: return@runBlock
                                         player.teleport(target)
-                                        if (data[2].toBoolean()) {
+                                        if (data[2].toBoolean()) { // data[2] = playTeleportSound
                                             player.soundTP()
                                         }
                                     }
@@ -392,7 +392,7 @@ object RedisBungeeAPI {
                             }
 
                             "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToLocation" -> {
-                                val player = Bukkit.getPlayer(data[0]) ?: return
+                                val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
                                 val worldName = data[1]
                                 UtilsMain.instance.syncTask {
                                     player.runBlock {
@@ -403,7 +403,7 @@ object RedisBungeeAPI {
                                         val loc =
                                             Location(world, data[2].toDouble(), data[3].toDouble(), data[4].toDouble())
                                         player.teleport(loc)
-                                        if (data[5].toBoolean()) {
+                                        if (data[5].toBoolean()) { // data[5] = playTeleportSound
                                             player.soundTP()
                                         }
                                     }
@@ -411,11 +411,10 @@ object RedisBungeeAPI {
                             }
 
                             "mkUtils:RedisBungeeAPI:Event:SendChat" -> {
-                                val player = Bukkit.getPlayer(data[0]) ?: return
-                                val msgToChat = data[1]
+                                val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
                                 UtilsMain.instance.syncTask {
                                     player.runBlock {
-                                        player.chat(msgToChat)
+                                        player.chat(data[1]) // data[1] = msgToChat
                                     }
                                 }
                             }
@@ -444,15 +443,15 @@ object RedisBungeeAPI {
                         val data = message.split(";")
                         when (channel) {
                             "mkUtils:BungeeAPI:Event:ConnectPlayer" -> {
-                                val player = ProxyServer.getInstance().getPlayer(data[0]) ?: return
+                                val player = ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
                                 player.runBlock {
-                                    val server = ProxyServer.getInstance().getServerInfo(data[1]) ?: return@runBlock
+                                    val server = ProxyServer.getInstance().getServerInfo(data[1]) ?: return@runBlock // data[1] = serverName
                                     player.connect(server)
                                 }
                             }
 
                             "mkUtils:BungeeAPI:Event:KickPlayer" -> {
-                                val player = ProxyServer.getInstance().getPlayer(data[0]) ?: return
+                                val player = ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
                                 player.runBlock {
                                     val bypassPerm = data[2]
                                     if (bypassPerm != "nullperm" && player.hasPermission(bypassPerm)) return@runBlock
@@ -463,7 +462,7 @@ object RedisBungeeAPI {
                             "mkUtils:BungeeAPI:Event:SendMsgToPlayerList" -> {
                                 val msgToSend = data[1].toTextComponent()
                                 val neededPermission = data[2]
-                                players@ for (playerName in data[0].split(",").filter { it.isNotEmpty() }) {
+                                players@ for (playerName in data[0].split(",").filter { it.isNotEmpty() }) { // data[0] = Player name list split with ';'.
                                     val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
                                     player.runBlock {
                                         if (neededPermission == "nullperm" || player.hasPermission(neededPermission)) {
