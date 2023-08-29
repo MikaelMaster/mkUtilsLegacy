@@ -1,6 +1,6 @@
 plugins {
     java
-    kotlin("jvm") version "1.8.21"
+    kotlin("jvm") version "1.9.10"
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
@@ -31,13 +31,13 @@ dependencies {
     api("redis.clients:jedis:4.3.1")
     api("org.slf4j:slf4j-api:2.0.5")
     api("org.slf4j:slf4j-log4j12:2.0.5")
-    api(files("C:\\Users\\mikael.peixoto\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar\\"))
+    api(files("C:\\Users\\Usuario\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar\\"))
 }
 
 tasks {
     jar {
         destinationDirectory
-            .set(file("C:\\Users\\mikael.peixoto\\Desktop\\Meus Plugins - Jars\\"))
+            .set(file("C:\\Users\\Usuario\\Desktop\\Rede Sweet - Plugins\\"))
     }
     compileJava {
         options.encoding = "UTF-8"
@@ -52,7 +52,7 @@ tasks {
         archiveVersion.set("4.0")
         archiveBaseName.set("mkUtilsLegacy")
         destinationDirectory.set(
-            file("C:\\Users\\mikael.peixoto\\Desktop\\Meus Plugins - Jars\\")
+            file("C:\\Users\\Usuario\\Desktop\\Rede Sweet - Plugins\\")
         )
     }
 }
