@@ -55,7 +55,7 @@ inline fun ProxiedPlayer.runCommand(crossinline thing: (() -> Unit)): Boolean {
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
-        this.sendMessage(RUN_COMMAND_ERROR_MSG.toTextComponent())
+        this.sendMessage(PROXY_RUN_COMMAND_ERROR_MSG.toTextComponent())
         false
     }
 }
