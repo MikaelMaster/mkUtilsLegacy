@@ -23,7 +23,7 @@ class MineHologramListener : MineListener() {
     internal val hologramsClick = mutableMapOf<MineHologram, ((PlayerInteractAtEntityEvent) -> Unit)>()
     private val clickCooldown = MineCooldown(10).apply { noMessages() }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     fun onClickHologram(e: PlayerInteractAtEntityEvent) {
         val player = e.player
         player.runBlock {
