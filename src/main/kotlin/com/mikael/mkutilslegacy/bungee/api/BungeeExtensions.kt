@@ -5,7 +5,6 @@ package com.mikael.mkutilslegacy.bungee.api
 import com.mikael.mkutilslegacy.api.chatClear
 import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
-import com.mikael.mkutilslegacy.spigot.api.RUN_COMMAND_ERROR_MSG
 import net.eduard.api.lib.hybrid.ISender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.connection.ProxiedPlayer

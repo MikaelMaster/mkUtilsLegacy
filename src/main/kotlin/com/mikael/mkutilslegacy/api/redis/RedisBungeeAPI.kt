@@ -8,10 +8,14 @@ import com.mikael.mkutilslegacy.spigot.api.actionBar
 import com.mikael.mkutilslegacy.spigot.api.runBlock
 import com.mikael.mkutilslegacy.spigot.api.soundTP
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.chat.TextComponent
+import net.md_5.bungee.chat.ComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.entity.Player
+import org.json.JSONArray
+import org.json.JSONObject
 import redis.clients.jedis.JedisPubSub
 import kotlin.concurrent.thread
 
@@ -212,23 +216,7 @@ object RedisBungeeAPI {
     }
 
     /**
-     * It'll send a text message (on chat) to the given [playerName], through Redis.
-     * The player will receive this message, regardless of the Proxy it is connected to.
-     *
-     * @param playerName the player that will receive the given [message].
-     * @param message the message to send to the given [playerName].
-     * @param neededPermission the permission that the player will NEED to have in order to receive the given [message].
-     * If nothing is given, the player will receive the message ignoring the permission check.
-     * @return True if the request has been sent with success. Otherwise, false.
-     * @throws IllegalStateException if the given [message] contains the character ';'.
-     * @throws IllegalStateException if [isEnabled] is False.
-     */
-    fun sendMessage(playerName: String, message: String, neededPermission: String = "nullperm"): Boolean {
-        return sendMessage(setOf(playerName), message, neededPermission)
-    }
-
-    /**
-     * It'll send a text message (on chat) to the given [playersToSend], through Redis.
+     * It'll send a text component (on chat) to the given [playersToSend], through Redis.
      * The players will receive this message, regardless of the Proxy it is connected to.
      *
      * @param playersToSend a list of players to send the given [message].
@@ -236,17 +224,39 @@ object RedisBungeeAPI {
      * @param neededPermission the permission that the player will NEED to have in order to receive the given [message].
      * If nothing is given, the player will receive the message ignoring the permission check.
      * @return True if the request has been sent with success. Otherwise, false.
-     * @throws IllegalStateException if the given [message] contains the character ';'.
      * @throws IllegalStateException if [isEnabled] is False.
      */
-    fun sendMessage(playersToSend: Set<String>, message: String, neededPermission: String = "nullperm"): Boolean {
+    fun sendMessage(playersToSend: Set<String>, message: TextComponent, neededPermission: String = "nullperm"): Boolean {
         if (!isEnabled) error("RedisBungeeAPI is not enabled.")
-        if (message.contains(";")) error("message cannot contains ';' because of internal separator")
-        if (neededPermission.contains(";")) error("neededPermission cannot contains ';' because of internal separator")
+        val json = JSONObject()
+        json.put("playersToSend", JSONArray(playersToSend))
+        json.put("message", ComponentSerializer.toString(message))
+        json.put("neededPermission", neededPermission)
         return RedisAPI.sendEvent(
             "mkUtils:BungeeAPI:Event:SendMsgToPlayerList",
-            "${playersToSend.joinToString(",")};${message};${neededPermission}"
+            json.toString()
         )
+    }
+
+    /**
+     * @see sendMessage
+     */
+    fun sendMessage(playerName: String, message: TextComponent, neededPermission: String = "nullperm"): Boolean {
+        return sendMessage(setOf(playerName), message, neededPermission)
+    }
+
+    /**
+     * @see sendMessage
+     */
+    fun sendMessage(playersToSend: Set<String>, message: String, neededPermission: String = "nullperm"): Boolean {
+        return sendMessage(playersToSend, TextComponent(message), neededPermission)
+    }
+
+    /**
+     * @see sendMessage
+     */
+    fun sendMessage(playerName: String, message: String, neededPermission: String = "nullperm"): Boolean {
+        return sendMessage(setOf(playerName), message, neededPermission)
     }
 
     /**
@@ -460,13 +470,16 @@ object RedisBungeeAPI {
                             }
 
                             "mkUtils:BungeeAPI:Event:SendMsgToPlayerList" -> {
-                                val msgToSend = data[1].toTextComponent()
-                                val neededPermission = data[2]
-                                players@ for (playerName in data[0].split(",").filter { it.isNotEmpty() }) { // data[0] = Player name list split with ';'.
+                                val json = JSONObject(message)
+                                val players = json.getJSONArray("playersToSend").toList() as List<String>
+                                val message = TextComponent(*ComponentSerializer.parse(json.getString("message")).toList().toTypedArray())
+                                val neededPermission = json.getString("neededPermission")
+
+                                players@ for (playerName in players) {
                                     val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
                                     player.runBlock {
                                         if (neededPermission == "nullperm" || player.hasPermission(neededPermission)) {
-                                            player.sendMessage(msgToSend)
+                                            player.sendMessage(message)
                                         }
                                     }
                                 }
