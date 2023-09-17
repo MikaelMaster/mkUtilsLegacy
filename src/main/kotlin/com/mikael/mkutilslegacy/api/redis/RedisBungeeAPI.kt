@@ -379,7 +379,7 @@ object RedisBungeeAPI {
                         val data = message.split(";")
                         when (channel) {
                             "mkUtils:RedisBungeeAPI:Event:PlaySoundToPlayer" -> {
-                                val players = data[0].split(",") // data[0] = playersName
+                                val players = data[0].split(",").filter { it.isNotEmpty() } // data[0] = playersName
                                 val soundToPlay = Sound.valueOf(data[1].uppercase()) // data[1] = soundName
                                 val volume = data[2].toFloat()
                                 val pitch = data[3].toFloat()
