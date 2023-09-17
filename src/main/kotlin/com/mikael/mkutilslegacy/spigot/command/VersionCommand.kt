@@ -2,11 +2,7 @@ package com.mikael.mkutilslegacy.spigot.command
 
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineCommand
-import com.mikael.mkutilslegacy.spigot.api.lib.hologram.MineHologram
-import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPCAPI
-import com.mikael.mkutilslegacy.spigot.api.npc.enums.NPCTextBalloonState
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 
 class VersionCommand : MineCommand("mkutils", "mkutilslegacy") {
 
@@ -18,6 +14,7 @@ class VersionCommand : MineCommand("mkutils", "mkutilslegacy") {
     override fun command(sender: CommandSender, args: List<String>) {
         sender.sendMessage("§a${UtilsMain.instance.systemName} §ev${UtilsMain.instance.description.version} §f- §bdeveloped with §c❤ §bby Mikael with help of Eduard and Koddy.")
 
+        /*
         if (sender !is Player) return
         val npc = PlayerNPCAPI.create(sender.world, lookNearbyPlayers = true)
         npc.setSkin(sender.name)
@@ -32,6 +29,7 @@ class VersionCommand : MineCommand("mkutils", "mkutilslegacy") {
                 sender.sendMessage("Estado do balão de fala: ${balloonState.name}")
             }
         }
+         */
     }
 
 }
