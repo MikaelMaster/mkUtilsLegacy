@@ -277,20 +277,27 @@ object RedisBungeeAPI {
     }
 
     /**
+     * @see playSound
+     */
+    fun playSound(playerName: String, bukkitSound: String, volume: Float = 2f, pitch: Float = 1f): Boolean {
+        return playSound(setOf(playerName), bukkitSound, volume, pitch)
+    }
+
+    /**
      * The spigot server with the given [playerName] will play the given [bukkitSound] to him.
      *
-     * @param playerName the player to play the sound.
+     * @param playersName a [List] of players names to play the sound.
      * @param bukkitSound the sound to player. (Must be equivalent to the [Sound] enum)
      * @param volume the sound volume. Default: 2f.
      * @param pitch the sound pitch. Default: 1f.
      * @return True if the request has been sent with success. Otherwise, false.
      * @throws IllegalStateException if [isEnabled] is False.
      */
-    fun playSound(playerName: String, bukkitSound: String, volume: Float = 2f, pitch: Float = 1f): Boolean {
+    fun playSound(playersName: Set<String>, bukkitSound: String, volume: Float = 2f, pitch: Float = 1f): Boolean {
         if (!isEnabled) error("RedisBungeeAPI is not enabled.")
         return RedisAPI.sendEvent(
             "mkUtils:RedisBungeeAPI:Event:PlaySoundToPlayer",
-            "${playerName};${bukkitSound};${volume};${pitch}"
+            "${playersName.joinToString(",")};${bukkitSound};${volume};${pitch}"
         )
     }
 
@@ -372,12 +379,16 @@ object RedisBungeeAPI {
                         val data = message.split(";")
                         when (channel) {
                             "mkUtils:RedisBungeeAPI:Event:PlaySoundToPlayer" -> {
-                                val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
-                                player.runBlock {
-                                    val soundToPlay = Sound.valueOf(data[1].uppercase()) // data[1] = soundName
-                                    val volume = data[2].toFloat()
-                                    val pitch = data[3].toFloat()
-                                    player.playSound(player.location, soundToPlay, volume, pitch)
+                                val players = data[0].split(",") // data[0] = playersName
+                                val soundToPlay = Sound.valueOf(data[1].uppercase()) // data[1] = soundName
+                                val volume = data[2].toFloat()
+                                val pitch = data[3].toFloat()
+
+                                players@for (playerName in players) {
+                                    val player = Bukkit.getPlayer(playerName) ?: continue@players
+                                    player.runBlock {
+                                        player.playSound(player.location, soundToPlay, volume, pitch)
+                                    }
                                 }
                             }
 
