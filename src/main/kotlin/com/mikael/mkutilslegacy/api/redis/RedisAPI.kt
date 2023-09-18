@@ -179,8 +179,11 @@ object RedisAPI {
         if (!isInitialized()) error("RedisAPI is not initialized.")
         return runTryCatch {
             if (useExistingData) {
-                for (string in getStringList(key)) {
-                    stringList.add(string)
+                val possibleData = getStringList(key)
+                if (possibleData != null) {
+                    for (string in possibleData) {
+                        stringList.add(string)
+                    }
                 }
             }
             val stringBuilder = StringBuilder()
@@ -201,7 +204,7 @@ object RedisAPI {
     ): Boolean {
         if (!isInitialized()) error("RedisAPI is not initialized.")
         return runTryCatch {
-            val data = getStringList(key).toMutableList()
+            val data = getStringList(key)?.toMutableList() ?: return@runTryCatch // There's nothing to remove
             if (data.isEmpty()) return@runTryCatch
             data.removeAll(stringListToRemove)
             insertStringList(key, data, false)
@@ -328,11 +331,10 @@ object RedisAPI {
      * @param key the key to search on redis server for a data.
      * @return A String List from the redis server. Empty list of the data dos not exist.
      * @throws IllegalStateException if [isInitialized] is false.
-     * @throws NullPointerException if the data returned is null.
      */
-    fun getStringList(key: String): List<String> {
+    fun getStringList(key: String): List<String>? {
         if (!isInitialized()) error("RedisAPI is not initialized.")
-        return getString(key)?.split(";")?.filter { it.isNotBlank() } ?: emptyList()
+        return getString(key)?.split(";")?.filter { it.isNotBlank() }
     }
 
     /**
