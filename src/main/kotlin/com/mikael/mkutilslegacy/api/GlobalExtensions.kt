@@ -14,6 +14,7 @@ import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
+import org.json.JSONObject
 import java.io.*
 import java.net.URL
 import java.text.NumberFormat
@@ -387,6 +388,14 @@ fun String.breakLines(lineLength: Int = 50): List<String> {
  */
 fun Double.getProbability(): Boolean {
     return Math.random() <= this
+}
+
+/**
+ * @return A value for the [key] or null if the key does not exists on the given [JSONObject].
+ */
+fun JSONObject.getOrNull(key: String): Any? {
+    if (!this.has(key)) return null
+    return this.get(key)
 }
 
 /**
