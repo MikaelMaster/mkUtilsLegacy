@@ -105,6 +105,11 @@ object PlayerNPCAPI {
         return holo
     }
 
+    fun removeExtraHeadHolos(npc: PlayerNPC) {
+        headExtraHolos[npc]?.despawn()
+        headExtraHolos.remove(npc)
+    }
+
     fun setNPCClickAction(npc: PlayerNPC, click: (PlayerInteractEntityEvent) -> Unit) {
         NPCSystemListener.instance.npcsClick[npc] = click
     }
