@@ -746,6 +746,7 @@ fun Player.moveToMounted(player: Player, targetLoc: Location) {
                 cancel()
                 return
             }
+            navigator.passenger = player
             val currentLocation = navigator.location
             val currentY = currentLocation.y
             val deltaY = max((midY - startY).coerceAtLeast(1.0), (endY - midY).coerceAtLeast(1.0))
