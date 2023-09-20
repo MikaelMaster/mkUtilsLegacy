@@ -738,8 +738,11 @@ fun Player.moveToMounted(player: Player, targetLoc: Location) {
         val totalDistance = startLoc.distance(targetLoc)
         var hasReachedMiddle = false
         override fun run() {
-            if (navigator.isDead || navigator.isOnGround) {
-                navigator.passenger = null
+            if (navigator.isDead || navigator.isOnGround || !player.isOnline) {
+                if (!navigator.chunk.isLoaded) {
+                    navigator.chunk.load(true)
+                }
+                navigator.eject()
                 navigator.remove()
                 player.isFlying = false
                 player.teleport(targetLoc)
