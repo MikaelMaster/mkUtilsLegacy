@@ -15,6 +15,7 @@ import com.mikael.mkutilslegacy.spigot.api.lib.menu.MineMenu
 import com.mikael.mkutilslegacy.spigot.api.util.MineNBT
 import com.mikael.mkutilslegacy.spigot.api.util.hooks.Vault
 import com.mikael.mkutilslegacy.spigot.listener.GeneralListener
+import net.eduard.api.lib.game.ItemBuilder
 import net.eduard.api.lib.game.Particle
 import net.eduard.api.lib.game.ParticleType
 import net.eduard.api.lib.kotlin.mineSendActionBar
@@ -42,12 +43,16 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.map.MapCanvas
 import org.bukkit.map.MapRenderer
 import org.bukkit.map.MapView
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
+import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import org.json.JSONObject
 import java.awt.Image
 import java.awt.image.BufferedImage
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.max
 
 /**
  * Shortcut to get the [UtilsMain.instance].
@@ -711,48 +716,54 @@ fun Player.moveTo(targetLoc: Location, xzForce: Double = 4.0, yForce: Double = 1
 }
 
 /**
- * In-dev; Not done yet.
+ * ?
+ *
+ * @author Mikael
  */
-@Deprecated("In-dev; Not done yet.")
-internal fun Player.moveToMounted(toMovePlayer: Location, entityInvisible: Boolean = true) {
-    val from = this.location
-    val velocity = Vector(0, 0, 0)
-
-    val horse = this.world.spawnEntity(from, EntityType.HORSE) as Horse
-    horse.isTamed = true
-    horse.variant = Horse.Variant.HORSE
-    horse.setAdult()
-    horse.inventory.saddle = MineItem(Material.SADDLE)
-    horse.owner = this
-    horse.passenger = this
-
-    if (entityInvisible) {
-        (horse as CraftEntity).handle.isInvisible = true
-    }
-
-    val to = toMovePlayer
-    val distance = from.distance(to)
-    val direction = to.toVector().subtract(from.toVector()).normalize()
-    val step = direction.multiply(0.5)
-    val ticks = (distance * 20 / 0.5).toInt()
-    val steps = (ticks / 2)
-    var ticksDelay = 1L
-
-    for (i in 0..steps) {
-        utilsMain.syncDelay(ticksDelay) {
-            if (horse.passenger == null) {
-                horse.passenger = this
+fun Player.moveToMounted(player: Player, targetLoc: Location) {
+    val startLoc = player.location.toCenterLocation()
+    val navigator = startLoc.world.spawn(startLoc.clone().add(0.0, 1.0, 0.0), Horse::class.java)
+    navigator.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1))
+    navigator.setInvincible(true)
+    navigator.owner = player
+    navigator.isTamed = true
+    navigator.setAdult()
+    navigator.variant = Horse.Variant.HORSE
+    navigator.inventory.saddle = ItemBuilder(Material.SADDLE)
+    navigator.passenger = player
+    object : BukkitRunnable() {
+        val startY = startLoc.y
+        val endY = targetLoc.y
+        val midY = (max(startY, endY) + 100)
+        val totalDistance = startLoc.distance(targetLoc)
+        var hasReachedMiddle = false
+        override fun run() {
+            if (navigator.isDead || navigator.isOnGround) {
+                navigator.passenger = null
+                navigator.remove()
+                player.isFlying = false
+                player.teleport(targetLoc)
+                cancel()
+                return
             }
-            velocity.add(step)
-            horse.velocity = velocity
-            ticksDelay++
+            val currentLocation = navigator.location
+            val currentY = currentLocation.y
+            val deltaY = max((midY - startY).coerceAtLeast(1.0), (endY - midY).coerceAtLeast(1.0))
+            val yOffset =
+                if (!hasReachedMiddle && currentY < midY && navigator.location.clone().apply { y = targetLoc.y }
+                        .distance(targetLoc)
+                        .toInt() >= (totalDistance / 2).toInt()
+                ) {
+                    (startY - currentY).coerceAtLeast(1.0) * deltaY / totalDistance
+                } else {
+                    hasReachedMiddle = true
+                    -((endY - currentY).coerceAtLeast(1.0) * deltaY / totalDistance)
+                }
+            val horizontalDirection =
+                targetLoc.toVector().subtract(currentLocation.toVector()).setY(0).normalize()
+            navigator.velocity = horizontalDirection.multiply(2.0).setY(yOffset)
         }
-    }
-
-    utilsMain.syncDelay(steps + 1L) {
-        horse.remove()
-
-    }
+    }.runTaskTimer(UtilsMain.instance, 0, 1)
 }
 
 /**
