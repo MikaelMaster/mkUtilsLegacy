@@ -717,7 +717,7 @@ fun Player.moveTo(targetLoc: Location, xzForce: Double = 4.0, yForce: Double = 1
 /**
  * @author Mikael
  */
-fun Player.moveToMountedLegacy(player: Player, targetLoc: Location, particleEffect: Boolean = true) {
+fun Player.moveToMounted(player: Player, targetLoc: Location, particleEffect: Boolean = true) {
     val startLoc = player.location.toCenterLocation()
     val navigator = startLoc.world.spawn(startLoc.clone().add(0.0, 1.0, 0.0), Horse::class.java)
     navigator.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1))
