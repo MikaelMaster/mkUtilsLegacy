@@ -33,7 +33,6 @@ import org.bukkit.block.Chest
 import org.bukkit.command.CommandSender
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlock
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers
 import org.bukkit.entity.*
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -716,11 +715,9 @@ fun Player.moveTo(targetLoc: Location, xzForce: Double = 4.0, yForce: Double = 1
 }
 
 /**
- * ?
- *
  * @author Mikael
  */
-fun Player.moveToMounted(player: Player, targetLoc: Location, particleEffect: Boolean = true) {
+fun Player.moveToMountedLegacy(player: Player, targetLoc: Location, particleEffect: Boolean = true) {
     val startLoc = player.location.toCenterLocation()
     val navigator = startLoc.world.spawn(startLoc.clone().add(0.0, 1.0, 0.0), Horse::class.java)
     navigator.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1))
