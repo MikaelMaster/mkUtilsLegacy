@@ -742,6 +742,7 @@ fun Player.moveToMounted(player: Player, targetLoc: Location) {
                 if (!navigator.chunk.isLoaded) {
                     navigator.chunk.load(true)
                 }
+                player.fallDistance = 0f
                 navigator.eject()
                 navigator.remove()
                 player.isFlying = false
