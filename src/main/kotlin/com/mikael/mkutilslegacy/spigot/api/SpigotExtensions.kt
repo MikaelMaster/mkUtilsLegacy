@@ -720,7 +720,7 @@ fun Player.moveTo(targetLoc: Location, xzForce: Double = 4.0, yForce: Double = 1
  *
  * @author Mikael
  */
-fun Player.moveToMounted(player: Player, targetLoc: Location) {
+fun Player.moveToMounted(player: Player, targetLoc: Location, particleEffect: Boolean = true) {
     val startLoc = player.location.toCenterLocation()
     val navigator = startLoc.world.spawn(startLoc.clone().add(0.0, 1.0, 0.0), Horse::class.java)
     navigator.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1))
@@ -731,6 +731,15 @@ fun Player.moveToMounted(player: Player, targetLoc: Location) {
     navigator.variant = Horse.Variant.HORSE
     navigator.inventory.saddle = ItemBuilder(Material.SADDLE)
     navigator.passenger = player
+
+    val cloudParticle = Particle(
+        ParticleType.DRIP_LAVA,
+        15,
+        0f,
+        0.5f,
+        0.5f,
+        0.5f,
+    )
     object : BukkitRunnable() {
         val startY = startLoc.y
         val endY = targetLoc.y
@@ -742,6 +751,7 @@ fun Player.moveToMounted(player: Player, targetLoc: Location) {
                 if (!navigator.chunk.isLoaded) {
                     navigator.chunk.load(true)
                 }
+                navigator.fallDistance = 0f
                 player.fallDistance = 0f
                 navigator.eject()
                 navigator.remove()
@@ -750,6 +760,8 @@ fun Player.moveToMounted(player: Player, targetLoc: Location) {
                 cancel()
                 return
             }
+            navigator.fallDistance = 0f
+            player.fallDistance = 0f
             navigator.passenger = player
             val currentLocation = navigator.location
             val currentY = currentLocation.y
@@ -767,6 +779,9 @@ fun Player.moveToMounted(player: Player, targetLoc: Location) {
             val horizontalDirection =
                 targetLoc.toVector().subtract(currentLocation.toVector()).setY(0).normalize()
             navigator.velocity = horizontalDirection.multiply(2.0).setY(yOffset)
+            if (particleEffect) {
+                Mine.getPlayers().forEach { cloudParticle.create(it, player.eyeLocation) }
+            }
         }
     }.runTaskTimer(UtilsMain.instance, 0, 1)
 }
