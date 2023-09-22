@@ -170,8 +170,30 @@ open class MineHologram(vararg var lines: String?) {
                 spawn(loc, isToDown)
             }
         } else {
-            despawn(player)
-            spawn(player, loc, isToDown)
+            val playerLines = spawnedPlayerLines[player]
+            if (playerLines != null) {
+                if (playerLines.size >= lines.size) {
+                    /*
+                    if (!loc.chunk.isLoaded) {
+                        loc.chunk.load(true)
+                    }
+                     */
+                    val newHolograms = playerLines.mapIndexed { index, armorStand ->
+                        if (index > lines.size - 1) {
+                            armorStand.hide(player)
+                            return@mapIndexed null
+                        }
+                        armorStand.text = lines[index]!!
+                        armorStand.update(player)
+                        armorStand
+                    }.filterNotNull()
+
+                    spawnedPlayerLines[player] = newHolograms.toMutableList()
+                } else {
+                    despawn(player)
+                    spawn(player, loc, isToDown)
+                }
+            }
         }
         return this
     }
