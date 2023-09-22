@@ -316,21 +316,28 @@ val Player.freeSlots: Int get() = 36 - this.inventory.contents.filterNotNull().s
 /**
  * @return True if the player has the needed amount of the needed ItemStack on his inventory.
  */
-fun Player.hasAmountOfItemOnInv(needed: ItemStack, neededAmount: Int): Boolean {
-    return this.inventory.hasAmountOfItem(needed, neededAmount)
+fun Player.hasAmountOfItemOnInv(needed: ItemStack, neededAmount: Int, exact: Boolean = false): Boolean {
+    return this.inventory.hasAmountOfItem(needed, neededAmount, exact)
 }
 
 /**
  * @return True if the given [Inventory] has the needed amount of the needed [ItemStack].
  */
-fun Inventory.hasAmountOfItem(needed: ItemStack, neededAmount: Int): Boolean {
+fun Inventory.hasAmountOfItem(needed: ItemStack, neededAmount: Int, exact: Boolean = false): Boolean {
     if (this.contents.isEmpty()) return false
     var amount = 0
     for (item in this) {
         if (item == null) continue
-        if (needed == item) {
-            amount++
-            if (amount >= neededAmount) return true
+        if (exact) {
+            if (needed == item) {
+                amount++
+                if (amount >= neededAmount) return true
+            }
+        } else {
+            if (needed.isSimilar(item)) {
+                amount++
+                if (amount >= neededAmount) return true
+            }
         }
     }
     return false
