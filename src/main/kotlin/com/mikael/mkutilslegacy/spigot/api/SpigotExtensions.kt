@@ -753,7 +753,7 @@ fun Player.moveToMounted(player: Player, targetLoc: Location, particleEffect: Bo
                 navigator.eject()
                 navigator.remove()
                 player.isFlying = false
-                player.teleport(targetLoc)
+                // player.teleport(targetLoc)
                 cancel()
                 return
             }
