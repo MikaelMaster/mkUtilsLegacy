@@ -7,6 +7,7 @@ import com.mikael.mkutilslegacy.spigot.api.npc.enums.NPCTextBalloonState
 import com.mikael.mkutilslegacy.spigot.api.npc.listener.NPCSystemListener
 import com.mikael.mkutilslegacy.spigot.api.npc.npc_1_8_R3.PlayerNPC_1_8_R3
 import com.mikael.mkutilslegacy.spigot.api.soundClick
+import net.eduard.api.lib.modules.Mine
 import org.bukkit.World
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
@@ -105,9 +106,31 @@ object PlayerNPCAPI {
         return holo
     }
 
+    internal val headExtraHolosByPlayer = mutableMapOf<PlayerNPC, MutableMap<Player, MineHologram>>()
+
+    fun setExtraHeadHolosForPlayer(npc: PlayerNPC, holo: MineHologram, player: Player): MineHologram {
+        // headExtraHolos[npc]?.despawn()
+        val loc = npc.getSpawnLocation().clone()
+        loc.y += 1.5
+        for (existingLine in headExtraHolos[npc]?.lines ?: emptyArray()) {
+            loc.y += 0.3
+        }
+        for (line in holo.lines) {
+            loc.y += 0.3
+        }
+        holo.spawn(player, loc, true)
+        headExtraHolosByPlayer.getOrPut(npc, { mutableMapOf() })[player] = holo
+        return holo
+    }
+
     fun removeExtraHeadHolos(npc: PlayerNPC) {
         headExtraHolos[npc]?.despawn()
         headExtraHolos.remove(npc)
+    }
+
+    fun removeExtraHeadHolosForPlayer(npc: PlayerNPC, player: Player) {
+        headExtraHolosByPlayer[npc]?.get(player)?.despawn(player)
+        headExtraHolosByPlayer[npc]?.remove(player)
     }
 
     fun setNPCClickAction(npc: PlayerNPC, click: (PlayerInteractEntityEvent) -> Unit) {
