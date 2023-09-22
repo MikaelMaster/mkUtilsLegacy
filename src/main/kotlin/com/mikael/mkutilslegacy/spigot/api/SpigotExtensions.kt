@@ -330,12 +330,12 @@ fun Inventory.hasAmountOfItem(needed: ItemStack, neededAmount: Int, exact: Boole
         if (item == null) continue
         if (exact) {
             if (needed == item) {
-                amount++
+                amount += item.amount
                 if (amount >= neededAmount) return true
             }
         } else {
             if (needed.isSimilar(item)) {
-                amount++
+                amount += item.amount
                 if (amount >= neededAmount) return true
             }
         }
