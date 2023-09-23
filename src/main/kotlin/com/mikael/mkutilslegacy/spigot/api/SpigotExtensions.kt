@@ -751,7 +751,7 @@ fun Player.moveToMounted(player: Player, targetLoc: Location, particleEffect: Bo
         val totalDistance = startLoc.distance(targetLoc)
         var hasReachedMiddle = false
         override fun run() {
-            if (navigator.isDead || navigator.isOnGround || !player.isOnline) {
+            if (navigator.isDead || navigator.isOnGround || !player.isOnline || navigator.location.distance(targetLoc) <= 0.5) {
                 if (!navigator.chunk.isLoaded) {
                     navigator.chunk.load(true)
                 }
