@@ -747,7 +747,7 @@ fun Player.moveToMounted(player: Player, targetLoc: Location, particleEffect: Bo
     object : BukkitRunnable() {
         val startY = startLoc.y
         val endY = targetLoc.y
-        val midY = (max(startY, endY) + 100)
+        val midY = (max(startY, endY) + 10)
         val totalDistance = startLoc.distance(targetLoc)
         var hasReachedMiddle = false
         override fun run() {
