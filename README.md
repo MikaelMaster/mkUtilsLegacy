@@ -1,4 +1,4 @@
-# mkUtilsLegacy - by Mikel, Vinícios and Eduard
+# mkUtilsLegacy - by Mikael, Vinícius and Eduard
 An utils plugin/lib for Minecraft Kotlin developers (For legacy Minecraft versions - Paper 1.8.8-R0.1).
 
 *Some useful APIs and Utils Systems mkUtilsLegacy have:*
