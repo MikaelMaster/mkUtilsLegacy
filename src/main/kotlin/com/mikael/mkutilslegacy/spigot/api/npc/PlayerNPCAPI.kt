@@ -7,7 +7,6 @@ import com.mikael.mkutilslegacy.spigot.api.npc.enums.NPCTextBalloonState
 import com.mikael.mkutilslegacy.spigot.api.npc.listener.NPCSystemListener
 import com.mikael.mkutilslegacy.spigot.api.npc.npc_1_8_R3.PlayerNPC_1_8_R3
 import com.mikael.mkutilslegacy.spigot.api.soundClick
-import net.eduard.api.lib.modules.Mine
 import org.bukkit.World
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player

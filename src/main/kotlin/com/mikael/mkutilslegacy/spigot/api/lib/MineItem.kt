@@ -9,18 +9,18 @@ import net.eduard.api.lib.storage.StorageAPI
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools
 import net.minecraft.server.v1_8_R3.NBTTagCompound
 import org.bukkit.Color
+import org.bukkit.DyeColor
 import org.bukkit.Material
 import org.bukkit.SkullType
 import org.bukkit.block.CreatureSpawner
+import org.bukkit.block.banner.Pattern
+import org.bukkit.block.banner.PatternType
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.EntityType
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.BlockStateMeta
-import org.bukkit.inventory.meta.LeatherArmorMeta
-import org.bukkit.inventory.meta.PotionMeta
-import org.bukkit.inventory.meta.SkullMeta
+import org.bukkit.inventory.meta.*
 import org.bukkit.potion.PotionEffect
 import org.json.JSONObject
 import java.io.*
@@ -454,7 +454,7 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
     // Change Custom Item Properties Functions below
 
     /**
-     * Sets the color os this [MineItem].
+     * Sets the color in this [MineItem].
      *
      * This should only be used when the [MineItem.getType] is something
      * that can have a color like a [Material.LEATHER_CHESTPLATE].
@@ -469,6 +469,35 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
         if (this.itemMeta == null) return this
         val meta = this.itemMeta as LeatherArmorMeta
         meta.color = color
+        this.itemMeta = meta
+        return this
+    }
+
+    /**
+     * Sets banners patterns in this [MineItem].
+     *
+     * @return this [MineItem].
+     */
+    fun banner(baseColor: DyeColor, patternColor: DyeColor, patternType: PatternType): MineItem { // Change Banners
+        this.type = Material.BANNER
+        if (this.itemMeta == null) return this
+        val meta = this.itemMeta as BannerMeta
+        meta.baseColor = baseColor
+        meta.addPattern(Pattern(patternColor, patternType))
+        this.itemMeta = meta
+        return this
+    }
+
+    /**
+     * Add a banner pattern in this [MineItem].
+     *
+     * @return this [MineItem].
+     */
+    fun addBanner(patternColor: DyeColor, patternType: PatternType): MineItem { // Change Banners
+        this.type = Material.BANNER
+        if (this.itemMeta == null) return this
+        val meta = this.itemMeta as BannerMeta
+        meta.addPattern(Pattern(patternColor, patternType))
         this.itemMeta = meta
         return this
     }
