@@ -150,11 +150,13 @@ object PlayerNPCAPI {
         callback: (state: NPCTextBalloonState) -> Unit
     ): MineHologram {
         val loc = npc.getSpawnLocation().clone()
-        loc.y += 1.5
+        loc.y += 1.8
         val textLines = text.breakLines(40)
+        /*
         for (line in textLines) {
             loc.y += 0.3
         }
+         */
         headExtraHolos[npc]?.let { extraHolo ->
             extraHolo.lines.forEach { _ ->
                 loc.y += 0.3
@@ -169,6 +171,7 @@ object PlayerNPCAPI {
         UtilsMain.instance.asyncTask {
             UtilsMain.instance.syncTask { callback.invoke(NPCTextBalloonState.STARTED) }
             for ((lineIndex, line) in textLines.withIndex()) {
+                loc.y += 0.3
                 val holoLines = holo.lines.toMutableList()
                 char@ for ((charIndex, char) in line.withIndex()) {
                     val indexLine = holoLines.getOrElse(lineIndex) { holoLines.add(textColorPrefix); textColorPrefix }
@@ -177,7 +180,7 @@ object PlayerNPCAPI {
                     if (lineIndex == 0 && charIndex == 0) {
                         holo.spawn(player, loc, true)
                     } else {
-                        holo.update(player)
+                        holo.update(player, loc)
                     }
                     player.soundClick(2f, 2f)
                     UtilsMain.instance.syncTask { callback.invoke(NPCTextBalloonState.FLUSH_CHARACTERS) }

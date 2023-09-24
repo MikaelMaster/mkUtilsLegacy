@@ -146,11 +146,11 @@ open class MineHologram(vararg var lines: String?) {
      * @param player the [Player]? to update this hologram. If null, the global lines (not per-player) will be updated, to everyone.
      * @return this [MineHologram].
      */
-    fun update(player: Player? = null): MineHologram {
-        val loc = lastSpawnLoc ?: error("MineHologram Last Spawn Loc was not defined; Can't update this hologram.")
+    fun update(player: Player? = null, newLocation: Location? = null): MineHologram {
+        val loc = newLocation?.clone() ?: lastSpawnLoc ?: error("MineHologram Last Spawn Loc was not defined; Can't update this hologram.")
         val isToDown = lastWasToDown ?: error("MineHologram Last IsToDown was not defined; Can't update this hologram.")
         if (player == null) {
-            if (spawnedLines.size >= lines.size) {
+            if (spawnedLines.size >= lines.size && loc == lastSpawnLoc) {
                 if (!loc.chunk.isLoaded) {
                     loc.chunk.load(true)
                 }
@@ -172,7 +172,7 @@ open class MineHologram(vararg var lines: String?) {
         } else {
             val playerLines = spawnedPlayerLines[player]
             if (playerLines != null) {
-                if (playerLines.size >= lines.size) {
+                if (playerLines.size >= lines.size && loc == lastSpawnLoc) {
                     /*
                     if (!loc.chunk.isLoaded) {
                         loc.chunk.load(true)
@@ -184,6 +184,7 @@ open class MineHologram(vararg var lines: String?) {
                             return@mapIndexed null
                         }
                         armorStand.text = lines[index]!!
+                        armorStand.location = loc
                         armorStand.update(player)
                         armorStand
                     }.filterNotNull()
