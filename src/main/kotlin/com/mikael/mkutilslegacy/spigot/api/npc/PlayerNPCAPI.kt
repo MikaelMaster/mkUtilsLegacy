@@ -160,6 +160,11 @@ object PlayerNPCAPI {
                 loc.y += 0.3
             }
         }
+        headExtraHolosByPlayer[npc]?.get(player)?.let { extraHolo ->
+            extraHolo.lines.forEach { _ ->
+                loc.y += 0.3
+            }
+        }
         val holo = MineHologram()
         UtilsMain.instance.asyncTask {
             UtilsMain.instance.syncTask { callback.invoke(NPCTextBalloonState.STARTED) }
