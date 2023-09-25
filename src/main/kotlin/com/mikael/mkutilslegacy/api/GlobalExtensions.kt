@@ -124,8 +124,8 @@ fun String.fixGrammar(): String {
     return newTextBuilder.toString()
 }
 
-var FORMAT_SECOND_WORLD_TEXT_SINGLE = "second"
-var FORMAT_SECOND_WORLD_TEXT_MULTI = "seconds"
+public var FORMAT_SECOND_WORLD_TEXT_SINGLE = "second"
+public var FORMAT_SECOND_WORLD_TEXT_MULTI = "seconds"
 
 /**
  * Will return a [String] with '[FORMAT_SECOND_WORLD_TEXT_MULTI]' if the given [Int] is different from 1. Otherwise, it will return '[FORMAT_SECOND_WORLD_TEXT_SINGLE]'.
@@ -138,8 +138,8 @@ fun Int.formatSecondWorld(): String {
     return if (this == 1) return FORMAT_SECOND_WORLD_TEXT_SINGLE else FORMAT_SECOND_WORLD_TEXT_MULTI
 }
 
-var FORMAT_ENABLED_DISABLED_TEXT_ENABLED = "Enabled"
-var FORMAT_ENABLED_DISABLED_TEXT_DISABLED = "Disabled"
+public var FORMAT_ENABLED_DISABLED_TEXT_ENABLED = "Enabled"
+public var FORMAT_ENABLED_DISABLED_TEXT_DISABLED = "Disabled"
 
 /**
  * @return a [String] with '[FORMAT_ENABLED_DISABLED_TEXT_ENABLED]' or '[FORMAT_ENABLED_DISABLED_TEXT_DISABLED]', following the given [Boolean].
@@ -154,8 +154,8 @@ fun Boolean.formatEnabledDisabled(colored: Boolean = true): String {
     return text
 }
 
-var FORMAT_YES_NO_TEXT_YES = "Yes"
-var FORMAT_YES_NO_TEXT_NO = "No"
+public var FORMAT_YES_NO_TEXT_YES = "Yes"
+public var FORMAT_YES_NO_TEXT_NO = "No"
 
 /**
  * @return a [String] with '[FORMAT_YES_NO_TEXT_YES]' or '[FORMAT_YES_NO_TEXT_NO]', following the given [Boolean].
@@ -170,8 +170,8 @@ fun Boolean.formatYesNo(colored: Boolean = true): String {
     return text
 }
 
-var FORMAT_ON_OFF_TEXT_ON = "ON"
-var FORMAT_ON_OFF_TEXT_OFF = "OFF"
+public var FORMAT_ON_OFF_TEXT_ON = "ON"
+public var FORMAT_ON_OFF_TEXT_OFF = "OFF"
 
 /**
  * @return a [String] with '[FORMAT_ON_OFF_TEXT_ON]' or '[FORMAT_ON_OFF_TEXT_OFF]' following the given [Boolean].
@@ -277,7 +277,7 @@ fun URL.stream(): String {
 }
 
 /**
- * Used by 'URL.getJson()'.
+ * @see URL.getJson
  */
 private val jsonParser = JsonParser()
 

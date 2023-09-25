@@ -16,7 +16,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer
  */
 val utilsBungeeMain get() = UtilsBungeeMain.instance
 
-var PROXY_RUN_COMMAND_ERROR_MSG = "§c[Proxy] An internal error occurred while executing this command."
+public var PROXY_RUN_COMMAND_ERROR_MSG = "§c[Proxy] An internal error occurred while executing this command."
 
 /**
  * Use in a proxy command to run the Unit using a try catch. If any error occur,
@@ -59,7 +59,7 @@ inline fun ProxiedPlayer.runCommand(crossinline thing: (() -> Unit)): Boolean {
     }
 }
 
-var PROXY_PLAYER_RUN_BLOCK_ERROR_MSG = "§c[Proxy] An internal error occurred while executing something to you."
+public var PROXY_PLAYER_RUN_BLOCK_ERROR_MSG = "§c[Proxy] An internal error occurred while executing something to you."
 
 /**
  * Use it anywhere to run the Unit using a try catch. If any error occur,

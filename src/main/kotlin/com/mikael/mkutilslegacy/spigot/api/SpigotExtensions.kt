@@ -198,8 +198,8 @@ fun <T : ItemStack> T.addLore(vararg lines: String): T {
     return this
 }
 
-var AGEABLE_FORMAT_AGE_TEXT_ADULT = "Adult"
-var AGEABLE_FORMAT_AGE_TEXT_BABY = "Baby"
+public var AGEABLE_FORMAT_AGE_TEXT_ADULT = "Adult"
+public var AGEABLE_FORMAT_AGE_TEXT_BABY = "Baby"
 
 /**
  * @return if [Ageable.isAdult] '[AGEABLE_FORMAT_AGE_TEXT_ADULT]' else '[AGEABLE_FORMAT_AGE_TEXT_BABY]'.
@@ -519,7 +519,7 @@ fun Player.giveArmorSet(
     return droppedArmor
 }
 
-var PLAYER_RUN_BLOCK_ERROR_MSG = "§cAn internal error occurred while executing something to you."
+public var PLAYER_RUN_BLOCK_ERROR_MSG = "§cAn internal error occurred while executing something to you."
 
 /**
  * Runs a loading animation to the player using the main thread (sync), while execute the given [thing] using async.
@@ -619,7 +619,7 @@ inline fun Player.runBlock(crossinline thing: (() -> Unit)): Boolean {
     }
 }
 
-var RUN_COMMAND_ERROR_MSG = "§cAn internal error occurred while executing this command."
+public var RUN_COMMAND_ERROR_MSG = "§cAn internal error occurred while executing this command."
 
 /**
  * Use in a command to run the Unit using a try catch. If any error occur,
