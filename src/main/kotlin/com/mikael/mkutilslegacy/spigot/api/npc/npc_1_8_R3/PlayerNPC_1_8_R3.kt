@@ -64,8 +64,13 @@ class PlayerNPC_1_8_R3(
         npc.f(npcLocation.yaw) // Sets NPC head rotation
         npc.setLocation(npcLocation.x, npcLocation.y, npcLocation.z, npcLocation.yaw, npcLocation.pitch)
         val packetNpcTeleport = PacketPlayOutEntityTeleport(npc)
+        val packetPlayerUpdateMetadata = PacketPlayOutEntityMetadata(npc.id, npc.dataWatcher, true)
+        val packetPlayerHeadRotation = PacketPlayOutEntityHeadRotation(npc, MathHelper.d(npc.headRotation * 256.0f / 360.0f).toByte())
         players.forEach { player ->
-            player.mineSendPacket(packetNpcTeleport)
+            val playerConnection = (player as CraftPlayer).handle.playerConnection
+            playerConnection.sendPacket(packetNpcTeleport)
+            playerConnection.sendPacket(packetPlayerUpdateMetadata)
+            playerConnection.sendPacket(packetPlayerHeadRotation)
         }
     }
 
@@ -237,8 +242,7 @@ class PlayerNPC_1_8_R3(
 
     override fun hideFor(player: Player) {
         val packetDestroy = PacketPlayOutEntityDestroy(npc.id)
-        val packetPlayerInfoRemove =
-            PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc)
+        val packetPlayerInfoRemove = PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npc)
         val playerConnection = (player as CraftPlayer).handle.playerConnection
         playerConnection.sendPacket(packetDestroy)
         playerConnection.sendPacket(packetPlayerInfoRemove)
