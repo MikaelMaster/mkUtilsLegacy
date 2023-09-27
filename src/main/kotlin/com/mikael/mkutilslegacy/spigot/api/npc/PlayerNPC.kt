@@ -109,11 +109,11 @@ interface PlayerNPC {
 
     /**
      * Shows this NPC for the given [player].
-     * This is useful with [showFor] to spawn and hide an NPC for just one player.
+     * This is useful with [hideFor] to spawn and hide an NPC for just one player.
      *
      * @see hideFor
      */
-    fun showFor(player: Player)
+    fun showFor(player: Player, onlyFlush: Boolean = false)
 
     /**
      * Hides this NPC from the given [player].

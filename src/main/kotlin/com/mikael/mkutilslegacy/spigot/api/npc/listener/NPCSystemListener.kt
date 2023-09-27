@@ -6,7 +6,6 @@ import com.mikael.mkutilslegacy.spigot.api.lib.MineListener
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPC
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPCAPI
 import com.mikael.mkutilslegacy.spigot.api.runBlock
-import net.eduard.api.lib.modules.Mine
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -15,6 +14,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityTargetEvent
 import org.bukkit.event.player.*
 import org.bukkit.event.world.ChunkUnloadEvent
+import kotlin.math.abs
+import kotlin.math.atan2
 
 class NPCSystemListener : MineListener() {
     companion object {
@@ -25,52 +26,104 @@ class NPCSystemListener : MineListener() {
         instance = this@NPCSystemListener
     }
 
-    private val seeing = mutableMapOf<Player, MutableSet<PlayerNPC>>()
+    private val seeingInDistance = mutableMapOf<Player, MutableSet<PlayerNPC>>()
+    private val seeingInFov = mutableMapOf<Player, MutableSet<PlayerNPC>>()
 
-    private fun flushNPCs(toLoc: Location, player: Player) {
-        val seeingNpcs = seeing.getOrPut(player) { mutableSetOf() }
+    private val fovToCalc = 70.0 // Fov padrão do Minecraft
+    private fun flushNPCs(from: Location, to: Location, player: Player) {
+        val seeingNpcs = seeingInDistance.getOrPut(player) { mutableSetOf() }
+        val seeingInFovNpcs = seeingInFov.getOrPut(player) { mutableSetOf() }
         PlayerNPCAPI.npcs.values.forEach { npc ->
             if (!npc.holders.contains(player)) {
                 seeingNpcs.remove(npc)
+                seeingInFovNpcs.remove(npc)
                 return@forEach
             }
-            if (npc.getPlayer().world.name != toLoc.world.name) {
+            if (npc.getPlayer().world.name != to.world.name) {
                 npc.hideFor(player)
                 seeingNpcs.remove(npc)
+                seeingInFovNpcs.remove(npc)
                 return@forEach
             }
 
-            val distance = toLoc.distance(npc.getPlayer().location)
+            val distance = to.distance(npc.getPlayer().location)
             if (distance < 45 &&
                 !seeingNpcs.contains(npc)
             ) {
-                npc.showFor(player)
+                npc.showFor(player, onlyFlush = false)
                 seeingNpcs.add(npc)
+                // seeingInFovNpcs.add(npc) // Nope!
+                return@forEach
             } else if (distance >= 45) {
                 seeingNpcs.remove(npc)
+                seeingInFovNpcs.remove(npc)
+                return@forEach
+            }
+
+            val npcLoc = npc.getSpawnLocation()
+            val playerDirection = from.direction.normalize()
+            val entityDirection = npcLoc.toVector().subtract(to.toVector()).normalize()
+            var angle = Math.toDegrees(
+                atan2(entityDirection.x, entityDirection.z) - atan2(
+                    playerDirection.x,
+                    playerDirection.z
+                )
+            )
+            if (angle > 180) {
+                angle -= 360
+            } else if (angle < -180) {
+                angle += 360
+            }
+            val isToFlush = abs(angle) <= fovToCalc
+            if (isToFlush) {
+                seeingInFovNpcs.add(npc)
+                return@forEach // Ele já está no campo de visão, ent fds
+            }
+
+            val npcLoc2 = npc.getSpawnLocation()
+            val playerDirection2 = to.direction.normalize()
+            val entityDirection2 = npcLoc2.toVector().subtract(to.toVector()).normalize()
+            var angle2 = Math.toDegrees(
+                atan2(entityDirection2.x, entityDirection2.z) - atan2(
+                    playerDirection2.x,
+                    playerDirection2.z
+                )
+            )
+            if (angle2 > 180) {
+                angle2 -= 360
+            } else if (angle2 < -180) {
+                angle2 += 360
+            }
+            val isToFlush2 = abs(angle2) <= fovToCalc
+            if (isToFlush2 && !seeingInFovNpcs.contains(npc)) { // Fds o isToFlush, já da return (continue) lá em cima
+                npc.showFor(player, onlyFlush = true)
+                seeingNpcs.add(npc)
+                seeingInFovNpcs.add(npc)
             }
         }
-        seeing[player] = seeingNpcs
+        seeingInDistance[player] = seeingNpcs
+        seeingInFov[player] = seeingInFovNpcs
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     fun onJoin(e: PlayerJoinEvent) {
         val player = e.player
         PlayerNPCAPI.npcs.values.forEach { npc ->
             if (!npc.shouldSpawnForNewPlayers) return@forEach
             npc.holders.add(player)
-            flushNPCs(player.location, player)
+            flushNPCs(player.location, player.location, player)
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     fun onQuit(e: PlayerQuitEvent) {
         val player = e.player
         player.runBlock {
             PlayerNPCAPI.npcs.values.forEach { npc ->
                 npc.holders.remove(player)
             }
-            seeing.remove(player)
+            seeingInDistance.remove(player)
+            seeingInFov.remove(player)
         }
     }
 
@@ -78,8 +131,10 @@ class NPCSystemListener : MineListener() {
     fun onPlayerTeleport(e: PlayerTeleportEvent) {
         val player = e.player
         player.runBlock {
-            if (Mine.equals2(e.from, e.to)) return@runBlock
-            flushNPCs(e.to, player)
+            val from = e.from
+            val to = e.to
+            // if (Mine.equals2(from, to)) return@runBlock
+            flushNPCs(from, to, player)
         }
     }
 
@@ -87,8 +142,10 @@ class NPCSystemListener : MineListener() {
     fun onPlayerMove(e: PlayerMoveEvent) {
         val player = e.player
         player.runBlock {
-            if (Mine.equals2(e.from, e.to)) return@runBlock
-            flushNPCs(e.to, player)
+            val from = e.from
+            val to = e.to
+            // if (Mine.equals2(from, to)) return@runBlock
+            flushNPCs(from, to, player)
         }
     }
 

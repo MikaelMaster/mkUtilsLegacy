@@ -12,6 +12,7 @@ import net.eduard.api.lib.kotlin.cut
 import net.eduard.api.lib.kotlin.mineSendPacket
 import net.eduard.api.lib.modules.Extra
 import net.eduard.api.lib.modules.FakePlayer
+import net.eduard.api.lib.modules.Mine
 import net.minecraft.server.v1_8_R3.*
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -23,6 +24,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.CreatureSpawnEvent
 import org.bukkit.metadata.FixedMetadataValue
 import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.scoreboard.NameTagVisibility
 import org.bukkit.util.Vector
 import java.util.*
 
@@ -171,7 +173,7 @@ class PlayerNPC_1_8_R3(
         for (player in players.filter { p -> !PlayerNPCAPI.isNPC(p) }) {
             holders.add(player)
             hideFor(player)
-            showFor(player)
+            showFor(player, onlyFlush = false)
         }
     }
 
@@ -207,26 +209,43 @@ class PlayerNPC_1_8_R3(
         PlayerNPCAPI.npcs.remove(getId())
     }
 
-    override fun showFor(player: Player) {
+    override fun showFor(player: Player, onlyFlush: Boolean) {
         if (npcWorld != player.world) return
-        val packetPlayerSpawn = PacketPlayOutNamedEntitySpawn(npc)
         val packetPlayerInfoAdd = PacketPlayOutPlayerInfo(
             PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER,
             npc
         )
-        val packetPlayerUpdateMetadata = PacketPlayOutEntityMetadata(
-            npc.id,
-            npc.dataWatcher, true
-        )
-        val packetPlayerHeadRotation = PacketPlayOutEntityHeadRotation(
-            npc,
-            MathHelper.d(npc.headRotation * 256.0f / 360.0f).toByte()
-        )
+        var packetPlayerSpawn: PacketPlayOutNamedEntitySpawn? = null
+        var packetPlayerUpdateMetadata: PacketPlayOutEntityMetadata? = null
+        var packetPlayerHeadRotation: PacketPlayOutEntityHeadRotation? = null
+        if (!onlyFlush) {
+             packetPlayerSpawn = PacketPlayOutNamedEntitySpawn(npc)
+             packetPlayerUpdateMetadata = PacketPlayOutEntityMetadata(
+                npc.id,
+                npc.dataWatcher, true
+            )
+             packetPlayerHeadRotation = PacketPlayOutEntityHeadRotation(
+                npc,
+                MathHelper.d(npc.headRotation * 256.0f / 360.0f).toByte()
+            )
+        }
         val playerConnection = (player as CraftPlayer).handle.playerConnection
         playerConnection.sendPacket(packetPlayerInfoAdd)
-        playerConnection.sendPacket(packetPlayerUpdateMetadata)
-        playerConnection.sendPacket(packetPlayerSpawn)
-        playerConnection.sendPacket(packetPlayerHeadRotation)
+        packetPlayerUpdateMetadata?.let { playerConnection.sendPacket(it) }
+        packetPlayerSpawn?.let { playerConnection.sendPacket(it) }
+        packetPlayerHeadRotation?.let { playerConnection.sendPacket(it) }
+
+        val name = Extra.cutText("${Int.MAX_VALUE}NPC", 16) // Sets NPC tab's show priority to 'last'
+        val team = Mine.getTeam(player.scoreboard ?: Mine.getMainScoreboard(), name)
+        try {
+            team.nameTagVisibility = NameTagVisibility.NEVER
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+        // team.prefix = Extra.cutText(tag.tabPrefix, 16)!!
+        if (!team.hasEntry(npc.name)) {
+            team.addEntry(npc.name)
+        }
 
         // This will remove the NPC name from the tab list after one second.
         // Shows the NPC in the tab is needed so clients will load the NPC skin.
@@ -262,7 +281,7 @@ class PlayerNPC_1_8_R3(
         for (player in players.filter { p -> !PlayerNPCAPI.isNPC(p) }) {
             holders.add(player)
             hideFor(player)
-            showFor(player)
+            showFor(player, onlyFlush = false)
         }
     }
 
