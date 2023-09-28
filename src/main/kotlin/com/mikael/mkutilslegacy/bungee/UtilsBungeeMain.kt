@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit
  * mkUtils (non-legacy for bungee) plugin main Bungee class.
  *
  * Special thanks to Eduard-- (*https://github.com/EduardMaster*).
- * This project uses soem EduardAPI codes and methods.
+ * This project uses some EduardAPI codes and methods.
  *
  * @author Mikael
  * @author KoddyDev

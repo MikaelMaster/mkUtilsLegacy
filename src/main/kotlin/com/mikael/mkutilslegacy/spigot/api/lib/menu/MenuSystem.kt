@@ -60,18 +60,12 @@ object MenuSystem {
         return openedMenu != null && openedMenu == menu
     }
 
-    /**
-     * Internal.
-     * Should be run when mkUtils enables.
-     */
+    // mkUtils onEnable
     internal fun onEnable() {
         onDisable() // Same as onDisable
     }
 
-    /**
-     * Internal.
-     * Should be run when mkUtils disables.
-     */
+    // mkUtils onDisable
     internal fun onDisable() {
         registeredMenus.forEach { menu ->
             menu.buttons.values.forEach {
@@ -81,8 +75,8 @@ object MenuSystem {
                 }
             }
         }
-        val registeredMenusCopy = mutableSetOf<MineMenu>(); registeredMenusCopy.addAll(registeredMenus)
-        registeredMenusCopy.forEach { it.unregisterMenu() }; registeredMenusCopy.clear()
+        val registeredMenusCopy = registeredMenus.toSet() // Copy registeredMenus Set
+        registeredMenusCopy.forEach { it.unregisterMenu() }
         registeredMenus.clear()
         openedMenu.clear()
         openedPage.clear()

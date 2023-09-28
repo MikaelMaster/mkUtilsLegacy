@@ -2,8 +2,8 @@
 
 package com.mikael.mkutilslegacy.spigot.api.npc.npc_1_8_R3
 
+import com.mikael.mkutilslegacy.spigot.api.blockLoc
 import com.mikael.mkutilslegacy.spigot.api.toCenterLocation
-import com.mikael.mkutilslegacy.spigot.api.toPlayerLoc
 import net.minecraft.server.v1_8_R3.EntityArmorStand
 import net.minecraft.server.v1_8_R3.Pathfinder
 import net.minecraft.server.v1_8_R3.PathfinderNormal
@@ -59,7 +59,7 @@ class NPCPathFinder_1_8_R3(private val startPoint: Location, private val targetP
                     to.world,
                     point.a.toDouble(), point.b.toDouble(), point.c.toDouble(),
                     pitchYaw.first, pitchYaw.second
-                ).toPlayerLoc()
+                ).blockLoc
             )
         }
 

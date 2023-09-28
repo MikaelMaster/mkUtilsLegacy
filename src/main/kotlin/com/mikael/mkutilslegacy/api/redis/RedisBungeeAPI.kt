@@ -365,12 +365,12 @@ object RedisBungeeAPI {
         )
     }
 
-    // REDIS SUBS SECTION
+    // REDIS SUBS SECTION BELOW
 
     // SPIGOT SUB - Start
-
     var bukkitServerPubSubThread: Thread? = null
 
+    // mkUtils onEnable
     fun bukkitServerOnEnable() {
         bukkitServerPubSubThread = thread {
             RedisAPI.getExtraClient(RedisAPI.managerData).subscribe(
@@ -449,11 +449,9 @@ object RedisBungeeAPI {
             )
         }
     }
-
     // SPIGOT SUB - End
 
     // PROXY SUB - Start
-
     var proxyServerPubSubThread: Thread? = null
 
     fun proxyServerOnEnable() {
@@ -518,7 +516,6 @@ object RedisBungeeAPI {
             )
         }
     }
-
     // PROXY SUB - End
 
 }

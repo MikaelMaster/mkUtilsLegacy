@@ -34,9 +34,7 @@ object RedisAPI {
     lateinit var jedisPoolConfig: GenericObjectPoolConfig<Jedis>
     lateinit var jedisPool: JedisPool
 
-    /**
-     * Internal.
-     */
+    // mkUtils onEnable
     internal fun onEnablePrepareRedisAPI(): Boolean {
         val config = GenericObjectPoolConfig<Jedis>()
         config.maxTotal = managerData.jedisPoolMaxClients

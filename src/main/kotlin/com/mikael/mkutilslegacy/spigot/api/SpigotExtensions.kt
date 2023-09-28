@@ -8,6 +8,7 @@ import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
+import com.mikael.mkutilslegacy.spigot.api.lib.MineScoreboard
 import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
@@ -45,12 +46,11 @@ import org.bukkit.map.MapView
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.util.Vector
 import org.json.JSONObject
 import java.awt.Image
 import java.awt.image.BufferedImage
-import kotlin.math.ceil
-import kotlin.math.floor
 import kotlin.math.max
 
 /**
@@ -60,7 +60,7 @@ import kotlin.math.max
  */
 val utilsMain get() = UtilsMain.instance
 
-// MineBook extra functions - Start
+// Extra for MineBook - Start
 /**
  * Opens the [book] to the given [Player].
  *
@@ -71,29 +71,18 @@ val utilsMain get() = UtilsMain.instance
 fun Player.openMineBook(book: MineBook) {
     book.open(this)
 }
-// MineBook extra functions - End
+// Extra for MineBook - End
 
-// MineMenu extra functions - Start
+// Extra for MineMenu - Start
 /**
- * Opens the [menu] to the given [Player].
- *
- * @return the opened [Inventory] owned by the [MineMenu] ([menu]).
- * @see MineMenu.open
+ * @see MenuSystem.openMenu
  */
 fun Player.openMineMenu(menu: MineMenu): Inventory {
     return MenuSystem.openMenu(this, menu)
 }
 
 /**
- * It'll check if the value returned from [Player.openedMineMenu] is not null.
- * If it's not, and the returned menu is the given [menu] the [player] have an opened [MineMenu].
- *
- * Note: This is a shortcut of [MenuSystem.isMenuOpen].
- *
- * @return True if the given [Player] is with the given [menu] opened. Otherwise, false.
- * @see MineMenu
- * @see Player.openedMineMenu
- * @see MenuSystem
+ * @see MenuSystem.isMenuOpen
  */
 fun Player.isMineMenuOpen(menu: MineMenu): Boolean {
     return MenuSystem.isMenuOpen(menu, this)
@@ -104,8 +93,8 @@ fun Player.isMineMenuOpen(menu: MineMenu): Boolean {
  *
  * Note: 'Set' option is *internal only*.
  *
- * @return Player's opened [MineMenu]?.
- * @see MineMenu
+ * @return player's opened [MineMenu]?.
+ * @see MenuSystem
  */
 var Player.openedMineMenu: MineMenu?
     get() = MenuSystem.openedMenu[this]
@@ -122,8 +111,8 @@ var Player.openedMineMenu: MineMenu?
  *
  * Note: 'Set' option is *internal only*.
  *
- * @return Player's opened [MenuPage]?.
- * @see MenuPage
+ * @return player's opened [MenuPage]?.
+ * @see MenuSystem
  */
 var Player.openedMineMenuPage: MenuPage?
     get() = MenuSystem.openedPage[this]
@@ -134,7 +123,7 @@ var Player.openedMineMenuPage: MenuPage?
             MenuSystem.openedPage[this] = value
         }
     }
-// MineMenu extra functions - End
+// Extra for MineMenu - End
 
 /**
  * Cashes the given [Player] client. USE WITH MODERATION!
@@ -829,9 +818,7 @@ fun Player.clearChat() {
 }
 
 // Extra for VaultAPI (Vault class) extras - Start
-
 /**
- * @throws IllegalStateException if [Vault.isHooked] if False.
  * @see [Vault.getPlayerBalance]
  */
 fun Player.getVaultBalance(): Double {
@@ -839,7 +826,6 @@ fun Player.getVaultBalance(): Double {
 }
 
 /**
- * @throws IllegalStateException if [Vault.isHooked] if False.
  * @see [Vault.addPlayerBalance]
  */
 fun Player.addVaultBalance(amount: Double) {
@@ -847,7 +833,6 @@ fun Player.addVaultBalance(amount: Double) {
 }
 
 /**
- * @throws IllegalStateException if [Vault.isHooked] if False.
  * @see [Vault.removePlayerBalance]
  */
 fun Player.removeVaultBalance(amount: Double) {
@@ -861,17 +846,21 @@ fun Player.removeVaultBalance(amount: Double) {
 fun Player.setVaultBalance(amount: Double) {
     Vault.setPlayerBalance(this, amount)
 }
-
 // Extra for VaultAPI (Vault class) extras - End
+
+/**
+ * @return the location of the block at the given [Location].
+ */
+val Location.blockLoc: Location get() = this.block.location.clone()
 
 /**
  * @return a new location where X,Y,Z are the center of the [Location.getBlock].
  */
 fun Location.toCenterLocation(): Location {
-    val centerLoc = this.clone()
-    centerLoc.x = this.blockX + 0.5
-    centerLoc.y = this.blockY + 0.5
-    centerLoc.z = this.blockZ + 0.5
+    val centerLoc = this.blockLoc
+    centerLoc.x = centerLoc.x + 0.5
+    centerLoc.y = centerLoc.y + 0.5
+    centerLoc.z = centerLoc.z + 0.5
     return centerLoc
 }
 
@@ -1017,10 +1006,16 @@ val JSONObject.asLocation: Location
         return Location(world, x, y, z, yaw, pitch)
     }
 
+/**
+ * This will render the given [Image] into a [MapView] and return it.
+ *
+ * For better results, the image should have 128x128 pixels.
+ *
+ * @return a new [MapView] with the given [Image] drawed on it.
+ */
 fun Image.renderAsBukkitMap(): MapView {
     val map = Bukkit.getServer().createMap(Bukkit.getWorlds().first())
     map.renderers.forEach { map.removeRenderer(it) }
-
     map.addRenderer(object : MapRenderer() {
         override fun render(map: MapView, canvas: MapCanvas, player: Player) {
             try {
@@ -1032,26 +1027,21 @@ fun Image.renderAsBukkitMap(): MapView {
             }
         }
     })
-
     return map
 }
 
-fun Location.toBlockLoc(): Location {
-    return Location(
-        world,
-        floor(x),
-        floor(y),
-        floor(z),
-        yaw, pitch
-    )
+// Extra for MineScoreboard - Start
+/**
+ * @see MineScoreboard.setScore
+ */
+fun Player.setMineScoreboard(title: String, vararg lines: String): Scoreboard {
+    return MineScoreboard.setScore(this, title, *lines)
 }
 
-fun Location.toPlayerLoc(): Location {
-    return Location(
-        world,
-        ceil(x),
-        ceil(y),
-        ceil(z),
-        yaw, pitch
-    )
+/**
+ * @see MineScoreboard.removeScore
+ */
+fun Player.removeMineScoreboard() {
+    return MineScoreboard.removeScore(this)
 }
+// Extra for MineScoreboard - End

@@ -286,7 +286,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                         if (lastSlot == 0) {
                             var lastSkip = 0
                             skip@ for (skip in autoAlignSkipLines) {
-                                if (lastSkip.plus(1) != skip) break@skip
+                                if ((lastSkip + 1) != skip) break@skip
                                 lastSlot += if (autoAlignIgnoreColumns && lastSlot == 1) 10 else 9
                                 lastSkip++
                             }
@@ -294,14 +294,14 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     } else if (lastSlot == 0 && autoAlignIgnoreColumns) {
                         lastSlot = 1
                     }
-                    if (lastSlot.plus(1) < 9 * lineAmount) {
+                    if ((lastSlot + 1) < 9 * lineAmount) {
                         lastSlot++
                     }
                     button.menuId = buttonId
                     val idToVerify = buttonId.minus(1)
                     if (autoAlignIgnoreColumns && idToVerify != 0 &&
                         idToVerify != 1 &&
-                        idToVerify.isMultOf(7) && lastSlot.plus(1) < 9 * lineAmount
+                        idToVerify.isMultOf(7) && (lastSlot + 1) < 9 * lineAmount
                     ) {
                         lastSlot += 2
                     }
@@ -370,7 +370,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     Bukkit.createInventory(
                         null,
                         9 * lineAmount,
-                        title.replace("%page%", playerPages.size.plus(1).toString(), true)
+                        title.replace("%page%", "${playerPages.size + 1}", true)
                     )
                 )
             pageInventory.clear()

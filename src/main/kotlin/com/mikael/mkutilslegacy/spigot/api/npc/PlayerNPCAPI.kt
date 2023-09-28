@@ -70,8 +70,7 @@ object PlayerNPCAPI {
         npcs.remove(npc.getId())
     }
 
-    // Extra Section - Start
-
+    // Extras section - Start
     internal val nickHiders = mutableMapOf<PlayerNPC, ArmorStand>()
 
     /**
@@ -196,14 +195,11 @@ object PlayerNPCAPI {
         }
         return holo
     }
-
-    // Extra Section - End
+    // Extras section - End
 
     private var lookAtNearbyTask: BukkitTask? = null
 
-    /**
-     * Internal; Should be run in [UtilsMain] onEnable.
-     */
+    // mkUtils onEnable
     internal fun onEnable() {
         onDisable()
         lookAtNearbyTask = UtilsMain.instance.syncTimer(2, 2) {
@@ -217,9 +213,7 @@ object PlayerNPCAPI {
         }
     }
 
-    /**
-     * Internal; Should be run in [UtilsMain] onDisable.
-     */
+    // mkUtils onDisable
     internal fun onDisable() {
         lookAtNearbyTask?.cancel(); lookAtNearbyTask = null
         nickHiders.values.forEach { it.remove() }; nickHiders.clear()

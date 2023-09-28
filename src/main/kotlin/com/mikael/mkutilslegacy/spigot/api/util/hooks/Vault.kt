@@ -29,9 +29,7 @@ object Vault {
      */
     private lateinit var economy: Economy
 
-    /**
-     * Internal.
-     */
+    // mkUtils onEnable
     internal fun onEnable() {
         isHooked = Bukkit.getPluginManager().isPluginEnabled("Vault")
         if (!isHooked) {
@@ -42,9 +40,7 @@ object Vault {
         economy = Bukkit.getServicesManager().getRegistration(Economy::class.java).provider
     }
 
-    /**
-     * Internal.
-     */
+    // mkUtils onDisable
     internal fun onDisable() {
         if (!isHooked) return
         UtilsMain.instance.log("§6[VaultAPI] §eUnloading VaultAPI...")
@@ -52,7 +48,6 @@ object Vault {
     }
 
     // Extra for VaultAPI methods - Start
-
     /**
      * @return True if the [Vault] is hooked to Vault plugin. Otherwise, false.
      */
@@ -164,7 +159,6 @@ object Vault {
     fun removePlayerBalance(player: Player, amount: Double): Boolean {
         return removePlayerBalance(player.name, amount)
     }
-
     // Extra for VaultAPI methods - End
 
 }

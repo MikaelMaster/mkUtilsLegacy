@@ -16,18 +16,16 @@ import org.bukkit.plugin.java.JavaPlugin
 /**
  * [MineCommand] util class
  *
- * *BETA: WORK IN PROGRESS!*
- *
  * This class represents a [CommandExecutor].
  *
  * To create a new MineCommand, extends it in a Class. As the example below:
  * - class TestCommand : MineCommand(command: [String]) { *class code* } -> This command will have no aliases.
- * - class TestCommand : MineCommand(command: [String], vararg aliasses: [String]) { *class code* } -> this command will have the given aliases.
+ * - class TestCommand : MineCommand(command: [String], vararg aliases: [String]) { *class code* } -> This command will have the given aliases.
  *
  * @param command the command name, as the example above.
  * @param aliases the command aliases, as the example above.
  * @author Mikael
- * @author Koddy
+ * @author KoddyDev
  * @see CommandExecutor
  * @see command
  * @see playerCommand

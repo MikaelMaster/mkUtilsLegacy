@@ -16,11 +16,11 @@ import org.bukkit.entity.Player
  *
  * To create a new ProxyCommand, extends it in a Class. As the example below:
  * - class TestCommand : ProxyCommand(command: [String]) { *class code* } -> This command will have no aliases.
- * - class TestCommand : ProxyCommand(command: [String], vararg aliasses: [String]) { *class code* } -> this command will have the given aliases.
+ * - class TestCommand : ProxyCommand(command: [String], vararg aliases: [String]) { *class code* } -> This command will have the given aliases.
  *
  * @param command the command name, as the example above.
  * @param aliases the command aliases, as the example above.
- * @author Koddy
+ * @author KoddyDev
  * @author Mikael
  * @see Command
  */

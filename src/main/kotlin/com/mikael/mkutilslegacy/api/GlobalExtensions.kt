@@ -44,7 +44,7 @@ val isProxyServer get() = Hybrid.instance.isBungeecord
  * @param markNull if the given value is null and this is true, the text used will NOT be "", so "null" will be used.
  * @return [TextComponent] with the given [String], or empty if null is given.
  * @author Mikael
- * @author Koddy
+ * @author KoddyDev
  * @see TextComponent
  */
 fun String?.toTextComponent(fixColors: Boolean = true, markNull: Boolean = false): TextComponent {
