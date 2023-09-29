@@ -22,6 +22,7 @@ import net.eduard.api.lib.game.ParticleType
 import net.eduard.api.lib.kotlin.mineSendActionBar
 import net.eduard.api.lib.kotlin.mineSendPacket
 import net.eduard.api.lib.kotlin.mineSendTitle
+import net.eduard.api.lib.modules.Extra
 import net.eduard.api.lib.modules.Mine
 import net.eduard.api.lib.modules.MineReflect
 import net.minecraft.server.v1_8_R3.BlockPosition
@@ -137,7 +138,7 @@ var Player.openedMineMenuPage: MenuPage?
  */
 fun Player.crashClient(plugin: MKPlugin): Boolean {
     utilsMain.log("§c[Player Crasher] §eCrashing player ${this.name.formatPersonal()} client. (Request by plugin: ${plugin.systemName})")
-    try {
+    return try {
         MineReflect.sendPacket(
             this, PacketPlayOutExplosion(
                 Double.MAX_VALUE,
@@ -148,11 +149,12 @@ fun Player.crashClient(plugin: MKPlugin): Boolean {
                 Vec3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
             )
         )
+        true
     } catch (ex: Exception) {
         ex.printStackTrace()
         utilsMain.log("§c[Player Crasher] §cAn internal error occurred while crashing a player. (Request by plugin: ${plugin.systemName})")
+        false
     }
-    return true
 }
 
 /**
@@ -239,7 +241,6 @@ fun Entity.enableAI(): Entity {
     } catch (ex: Exception) {
         ex.printStackTrace()
     }
-
     return e
 }
 
@@ -356,7 +357,7 @@ fun <T : ItemStack> T.notBreakable(isUnbreakable: Boolean = true): T {
  * @see Material.REDSTONE_BLOCK (as breaked block, using STEP_SOUND effect)
  */
 fun Player.bloodEffect(allBody: Boolean = false): Boolean {
-    if (this.isDead) return false
+    if (this.isDead || !this.isOnline) return false
     this.world.playEffect(this.eyeLocation, Effect.STEP_SOUND, Material.REDSTONE_BLOCK)
     if (allBody) {
         this.world.playEffect(this.location, Effect.STEP_SOUND, Material.REDSTONE_BLOCK)
@@ -459,6 +460,17 @@ fun Player.giveItem(item: ItemStack): List<Item> {
         )
     }
     return droppedItems
+}
+
+/**
+ * Sets a random vector with low values in the given [Item].
+ *
+ * @return the random created and set [Vector].
+ */
+fun Item.spreadEffect(): Vector {
+    val vector = Vector(Extra.getRandomDouble(-0.1, 0.1), 0.5, Extra.getRandomDouble(-0.1, 0.1))
+    this.velocity = vector
+    return vector
 }
 
 /**
@@ -862,6 +874,14 @@ fun Location.toCenterLocation(): Location {
     centerLoc.y = centerLoc.y + 0.5
     centerLoc.z = centerLoc.z + 0.5
     return centerLoc
+}
+
+/**
+ * @return True if the given [Location] is inside [pos1] and [pos2] considering a cuboid. Otherwise, false.
+ */
+fun Location.isInside(loc1: Location, loc2: Location): Boolean {
+    return this.toVector()
+        .isInAABB(Mine.getLowLocation(loc1, loc2).toVector(), Mine.getHighLocation(loc1, loc2).toVector())
 }
 
 /**
