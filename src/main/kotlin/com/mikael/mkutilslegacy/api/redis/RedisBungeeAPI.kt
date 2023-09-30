@@ -242,14 +242,14 @@ object RedisBungeeAPI {
     /**
      * @see sendMessage
      */
-    fun sendMessage(playersToSend: Set<String>, message: BaseComponent, neededPermission: String = "nullperm"): Boolean {
-        return sendMessage(playersToSend, message, neededPermission)
+    fun sendMessage(playersToSend: Set<String>, message: TextComponent, neededPermission: String = "nullperm"): Boolean {
+        return sendMessage(playersToSend, *listOf(message).toTypedArray(), neededPermission = neededPermission)
     }
 
     /**
      * @see sendMessage
      */
-    fun sendMessage(playerName: String, message: BaseComponent, neededPermission: String = "nullperm"): Boolean {
+    fun sendMessage(playerName: String, message: TextComponent, neededPermission: String = "nullperm"): Boolean {
         return sendMessage(setOf(playerName), message, neededPermission)
     }
 
@@ -257,7 +257,7 @@ object RedisBungeeAPI {
      * @see sendMessage
      */
     fun sendMessage(playersToSend: Set<String>, message: String, neededPermission: String = "nullperm"): Boolean {
-        return sendMessage(playersToSend, TextComponent(message), neededPermission)
+        return sendMessage(playersToSend, message.toTextComponent(), neededPermission)
     }
 
     /**
