@@ -8,6 +8,7 @@ import com.mikael.mkutilslegacy.spigot.api.actionBar
 import com.mikael.mkutilslegacy.spigot.api.runBlock
 import com.mikael.mkutilslegacy.spigot.api.soundTP
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.chat.ComponentSerializer
 import org.bukkit.Bukkit
@@ -226,7 +227,7 @@ object RedisBungeeAPI {
      * @return True if the request has been sent with success. Otherwise, false.
      * @throws IllegalStateException if [isEnabled] is False.
      */
-    fun sendMessage(playersToSend: Set<String>, message: TextComponent, neededPermission: String = "nullperm"): Boolean {
+    fun sendMessage(playersToSend: Set<String>, message: BaseComponent, neededPermission: String = "nullperm"): Boolean {
         if (!isEnabled) error("RedisBungeeAPI is not enabled.")
         val json = JSONObject()
         json.put("playersToSend", JSONArray(playersToSend))
@@ -241,7 +242,7 @@ object RedisBungeeAPI {
     /**
      * @see sendMessage
      */
-    fun sendMessage(playerName: String, message: TextComponent, neededPermission: String = "nullperm"): Boolean {
+    fun sendMessage(playerName: String, message: BaseComponent, neededPermission: String = "nullperm"): Boolean {
         return sendMessage(setOf(playerName), message, neededPermission)
     }
 
