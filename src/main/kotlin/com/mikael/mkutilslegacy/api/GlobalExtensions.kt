@@ -8,9 +8,9 @@ import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.hybrid.Hybrid
-import net.eduard.api.lib.kotlin.fixColors
 import net.eduard.api.lib.modules.Extra
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -39,22 +39,22 @@ val syncMysqUpdatesKey = Any()
 val isProxyServer get() = Hybrid.instance.isBungeecord
 
 /**
- * Transforms a [String]? into a [TextComponent].
+ * Transforms the given [String]? into a array of [BaseComponent]s.
+ *
+ * The name 'toTextComponent' was of old funcion of this method, that used to return a [TextComponent].
  *
  * @param markNull if the given value is null and this is true, the text used will NOT be "", so "null" will be used.
- * @return [TextComponent] with the given [String], or empty if null is given.
+ * @return an Array of [BaseComponent] with the given [String], or empty if null is given.
  * @author Mikael
  * @author KoddyDev
- * @see TextComponent
+ * @see TextComponent.fromLegacyText
  */
-fun String?.toTextComponent(fixColors: Boolean = true, markNull: Boolean = false): TextComponent {
-    val textComponent: TextComponent = if (this != null) {
-        TextComponent(this)
+fun String?.toTextComponent(markNull: Boolean = false): Array<BaseComponent> {
+    return if (this != null) {
+        TextComponent.fromLegacyText(this)
     } else {
-        TextComponent(if (markNull) "null" else "")
+        TextComponent.fromLegacyText(if (markNull) "null" else "")
     }
-
-    return if (fixColors) textComponent.fixColors() as TextComponent else textComponent
 }
 
 /**

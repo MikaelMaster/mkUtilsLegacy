@@ -474,7 +474,7 @@ object RedisBungeeAPI {
                                 player.runBlock {
                                     val bypassPerm = data[2]
                                     if (bypassPerm != "nullperm" && player.hasPermission(bypassPerm)) return@runBlock
-                                    player.disconnect(data[1].toTextComponent()) // data[1] = kickMsg
+                                    player.disconnect(*data[1].toTextComponent()) // data[1] = kickMsg
                                 }
                             }
 

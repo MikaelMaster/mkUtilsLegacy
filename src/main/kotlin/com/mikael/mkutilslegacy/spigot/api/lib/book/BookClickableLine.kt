@@ -1,15 +1,16 @@
 package com.mikael.mkutilslegacy.spigot.api.lib.book
 
 import com.mikael.mkutilslegacy.api.toTextComponent
+import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
 
 @Deprecated("Broken")
 @Suppress("WARNINGS")
-open class BookClickableLine(component: TextComponent) : TextComponent(component) {
+open class BookClickableLine(vararg component: BaseComponent) : TextComponent(*component) {
 
-    constructor(textLine: String) : this(textLine.toTextComponent())
+    constructor(textLine: String) : this(*textLine.toTextComponent())
 
     var textLine: String
         get() = this.text
@@ -30,7 +31,7 @@ open class BookClickableLine(component: TextComponent) : TextComponent(component
     val hoverAction: HoverEvent.Action get() = this.hoverEvent.action
 
     fun setHoverAction(action: HoverEvent.Action, vararg value: String) {
-        this.hoverEvent = HoverEvent(action, arrayOf(value.joinToString("/n").toTextComponent()))
+        this.hoverEvent = HoverEvent(action, value.joinToString("\n").toTextComponent())
     }
 
 }

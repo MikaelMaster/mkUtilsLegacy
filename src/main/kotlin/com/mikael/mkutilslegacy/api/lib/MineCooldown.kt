@@ -115,7 +115,7 @@ class MineCooldown(var duration: Long) {
         messageOnCooldown?.let {
             if (isProxyServer) {
                 ProxyServer.getInstance().getPlayer(playerName)
-                    ?.sendMessage(it.replace("%time%", "${getCooldown(playerName)}").toTextComponent())
+                    ?.sendMessage(*it.replace("%time%", "${getCooldown(playerName)}").toTextComponent())
             } else {
                 Bukkit.getOnlinePlayers().firstOrNull { player -> player.name == playerName }
                     ?.sendMessage(it.replace("%time%", "${getCooldown(playerName)}"))

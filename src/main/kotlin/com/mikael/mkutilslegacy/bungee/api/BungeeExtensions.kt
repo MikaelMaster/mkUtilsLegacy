@@ -54,7 +54,7 @@ inline fun ProxiedPlayer.runCommand(crossinline thing: (() -> Unit)): Boolean {
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
-        this.sendMessage(PROXY_RUN_COMMAND_ERROR_MSG.toTextComponent())
+        this.sendMessage(*PROXY_RUN_COMMAND_ERROR_MSG.toTextComponent())
         false
     }
 }
@@ -76,7 +76,7 @@ inline fun ProxiedPlayer.runBlock(crossinline thing: (() -> Unit)): Boolean {
         true
     } catch (ex: Exception) {
         ex.printStackTrace()
-        this.sendMessage(PROXY_PLAYER_RUN_BLOCK_ERROR_MSG.toTextComponent())
+        this.sendMessage(*PROXY_PLAYER_RUN_BLOCK_ERROR_MSG.toTextComponent())
         false
     }
 }
@@ -90,8 +90,8 @@ inline fun ProxiedPlayer.runBlock(crossinline thing: (() -> Unit)): Boolean {
 fun ProxiedPlayer.title(title: String?, subtitle: String?, fadeIn: Int = 10, stay: Int = 20 * 2, fadeOut: Int = 10) {
     val proxyTitle = ProxyServer.getInstance().createTitle()
     proxyTitle.reset()
-    proxyTitle.title(title.toTextComponent())
-    proxyTitle.title(subtitle.toTextComponent())
+    proxyTitle.title(*title.toTextComponent())
+    proxyTitle.title(*subtitle.toTextComponent())
     proxyTitle.fadeIn(fadeIn)
     proxyTitle.stay(stay)
     proxyTitle.fadeOut(fadeOut)
@@ -120,7 +120,9 @@ fun ProxiedPlayer.sendMessage(vararg messages: String) {
  */
 fun ProxiedPlayer.sendMessages(vararg messages: String) {
     val messagesToSend = messages.map { it.toTextComponent() }.toTypedArray()
-    this.sendMessage(*messagesToSend)
+    messagesToSend.forEach { components ->
+        this.sendMessage(*components)
+    }
 }
 
 /**

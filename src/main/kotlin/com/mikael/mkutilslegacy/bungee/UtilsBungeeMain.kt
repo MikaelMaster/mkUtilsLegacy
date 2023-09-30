@@ -202,7 +202,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
 
     override fun log(vararg msg: String) {
         msg.forEach {
-            ProxyServer.getInstance().console.sendMessage("§b[${systemName}] §f${it}".toTextComponent())
+            ProxyServer.getInstance().console.sendMessage(*"§b[${systemName}] §f${it}".toTextComponent())
         }
     }
 

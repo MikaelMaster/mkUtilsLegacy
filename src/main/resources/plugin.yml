@@ -1,6 +1,6 @@
 name: mkUtilsLegacy
 description: mkUtilsLegacy is a lib for plugins development. By Mikael with help of Eduard and Koddy.
-version: 4.0.7
+version: 4.0.8
 softdepend: [ Vault ]
 load: POSTWORLD
 authors: [ Mikael, Eduard, Koddy ]

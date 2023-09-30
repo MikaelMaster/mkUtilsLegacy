@@ -13,7 +13,7 @@ class BungeeVersionCommand : ProxyCommand("mkutilsproxy", "mkutilsbungee") {
     }
 
     override fun command(sender: CommandSender, args: List<String>) {
-        sender.sendMessage("§a${UtilsBungeeMain.instance.systemName} §ev${UtilsBungeeMain.instance.description.version} §f- §bdeveloped with §c❤ §bby Mikael with help of Eduard and Koddy.".toTextComponent())
+        sender.sendMessage(*"§a${UtilsBungeeMain.instance.systemName} §ev${UtilsBungeeMain.instance.description.version} §f- §bdeveloped with §c❤ §bby Mikael with help of Eduard and Koddy.".toTextComponent())
     }
 
 }
