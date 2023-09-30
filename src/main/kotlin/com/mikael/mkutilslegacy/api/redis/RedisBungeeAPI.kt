@@ -227,16 +227,23 @@ object RedisBungeeAPI {
      * @return True if the request has been sent with success. Otherwise, false.
      * @throws IllegalStateException if [isEnabled] is False.
      */
-    fun sendMessage(playersToSend: Set<String>, message: BaseComponent, neededPermission: String = "nullperm"): Boolean {
+    fun sendMessage(playersToSend: Set<String>, vararg message: BaseComponent, neededPermission: String = "nullperm"): Boolean {
         if (!isEnabled) error("RedisBungeeAPI is not enabled.")
         val json = JSONObject()
         json.put("playersToSend", JSONArray(playersToSend))
-        json.put("message", ComponentSerializer.toString(message))
+        json.put("message", ComponentSerializer.toString(*message))
         json.put("neededPermission", neededPermission)
         return RedisAPI.sendEvent(
             "mkUtils:BungeeAPI:Event:SendMsgToPlayerList",
             json.toString()
         )
+    }
+
+    /**
+     * @see sendMessage
+     */
+    fun sendMessage(playersToSend: Set<String>, message: BaseComponent, neededPermission: String = "nullperm"): Boolean {
+        return sendMessage(playersToSend, message, neededPermission)
     }
 
     /**
