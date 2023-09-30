@@ -104,7 +104,7 @@ open class ProxyCommand(command: String, vararg aliases: String) : TabExecutor {
      * @see usage
      */
     fun sendUsage(sender: CommandSender) {
-        sender.sendMessage(*"§cUse: $usage".toTextComponent(markNull = true))
+        sender.sendMessage("§cUse: $usage".toTextComponent())
     }
 
     /**
@@ -118,7 +118,7 @@ open class ProxyCommand(command: String, vararg aliases: String) : TabExecutor {
      * The code here will be executed when the [CommandSender] is a [Player].
      */
     open fun playerCommand(player: ProxiedPlayer, args: List<String>) {
-        player.sendMessage(*"§cOps! Something went wrong. :c".toTextComponent(true))
+        player.sendMessage("§cOps! Something went wrong. :c".toTextComponent())
     }
 
     /**
@@ -130,7 +130,7 @@ open class ProxyCommand(command: String, vararg aliases: String) : TabExecutor {
         if (sender is ProxiedPlayer) {
             playerCommand(sender, args)
         } else {
-            sender.sendMessage(*"§cOnly players can use this command.".toTextComponent(true))
+            sender.sendMessage("§cOnly players can use this command.".toTextComponent())
         }
     }
 
@@ -166,7 +166,7 @@ open class ProxyCommand(command: String, vararg aliases: String) : TabExecutor {
                 }
                 val subPerm = sub.permission
                 if (subPerm != null && !sender.hasPermission(subPerm)) {
-                    sender.sendMessage(*sub.permissionMessage.toTextComponent())
+                    sender.sendMessage(sub.permissionMessage.toTextComponent())
                     return
                 }
 
@@ -174,7 +174,7 @@ open class ProxyCommand(command: String, vararg aliases: String) : TabExecutor {
             } else {
                 val commandPerm = permission
                 if (commandPerm != null && !sender.hasPermission(commandPerm)) {
-                    sender.sendMessage(*permissionMessage.toTextComponent())
+                    sender.sendMessage(permissionMessage.toTextComponent())
                     return
                 }
                 command(sender, args)

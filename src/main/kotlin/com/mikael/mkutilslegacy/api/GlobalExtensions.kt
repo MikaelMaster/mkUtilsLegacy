@@ -10,7 +10,6 @@ import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.hybrid.Hybrid
 import net.eduard.api.lib.modules.Extra
 import net.md_5.bungee.api.ProxyServer
-import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -39,21 +38,19 @@ val syncMysqUpdatesKey = Any()
 val isProxyServer get() = Hybrid.instance.isBungeecord
 
 /**
- * Transforms the given [String]? into a array of [BaseComponent]s.
- *
- * The name 'toTextComponent' was of old funcion of this method, that used to return a [TextComponent].
+ * Transforms the given [String]? into a [TextComponent].
  *
  * @param markNull if the given value is null and this is true, the text used will NOT be "", so "null" will be used.
- * @return an Array of [BaseComponent] with the given [String], or empty if null is given.
+ * @return a [TextComponent] with the given [String], or empty if null is given.
  * @author Mikael
  * @author KoddyDev
  * @see TextComponent.fromLegacyText
  */
-fun String?.toTextComponent(markNull: Boolean = false): Array<BaseComponent> {
+fun String?.toTextComponent(markNull: Boolean = false): TextComponent {
     return if (this != null) {
-        TextComponent.fromLegacyText(this)
+        TextComponent(*TextComponent.fromLegacyText(this))
     } else {
-        TextComponent.fromLegacyText(if (markNull) "null" else "")
+        TextComponent(*TextComponent.fromLegacyText(if (markNull) "null" else ""))
     }
 }
 
