@@ -818,6 +818,13 @@ fun Player.sendMessages(vararg messages: String) {
 }
 
 /**
+ * Sends all the [messages] to the given [CommandSender].
+ */
+fun CommandSender.sendMessages(vararg messages: String) {
+    this.sendMessage(messages)
+}
+
+/**
  * Clear the chat of the given [Player] by sending 150 messages.
  *
  * IMPORTANT: If the given [Player]'s client have infinity chat scrolling,
