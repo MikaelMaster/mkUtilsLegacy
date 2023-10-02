@@ -637,11 +637,11 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
             }
 
             "P" -> {
-                meta.addPattern(Pattern(baseColor, PatternType.HALF_HORIZONTAL))
                 meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
-                meta.addPattern(Pattern(baseColor, PatternType.STRIPE_BOTTOM))
-                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
                 meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.HALF_HORIZONTAL_MIRROR))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
                 meta.addPattern(Pattern(baseColor, PatternType.BORDER))
             }
 
