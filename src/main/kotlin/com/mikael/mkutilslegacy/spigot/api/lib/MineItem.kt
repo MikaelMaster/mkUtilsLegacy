@@ -5,6 +5,7 @@ import com.mikael.mkutilslegacy.spigot.api.util.MineNBT
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import net.eduard.api.lib.game.EnchantGlow
+import net.eduard.api.lib.game.ItemBuilder
 import net.eduard.api.lib.storage.StorageAPI
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools
 import net.minecraft.server.v1_8_R3.NBTTagCompound
@@ -26,6 +27,7 @@ import org.json.JSONObject
 import java.io.*
 import java.util.*
 import org.apache.commons.codec.binary.Base64 as aBase64
+
 
 /**
  * [MineItem] util class
@@ -499,6 +501,306 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
         val meta = this.itemMeta as BannerMeta
         meta.addPattern(Pattern(patternColor, patternType))
         this.itemMeta = meta
+        return this
+    }
+
+    /**
+     * Builds a banner with the given [alphabet] letter.
+     *
+     * @return this [MineItem]
+     */
+    fun banner(alphabet: String, baseColor: DyeColor, dyeColor: DyeColor): MineItem {
+        val letter = alphabet.uppercase()
+        this.type = Material.BANNER
+        if (this.itemMeta == null) return this
+        val meta = this.itemMeta as BannerMeta
+        meta.baseColor = baseColor
+        when (letter) {
+            "A" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "B", "8" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "C" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "D" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.CURLY_BORDER))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "E" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
+                meta.addPattern(Pattern(baseColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "F" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
+                meta.addPattern(Pattern(baseColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "G" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.HALF_HORIZONTAL))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "H" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "I" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_CENTER))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "J" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.HALF_HORIZONTAL))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "K" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
+                meta.addPattern(Pattern(baseColor, PatternType.HALF_VERTICAL_MIRROR))
+                meta.addPattern(Pattern(dyeColor, PatternType.CROSS))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "L" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "M" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.TRIANGLE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.TRIANGLES_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "N" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.DIAGONAL_RIGHT_MIRROR))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_DOWNRIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "O" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "P" -> {
+                meta.addPattern(Pattern(baseColor, PatternType.HALF_HORIZONTAL))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "Q" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+                meta.addPattern(Pattern(dyeColor, PatternType.SQUARE_BOTTOM_RIGHT))
+            }
+
+            "R" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.HALF_HORIZONTAL_MIRROR))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_DOWNRIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "S" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.RHOMBUS_MIDDLE))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_DOWNRIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+                meta.addPattern(Pattern(baseColor, PatternType.CURLY_BORDER))
+            }
+
+            "T" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_CENTER))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "U" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "V" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.TRIANGLES_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_DOWNLEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "W" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.TRIANGLE_BOTTOM))
+                meta.addPattern(Pattern(baseColor, PatternType.TRIANGLES_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "X" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(baseColor, PatternType.STRIPE_CENTER))
+                meta.addPattern(Pattern(dyeColor, PatternType.CROSS))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "Y" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.CROSS))
+                meta.addPattern(Pattern(baseColor, PatternType.HALF_VERTICAL_MIRROR))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_DOWNLEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "Z" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_DOWNLEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "1" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.SQUARE_TOP_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_CENTER))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "2" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.RHOMBUS_MIDDLE))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_DOWNLEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "3" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
+                meta.addPattern(Pattern(baseColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "4" -> {
+                meta.addPattern(Pattern(baseColor, PatternType.HALF_HORIZONTAL))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "5" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_DOWNRIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.CURLY_BORDER))
+                meta.addPattern(Pattern(dyeColor, PatternType.SQUARE_BOTTOM_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "6" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.HALF_HORIZONTAL))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "7" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(baseColor, PatternType.DIAGONAL_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_DOWNLEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.SQUARE_BOTTOM_LEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "9" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.HALF_HORIZONTAL_MIRROR))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_MIDDLE))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+
+            "0" -> {
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_TOP))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_RIGHT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_BOTTOM))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_LEFT))
+                meta.addPattern(Pattern(dyeColor, PatternType.STRIPE_DOWNLEFT))
+                meta.addPattern(Pattern(baseColor, PatternType.BORDER))
+            }
+        }
+        itemMeta = meta
         return this
     }
 
