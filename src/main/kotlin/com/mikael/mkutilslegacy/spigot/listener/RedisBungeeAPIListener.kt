@@ -1,25 +1,21 @@
-package com.mikael.mkutilslegacy.bungee.listener
+package com.mikael.mkutilslegacy.spigot.listener
 
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
-import com.mikael.mkutilslegacy.bungee.api.lib.ProxyListener
-import com.mikael.mkutilslegacy.bungee.api.runBlock
-import net.md_5.bungee.api.event.PlayerDisconnectEvent
-import net.md_5.bungee.api.event.ServerConnectedEvent
-import net.md_5.bungee.event.EventHandler
-import net.md_5.bungee.event.EventPriority
+import com.mikael.mkutilslegacy.spigot.api.lib.MineListener
+import com.mikael.mkutilslegacy.spigot.api.runBlock
+import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 
-/**
- * Listener for [RedisBungeeAPI].
- */
-class RedisBungeeAPIListener : ProxyListener() {
+class RedisBungeeAPIListener : MineListener() {
 
-    @EventHandler(priority = EventPriority.LOWEST) // Called before everything
-    fun onServerChange(e: ServerConnectedEvent) {
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onPlayerJoin(e: PlayerJoinEvent) {
         val player = e.player
         player.runBlock {
-            if (!RedisBungeeAPI.isEnabled) return@runBlock
-            val newServer = e.server?.info?.name ?: return@runBlock
+            val currentServer = RedisBungeeAPI.spigotServerName
             val servers = mutableMapOf<String, MutableSet<String>>()
             RedisAPI.getMap("mkUtils:BungeeAPI:Servers").forEach {
                 servers.getOrPut(it.key) { mutableSetOf() }.addAll(
@@ -29,8 +25,8 @@ class RedisBungeeAPIListener : ProxyListener() {
             servers.values.forEach { set ->
                 set.removeIf { it == player.name }
             }
-            if (servers.containsKey(newServer) && player.isConnected) {
-                servers[newServer]!!.add(player.name)
+            if (servers.containsKey(currentServer)) {
+                servers[currentServer]!!.add(player.name)
             }
             RedisAPI.insertMap("mkUtils:BungeeAPI:Servers",
                 servers.mapValues { it.value.joinToString(";") }
@@ -38,20 +34,21 @@ class RedisBungeeAPIListener : ProxyListener() {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST) // Called after everything
-    fun onPlayerQuit(e: PlayerDisconnectEvent) {
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onPlayerQuit(e: PlayerQuitEvent) {
         val player = e.player
         player.runBlock {
-            if (!RedisBungeeAPI.isEnabled) return@runBlock
+            val currentServer = RedisBungeeAPI.spigotServerName
             val servers = mutableMapOf<String, MutableSet<String>>()
             RedisAPI.getMap("mkUtils:BungeeAPI:Servers").forEach {
                 servers.getOrPut(it.key) { mutableSetOf() }.addAll(
                     it.value.split(";").filter { l -> l.isNotBlank() }
                 )
             }
-            servers.values.forEach { set ->
-                set.removeIf { it == player.name }
+            servers[currentServer]?.let { serverPlayers ->
+                serverPlayers.removeIf { it == player.name }
             }
+
             RedisAPI.insertMap("mkUtils:BungeeAPI:Servers",
                 servers.mapValues { it.value.joinToString(";") }
             )

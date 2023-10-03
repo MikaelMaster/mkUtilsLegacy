@@ -22,6 +22,7 @@ import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import com.mikael.mkutilslegacy.spigot.command.VersionCommand
 import com.mikael.mkutilslegacy.spigot.listener.CustomEventsListener
 import com.mikael.mkutilslegacy.spigot.listener.GeneralListener
+import com.mikael.mkutilslegacy.spigot.listener.RedisBungeeAPIListener
 import com.mikael.mkutilslegacy.spigot.task.AutoUpdateMenusTask
 import com.mikael.mkutilslegacy.spigot.task.PlayerTargetAtPlayerTask
 import net.eduard.api.core.BukkitReplacers
@@ -129,6 +130,9 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         CustomEventsListener().registerListener(this)
         NPCSystemListener().registerListener(this) // PlayerNPCAPI
         MineHologramListener().registerListener(this) // MineHologram Extra
+        if (RedisBungeeAPI.isEnabled) {
+            RedisBungeeAPIListener().registerListener(this)
+        }
 
         val loadTime = System.currentTimeMillis() - loadStart
         log(LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$loadTime"))
@@ -150,7 +154,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
             // MySQL queue updater timer
             if (UtilsManager.sqlManager.hasConnection()) {
-                mySqlQueueUpdater = asyncTimer(20, 20) {
+                mySqlQueueUpdater = asyncTimer(1, 20) {
                     if (!UtilsManager.sqlManager.hasConnection()) return@asyncTimer
                     UtilsManager.sqlManager.runChanges()
                 }
@@ -248,12 +252,9 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     }
 
     private fun preparePlaceholders() { // mkUtils default placeholders
-        Mine.addReplacer("mkutils_players") {
-            Bukkit.getOnlinePlayers().size.formatValue()
-        }
-        Mine.addReplacer("mkbungeeapi_players") {
+        Mine.addReplacer("mkutils_redisbungeeapi_players") {
             try {
-                RedisBungeeAPI.getGlobalPlayerAmount()
+                Bukkit.getOnlinePlayers().size.formatValue()
             } catch (ex: Exception) {
                 -1
             }
