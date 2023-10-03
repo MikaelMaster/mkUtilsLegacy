@@ -29,15 +29,7 @@ import org.bukkit.scoreboard.Scoreboard
 // @Deprecated("In-dev.")
 @Suppress("WARNINGS")
 object MineScoreboard {
-
-    /**
-     * All Bukkit [Scoreboard]s set by player throwout [setScore].
-     *
-     * Offline players will be removed from this map.
-     * Every 3s a timer verifies if one of players in map is offline.
-     * If the player is offline, he's removed from the map.
-     */
-    val bukkitScores = mutableMapOf<Player, Scoreboard>()
+    private val bukkitScores = mutableMapOf<Player, Scoreboard>()
 
     init {
         UtilsMain.instance.syncTimer(20 * 3, 20 * 3) {
@@ -45,48 +37,54 @@ object MineScoreboard {
         }
     }
 
-    /**
-     * Sets a [Scoreboard] with the given [title] and [lines] for the [player].
-     *
-     * If the player already have a scoreboard set by [MineScoreboard], and the
-     * [title] and [lines] is the same of the already set scoreboard, the already
-     * set score will be returned, and it'll not create a new one.
-     *
-     * @param player the player to set the scoboard.
-     * @param title the new scoreboard 'title'.
-     * @param lines the new scoreboard 'lines'.
-     * @return a new [Scoreboard] linked to the given [player]. See [bukkitScores] for details.
-     */
     fun setScore(player: Player, title: String, vararg lines: String): Scoreboard {
         val oldScore = bukkitScores[player]
         if (oldScore != null) {
-            if (oldScore.getObjective(DisplaySlot.SIDEBAR).displayName == title &&
-                oldScore.teams.firstOrNull { it.name == player.name }?.entries?.toTypedArray() == lines
-            ) return oldScore // The score title and lines is the same, will note set it gain.
+            val sidebar = oldScore.getObjective(DisplaySlot.SIDEBAR)
+            if (sidebar != null && sidebar.displayName == title) {
+                val playerTeam = oldScore.getTeam(player.name)
+                if (playerTeam != null) {
+                    val currentLines = playerTeam.entries.map { it }
+                    if (currentLines == lines.toList().reversed()) {
+                        return oldScore // O título e as linhas são os mesmos
+                    }
+                }
+            }
         }
-        val newScore = bukkitScores.put(player, Bukkit.getScoreboardManager().newScoreboard)!!
+        val newScore = oldScore ?: Bukkit.getScoreboardManager().newScoreboard
+        bukkitScores[player] = newScore
+        newScore.objectives.forEach {
+            it.unregister()
+        }
 
-        val team = newScore.registerNewTeam(player.name)
-        val objective = newScore.getObjective(DisplaySlot.SIDEBAR)
-        objective.displayName = title.cut(16)
-        objective.criteria
-        lines.forEach { line ->
-            team.addEntry(line.cut(16))
+        if (newScore.getEntryTeam(player.name) == null) {
+            val team = newScore.registerNewTeam(player.name)
+            team.addEntry(player.name)
+        }
+        // team.prefix = player.name // Você pode definir o prefixo para o nome do jogador
+        val objective = newScore.registerNewObjective("sidebar", "dummy")
+        objective.displaySlot = DisplaySlot.SIDEBAR
+        objective.displayName = title.cut(32)
+
+        val builder = StringBuilder("§r")
+        lines.forEachIndexed { index, line ->
+            val finalLine = line.cut(32)
+            val score = objective.getScore(
+                if (finalLine == "") {
+                    builder.append(" ")
+                    builder.toString()
+                } else finalLine
+            )
+            score.score = lines.size - index
         }
 
         player.scoreboard = newScore
-        oldScore?.let { it.teams.firstOrNull { it.name == player.name }?.unregister() }
+        oldScore?.let { it.getTeam(player.name)?.unregister() }
         return newScore
     }
 
-    /**
-     * Removes the scoreboard set in the given [player]. ([Player.setScoreboard]=null)
-     *
-     * @param player the player to remove his [Scoreboard].
-     */
     fun removeScore(player: Player) {
         player.scoreboard = null
         bukkitScores.remove(player)
     }
-
 }

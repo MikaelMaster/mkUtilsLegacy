@@ -5,7 +5,6 @@ import com.mikael.mkutilslegacy.spigot.api.util.MineNBT
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import net.eduard.api.lib.game.EnchantGlow
-import net.eduard.api.lib.game.ItemBuilder
 import net.eduard.api.lib.storage.StorageAPI
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools
 import net.minecraft.server.v1_8_R3.NBTTagCompound
