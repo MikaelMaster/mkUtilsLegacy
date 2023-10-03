@@ -35,6 +35,7 @@ object MineScoreboard {
     init {
         UtilsMain.instance.syncTimer(20 * 3, 20 * 3) {
             bukkitScores.keys.removeIf { !it.isOnline }
+            lastScoreLines.keys.removeIf { !it.isOnline }
         }
     }
 
