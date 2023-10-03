@@ -30,6 +30,7 @@ import org.bukkit.scoreboard.Scoreboard
 @Suppress("WARNINGS")
 object MineScoreboard {
     private val bukkitScores = mutableMapOf<Player, Scoreboard>()
+    private val lastScoreLines = mutableMapOf<Player, List<String>>()
 
     init {
         UtilsMain.instance.syncTimer(20 * 3, 20 * 3) {
@@ -37,18 +38,13 @@ object MineScoreboard {
         }
     }
 
-    fun setScore(player: Player, title: String, vararg lines: String): Scoreboard {
+    fun setScore(player: Player, title: String, lines: List<String>): Scoreboard {
         val oldScore = bukkitScores[player]
-        if (oldScore != null) {
+        val lastLines = lastScoreLines[player]
+        if (oldScore != null && lastLines != null) {
             val sidebar = oldScore.getObjective(DisplaySlot.SIDEBAR)
-            if (sidebar != null && sidebar.displayName == title) {
-                val playerTeam = oldScore.getTeam(player.name)
-                if (playerTeam != null) {
-                    val currentLines = playerTeam.entries.map { it }
-                    if (currentLines == lines.toList().reversed()) {
-                        return oldScore // O título e as linhas são os mesmos
-                    }
-                }
+            if (sidebar != null && sidebar.displayName == title.cut(32) && lastLines == lines) {
+                return oldScore
             }
         }
         val newScore = oldScore ?: Bukkit.getScoreboardManager().newScoreboard
@@ -77,9 +73,10 @@ object MineScoreboard {
             )
             score.score = lines.size - index
         }
+        lastScoreLines[player] = lines
 
         player.scoreboard = newScore
-        oldScore?.let { it.getTeam(player.name)?.unregister() }
+        // oldScore?.let { it.getTeam(player.name)?.unregister() }
         return newScore
     }
 
