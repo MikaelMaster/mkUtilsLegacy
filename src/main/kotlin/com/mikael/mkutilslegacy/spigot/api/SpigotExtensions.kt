@@ -1061,8 +1061,8 @@ fun Image.renderAsBukkitMap(): MapView {
 /**
  * @see MineScoreboard.setScore
  */
-fun Player.setMineScoreboard(title: String, lines: List<String>): Scoreboard {
-    return MineScoreboard.setScore(this, title, lines)
+fun Player.setMineScoreboard(title: String, lines: List<String>, healthBarEnabled: Boolean = false): Scoreboard {
+    return MineScoreboard.setScore(this, title, lines, healthBarEnabled)
 }
 
 /**

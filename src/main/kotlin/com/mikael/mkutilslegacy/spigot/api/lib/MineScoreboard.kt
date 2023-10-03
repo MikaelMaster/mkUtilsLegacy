@@ -7,7 +7,9 @@ import com.mikael.mkutilslegacy.spigot.api.lib.MineScoreboard.setScore
 import net.eduard.api.lib.kotlin.cut
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.scoreboard.Criterias
 import org.bukkit.scoreboard.DisplaySlot
+import org.bukkit.scoreboard.NameTagVisibility
 import org.bukkit.scoreboard.Scoreboard
 
 /**
@@ -39,7 +41,20 @@ object MineScoreboard {
         }
     }
 
-    fun setScore(player: Player, title: String, lines: List<String>): Scoreboard {
+    private fun updateHealthBar(player: Player, isEnabled: Boolean) {
+        val healthScoreboard = player.scoreboard
+        val healthObjective = healthScoreboard.getObjective("health")
+        if (healthObjective == null && isEnabled) {
+            val newHealthObjective = healthScoreboard.registerNewObjective("health", Criterias.HEALTH)
+            newHealthObjective.displaySlot = DisplaySlot.BELOW_NAME
+            newHealthObjective.displayName = "§c❤"
+        } else if (healthObjective != null) {
+            healthObjective.unregister()
+        }
+        healthObjective?.getScore(player.name)?.score = player.health.toInt()
+    }
+
+    fun setScore(player: Player, title: String, lines: List<String>, healthBarEnabled: Boolean): Scoreboard {
         val oldScore = bukkitScores[player]
         val lastLines = lastScoreLines[player]
         if (oldScore != null && lastLines != null) {
@@ -57,6 +72,10 @@ object MineScoreboard {
         if (newScore.getEntryTeam(player.name) == null) {
             val team = newScore.registerNewTeam(player.name)
             team.addEntry(player.name)
+            if (healthBarEnabled) {
+                // Define a visibilidade da tag do nome para mostrar a barra de vida
+                team.nameTagVisibility = NameTagVisibility.ALWAYS
+            }
         }
         // team.prefix = player.name // Você pode definir o prefixo para o nome do jogador
         val objective = newScore.registerNewObjective("sidebar", "dummy")
@@ -77,6 +96,7 @@ object MineScoreboard {
         lastScoreLines[player] = lines
 
         player.scoreboard = newScore
+        updateHealthBar(player, healthBarEnabled)
         // oldScore?.let { it.getTeam(player.name)?.unregister() }
         return newScore
     }
