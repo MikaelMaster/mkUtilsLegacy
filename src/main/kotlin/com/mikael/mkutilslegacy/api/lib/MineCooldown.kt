@@ -1,5 +1,6 @@
 package com.mikael.mkutilslegacy.api.lib
 
+import com.mikael.mkutilslegacy.api.formatDuration
 import com.mikael.mkutilslegacy.api.isProxyServer
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.toTextComponent
@@ -115,10 +116,10 @@ class MineCooldown(var duration: Long) {
         messageOnCooldown?.let {
             if (isProxyServer) {
                 ProxyServer.getInstance().getPlayer(playerName)
-                    ?.sendMessage(it.replace("%time%", "${getCooldown(playerName)}").toTextComponent())
+                    ?.sendMessage(it.replace("%time%", "${getCooldown(playerName).toLong().formatDuration()}").toTextComponent())
             } else {
-                Bukkit.getOnlinePlayers().firstOrNull { player -> player.name == playerName }
-                    ?.sendMessage(it.replace("%time%", "${getCooldown(playerName)}"))
+                Bukkit.getPlayer(playerName)
+                    ?.sendMessage(it.replace("%time%", "${getCooldown(playerName).toLong().formatDuration()}"))
             }
         }
     }
