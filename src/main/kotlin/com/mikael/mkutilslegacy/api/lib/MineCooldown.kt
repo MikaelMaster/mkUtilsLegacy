@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
  *
  * Then, you can use clw.apply { *code* } to set your custom [messageOnCooldown] for example.
  * Important: Inside [messageOnCooldown] use the placeholder '%time%' to get the seconds remaining.
- * So, the message "Please wait %times%s to use this again." will be transformed into -> "Please wait 3s to use this again." (3 seconds as example)
+ * So, the message "Please wait %times% to use this again." will be transformed into -> "Please wait 3s to use this again." (3 seconds as example)
  *
  * To use, just do as the example bellow:
  * - clw.cooldown(playerName: [String]) { *code to be executed under delay* }
