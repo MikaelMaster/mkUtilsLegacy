@@ -6,6 +6,7 @@ import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.toTextComponent
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
+import java.util.concurrent.TimeUnit
 
 /**
  * [MineCooldown] util class (Hybrid - can be used on ProxyServer and BukkitServer)
@@ -116,10 +117,20 @@ class MineCooldown(var duration: Long) {
         messageOnCooldown?.let {
             if (isProxyServer) {
                 ProxyServer.getInstance().getPlayer(playerName)
-                    ?.sendMessage(it.replace("%time%", "${getCooldown(playerName).toLong().formatDuration()}").toTextComponent())
+                    ?.sendMessage(
+                        it.replace(
+                            "%time%",
+                            "${TimeUnit.SECONDS.toMillis(getCooldown(playerName).toLong()).formatDuration()}"
+                        ).toTextComponent()
+                    )
             } else {
                 Bukkit.getPlayer(playerName)
-                    ?.sendMessage(it.replace("%time%", "${getCooldown(playerName).toLong().formatDuration()}"))
+                    ?.sendMessage(
+                        it.replace(
+                            "%time%",
+                            "${TimeUnit.SECONDS.toMillis(getCooldown(playerName).toLong()).formatDuration()}"
+                        )
+                    )
             }
         }
     }
