@@ -876,10 +876,10 @@ val Location.blockLoc: Location get() = this.block.location.clone()
  * @return a new location where X,Y,Z are the center of the [Location.getBlock].
  */
 fun Location.toCenterLocation(): Location {
-    val centerLoc = this.blockLoc
-    centerLoc.x = centerLoc.x + 0.5
-    centerLoc.y = centerLoc.y + 0.5
-    centerLoc.z = centerLoc.z + 0.5
+    val centerLoc = this.clone() // Should NOT use this.blockLoc because this will set the pitch and yaw to 0
+    centerLoc.x = this.blockX + 0.5
+    centerLoc.y = this.blockY + 0.5
+    centerLoc.z = this.blockZ + 0.5
     return centerLoc
 }
 
