@@ -500,22 +500,21 @@ fun Player.giveArmorSet(
         if (this.inventory.chestplate != null) {
             droppedArmor.add(this.world.dropItemNaturally(this.eyeLocation, chestplate))
         } else {
-            this.inventory.chestplate = helmet
+            this.inventory.chestplate = chestplate
         }
     }
     if (leggings != null) {
         if (this.inventory.leggings != null) {
             droppedArmor.add(this.world.dropItemNaturally(this.eyeLocation, leggings))
         } else {
-            this.inventory.leggings = helmet
+            this.inventory.leggings = leggings
         }
     }
     if (boots != null) {
         if (this.inventory.boots != null) {
             droppedArmor.add(this.world.dropItemNaturally(this.eyeLocation, boots))
         } else {
-            this.inventory.boots = helmet
-        }
+            this.inventory.boots = boots        }
     }
     return droppedArmor
 }
