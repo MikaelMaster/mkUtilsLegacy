@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.*
 import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionType
 import org.json.JSONObject
 import java.io.*
 import java.util.*
@@ -800,6 +801,34 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
             }
         }
         itemMeta = meta
+        return this
+    }
+
+    @Suppress("DEPRECATION")
+    fun potion(potionType: PotionType, level: Int, isSplash: Boolean = false, isExtended: Boolean = false): MineItem { // Change Item Potion
+        if (this.type != Material.POTION) {
+            this.type = Material.POTION
+        }
+        val name: Int = potionType.damageValue
+        var damage: Short
+        if (potionType == PotionType.WATER) {
+            damage = 0
+        } else {
+            if (this.type == null) {
+                damage = (if (name == 0) 8192 else name).toShort()
+            } else {
+                damage = ((level - 1).toShort())
+                damage = (damage.toInt() shl 5).toShort()
+                damage = (damage.toInt() or (potionType.damageValue.toShort()).toInt()).toShort()
+            }
+            if (isSplash) {
+                damage = (damage.toInt() or 16384).toShort()
+            }
+            if (isExtended) {
+                damage = (damage.toInt() or 64).toShort()
+            }
+        }
+        this.durability = damage
         return this
     }
 
