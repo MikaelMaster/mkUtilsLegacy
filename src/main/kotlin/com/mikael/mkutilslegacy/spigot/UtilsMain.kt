@@ -246,7 +246,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
         // Storable Custom Objects
         StorageAPI.registerStorable(Location::class.java, LocationStorable())
-        StorageAPI.registerStorable(MineItemStorable::class.java, MineItemStorable())
+        // StorageAPI.registerStorable(MineItemStorable::class.java, MineItemStorable())
 
         StorageAPI.startGson() // EduardAPI
     }
