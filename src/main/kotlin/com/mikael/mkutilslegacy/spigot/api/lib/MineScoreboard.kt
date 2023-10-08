@@ -72,7 +72,7 @@ object MineScoreboard {
         val builder = StringBuilder("§r")
         lines.forEachIndexed { index, line ->
             val finalLine = line.cut(32)
-            if (lastLines != null) {
+            if (lastLines != null && lastLines.size == lines.size) {
                 val lastLine = lastLines.getOrNull(index)
                 if (lastLine != null && lastLine != line) {
                     newScore.resetScores(lastLine)
