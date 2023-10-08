@@ -110,6 +110,7 @@ object MineScoreboard {
             healthObjective = newHealthObjective
         } else if (healthObjective != null && !isEnabled) {
             healthObjective.unregister()
+            healthObjective = null
         }
         healthObjective?.getScore(player.name)?.score = player.health.toInt()
     }
