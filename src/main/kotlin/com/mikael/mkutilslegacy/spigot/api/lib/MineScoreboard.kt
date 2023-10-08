@@ -101,15 +101,16 @@ object MineScoreboard {
     }
 
     private fun updateHealthBar(player: Player, isEnabled: Boolean) {
-        val healthScoreboard = player.scoreboard
-        val healthObjective = healthScoreboard.getObjective("health")
+        val healthScoreboard = player.scoreboard ?: return
+        var healthObjective = healthScoreboard.getObjective("health")
         if (healthObjective == null && isEnabled) {
             val newHealthObjective = healthScoreboard.registerNewObjective("health", Criterias.HEALTH)
             newHealthObjective.displaySlot = DisplaySlot.BELOW_NAME
             newHealthObjective.displayName = "§c❤"
-            newHealthObjective.getScore(player.name).score = player.health.toInt()
-        } else if (healthObjective != null) {
+            healthObjective = newHealthObjective
+        } else if (healthObjective != null && !isEnabled) {
             healthObjective.unregister()
         }
+        healthObjective?.getScore(player.name)?.score = player.health.toInt()
     }
 }
