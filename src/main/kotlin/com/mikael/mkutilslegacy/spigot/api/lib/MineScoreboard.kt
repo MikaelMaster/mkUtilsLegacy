@@ -28,7 +28,6 @@ import org.bukkit.scoreboard.Scoreboard
  * @author Mikael
  * @see Scoreboard
  */
-// @Deprecated("In-dev.")
 @Suppress("WARNINGS")
 object MineScoreboard {
     private val bukkitScores = mutableMapOf<Player, Scoreboard>()
@@ -39,19 +38,6 @@ object MineScoreboard {
             bukkitScores.keys.removeIf { !it.isOnline }
             lastScoreLines.keys.removeIf { !it.isOnline }
         }
-    }
-
-    private fun updateHealthBar(player: Player, isEnabled: Boolean) {
-        val healthScoreboard = player.scoreboard
-        val healthObjective = healthScoreboard.getObjective("health")
-        if (healthObjective == null && isEnabled) {
-            val newHealthObjective = healthScoreboard.registerNewObjective("health", Criterias.HEALTH)
-            newHealthObjective.displaySlot = DisplaySlot.BELOW_NAME
-            newHealthObjective.displayName = "§c❤"
-        } else if (healthObjective != null) {
-            healthObjective.unregister()
-        }
-        healthObjective?.getScore(player.name)?.score = player.health.toInt()
     }
 
     fun setScore(player: Player, title: String, lines: List<String>, healthBarEnabled: Boolean): Scoreboard {
@@ -65,8 +51,10 @@ object MineScoreboard {
         }
         val newScore = oldScore ?: Bukkit.getScoreboardManager().newScoreboard
         bukkitScores[player] = newScore
-        newScore.objectives.forEach {
-            it.unregister()
+        if (lastLines != null && lastLines.size != lines.size) {
+            newScore.objectives.forEach {
+                it.unregister()
+            }
         }
 
         if (newScore.getEntryTeam(player.name) == null) {
@@ -77,14 +65,19 @@ object MineScoreboard {
                 team.nameTagVisibility = NameTagVisibility.ALWAYS
             }
         }
-        // team.prefix = player.name // Você pode definir o prefixo para o nome do jogador
-        val objective = newScore.registerNewObjective("sidebar", "dummy")
+        val objective = newScore.getObjective("sidebar") ?: newScore.registerNewObjective("sidebar", "dummy")
         objective.displaySlot = DisplaySlot.SIDEBAR
         objective.displayName = title.cut(32)
 
         val builder = StringBuilder("§r")
         lines.forEachIndexed { index, line ->
             val finalLine = line.cut(32)
+            if (lastLines != null) {
+                val lastLine = lastLines.getOrNull(index)
+                if (lastLine != null && lastLine != line) {
+                    newScore.resetScores(lastLine)
+                }
+            }
             val score = objective.getScore(
                 if (finalLine == "") {
                     builder.append(" ")
@@ -95,14 +88,28 @@ object MineScoreboard {
         }
         lastScoreLines[player] = lines
 
-        player.scoreboard = newScore
+        if (oldScore == null) {
+            player.scoreboard = newScore
+        }
         updateHealthBar(player, healthBarEnabled)
-        // oldScore?.let { it.getTeam(player.name)?.unregister() }
         return newScore
     }
 
     fun removeScore(player: Player) {
         player.scoreboard = null
         bukkitScores.remove(player)
+    }
+
+    private fun updateHealthBar(player: Player, isEnabled: Boolean) {
+        val healthScoreboard = player.scoreboard
+        val healthObjective = healthScoreboard.getObjective("health")
+        if (healthObjective == null && isEnabled) {
+            val newHealthObjective = healthScoreboard.registerNewObjective("health", Criterias.HEALTH)
+            newHealthObjective.displaySlot = DisplaySlot.BELOW_NAME
+            newHealthObjective.displayName = "§c❤"
+            newHealthObjective.getScore(player.name).score = player.health.toInt()
+        } else if (healthObjective != null) {
+            healthObjective.unregister()
+        }
     }
 }
