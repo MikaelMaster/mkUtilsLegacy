@@ -219,7 +219,7 @@ fun Entity.disableAI(): Entity {
     var e = this
     try {
         val nbt = MineNBT.Entity(e)
-        e = nbt.setByte("NoAI", 1)
+        e = nbt.setByte("NoAI", 1).toBukkitEntity()
     } catch (ex: Exception) {
         ex.printStackTrace()
     }
@@ -237,7 +237,7 @@ fun Entity.enableAI(): Entity {
     var e = this
     try {
         val nbt = MineNBT.Entity(e)
-        e = nbt.setByte("NoAI", 0)
+        e = nbt.setByte("NoAI", 0).toBukkitEntity()
     } catch (ex: Exception) {
         ex.printStackTrace()
     }

@@ -28,7 +28,6 @@ import java.io.*
 import java.util.*
 import org.apache.commons.codec.binary.Base64 as aBase64
 
-
 /**
  * [MineItem] util class
  *
@@ -276,7 +275,7 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
      */
     fun addAllFlags(): MineItem {
         val meta = this.itemMeta ?: return this
-        meta.addItemFlags(*ItemFlag.values())
+        meta.addItemFlags(*ItemFlag.entries.toTypedArray())
         this.itemMeta = meta
         return this
     }
@@ -302,7 +301,7 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
      */
     fun removeFlags(): MineItem {
         val meta = this.itemMeta ?: return this
-        meta.removeItemFlags(*ItemFlag.values())
+        meta.removeItemFlags(*ItemFlag.entries.toTypedArray())
         this.itemMeta = meta
         return this
     }
@@ -376,10 +375,9 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
         return MineBook(this)
     }
 
-    /**
-     * @return a [MineNBT.Item] using this [MineItem] as 'baseItem'.
-     */
-    val nbtItem get() = MineNBT.Item(this)
+    fun toMineNBTItem(): MineNBT.Item {
+        return MineNBT.Item(this)
+    }
 
     /**
      * @return a clone of this [MineItem].

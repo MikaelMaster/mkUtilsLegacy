@@ -1,6 +1,7 @@
 package com.mikael.mkutilslegacy.spigot.api.util
 
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
+import com.mikael.mkutilslegacy.spigot.api.toMineItem
 import net.minecraft.server.v1_8_R3.NBTBase
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools
 import net.minecraft.server.v1_8_R3.NBTTagCompound
@@ -25,15 +26,12 @@ object MineNBT {
         private val nmsItem: net.minecraft.server.v1_8_R3.ItemStack = CraftItemStack.asNMSCopy(baseItem.toItemStack())
         private var itemCompound = if (nmsItem.hasTag()) nmsItem.tag else NBTTagCompound()
 
-        fun clearCompound(): MineItem {
-
+        fun clearCompound(): MineNBT.Item {
             itemCompound.c().forEach { key ->
                 itemCompound.remove(key)
             }
-
             nmsItem.tag = itemCompound
-
-            return this@Item.build()
+            return this@Item
         }
 
         fun getKeys(): List<String> {
@@ -54,84 +52,82 @@ object MineNBT {
             return Base64.getEncoder().encodeToString(outputStream.toByteArray())
         }
 
-        fun base64(base64: String): MineItem {
+        fun base64(base64: String): MineNBT.Item {
             val inputStream = ByteArrayInputStream(
                 Base64.getDecoder().decode(base64)
             )
             val nbtTagCompound = NBTCompressedStreamTools.a(inputStream)
             inputStream.close()
-
             itemCompound = nbtTagCompound
             nmsItem.tag = nbtTagCompound
-
-            return this@Item.build()
+            return this@Item
         }
 
 
-        fun setString(key: String, value: String): MineItem {
+        fun setString(key: String, value: String): MineNBT.Item {
             itemCompound.setString(key, value)
             nmsItem.tag = itemCompound
-            return this@Item.build()
+            return this@Item
         }
 
         fun getString(key: String): String? {
             return itemCompound.getString(key)
         }
 
-        fun setInt(key: String, value: Int): MineItem {
+        fun setInt(key: String, value: Int): MineNBT.Item {
             itemCompound.setInt(key, value)
             nmsItem.tag = itemCompound
-            return this@Item.build()
+            return this@Item
         }
 
         fun getInt(key: String): Int? {
             return itemCompound.getInt(key).toString().toIntOrNull()
         }
 
-        fun setBoolean(key: String, value: Boolean): MineItem {
+        fun setBoolean(key: String, value: Boolean): MineNBT.Item {
             itemCompound.setBoolean(key, value)
             nmsItem.tag = itemCompound
-            return this@Item.build()
+            return this@Item
         }
 
         fun getBoolean(key: String): Boolean {
             return itemCompound.getBoolean(key)
         }
 
-        fun setDouble(key: String, value: Double): MineItem {
+        fun setDouble(key: String, value: Double): MineNBT.Item {
             itemCompound.setDouble(key, value)
             nmsItem.tag = itemCompound
-            return this@Item.build()
+            return this@Item
         }
 
         fun getDouble(key: String): Double? {
             return itemCompound.getDouble(key).toString().toDoubleOrNull()
         }
 
-        fun setFloat(key: String, value: Float): MineItem {
+        fun setFloat(key: String, value: Float): MineNBT.Item {
             itemCompound.setFloat(key, value)
             nmsItem.tag = itemCompound
-            return this@Item.build()
+            return this@Item
         }
 
         fun getFloat(key: String): Float? {
             return itemCompound.getFloat(key).toString().toFloatOrNull()
         }
 
-        fun setLong(key: String, value: Long): MineItem {
+        fun setLong(key: String, value: Long): MineNBT.Item {
             itemCompound.setLong(key, value)
             nmsItem.tag = itemCompound
-            return this@Item.build()
+            return this@Item
         }
 
         fun getLong(key: String): Long? {
             return itemCompound.getLong(key).toString().toLongOrNull()
         }
 
-        fun setShort(key: String, value: Short): MineItem {
+        fun setShort(key: String, value: Short): MineNBT.Item {
             itemCompound.setShort(key, value)
             nmsItem.tag = itemCompound
-            return this@Item.build()
+            return this@Item
         }
 
         fun getShort(key: String): Short? {
@@ -142,20 +138,17 @@ object MineNBT {
             return itemCompound.hasKey(key)
         }
 
-        fun removeKey(key: String): MineItem {
+        fun removeKey(key: String): MineNBT.Item {
             itemCompound.remove(key)
             nmsItem.tag = itemCompound
-            return this@Item.build()
+            return this@Item
         }
 
         /**
-         * This is internal only.
-         * 3rd-party plugins should not be able to use this function.
-         *
          * @return the final [MineItem] with all values defined.
          */
-        internal fun build(): MineItem {
-            return MineItem(CraftItemStack.asBukkitCopy(nmsItem))
+        fun toMineItem(): MineItem {
+            return CraftItemStack.asBukkitCopy(nmsItem).toMineItem()
         }
     }
 
@@ -166,88 +159,88 @@ object MineNBT {
         private val nmsEntity: net.minecraft.server.v1_8_R3.Entity = (entity as CraftEntity).handle
         private var entityCompound = if (nmsEntity.nbtTag != null) nmsEntity.nbtTag else NBTTagCompound()
 
-        fun setString(key: String, value: String): org.bukkit.entity.Entity {
+        fun setString(key: String, value: String): MineNBT.Entity {
             nmsEntity.c(entityCompound)
             entityCompound.setString(key, value)
             nmsEntity.f(entityCompound)
-            return this@Entity.build()
+            return this@Entity
         }
 
         fun getString(key: String): String? {
             return entityCompound.getString(key)
         }
 
-        fun setInt(key: String, value: Int): org.bukkit.entity.Entity {
+        fun setInt(key: String, value: Int): MineNBT.Entity {
             nmsEntity.c(entityCompound)
             entityCompound.setInt(key, value)
             nmsEntity.f(entityCompound)
-            return this@Entity.build()
+            return this@Entity
         }
 
         fun getInt(key: String): Int? {
             return entityCompound.getInt(key).toString().toIntOrNull()
         }
 
-        fun setBoolean(key: String, value: Boolean): org.bukkit.entity.Entity {
+        fun setBoolean(key: String, value: Boolean): MineNBT.Entity {
             nmsEntity.c(entityCompound)
             entityCompound.setBoolean(key, value)
             nmsEntity.f(entityCompound)
-            return this@Entity.build()
+            return this@Entity
         }
 
         fun getBoolean(key: String): Boolean {
             return entityCompound.getBoolean(key)
         }
 
-        fun setDouble(key: String, value: Double): org.bukkit.entity.Entity {
+        fun setDouble(key: String, value: Double): MineNBT.Entity {
             nmsEntity.c(entityCompound)
             entityCompound.setDouble(key, value)
             nmsEntity.f(entityCompound)
-            return this@Entity.build()
+            return this@Entity
         }
 
         fun getDouble(key: String): Double? {
             return entityCompound.getDouble(key).toString().toDoubleOrNull()
         }
 
-        fun setFloat(key: String, value: Float): org.bukkit.entity.Entity {
+        fun setFloat(key: String, value: Float): MineNBT.Entity {
             nmsEntity.c(entityCompound)
             entityCompound.setFloat(key, value)
             nmsEntity.f(entityCompound)
-            return this@Entity.build()
+            return this@Entity
         }
 
         fun getFloat(key: String): Float? {
             return entityCompound.getFloat(key).toString().toFloatOrNull()
         }
 
-        fun setLong(key: String, value: Long): org.bukkit.entity.Entity {
+        fun setLong(key: String, value: Long): MineNBT.Entity {
             nmsEntity.c(entityCompound)
             entityCompound.setLong(key, value)
             nmsEntity.f(entityCompound)
-            return this@Entity.build()
+            return this@Entity
         }
 
         fun getLong(key: String): Long? {
             return entityCompound.getLong(key).toString().toLongOrNull()
         }
 
-        fun setShort(key: String, value: Short): org.bukkit.entity.Entity {
+        fun setShort(key: String, value: Short): MineNBT.Entity {
             nmsEntity.c(entityCompound)
             entityCompound.setShort(key, value)
             nmsEntity.f(entityCompound)
-            return this@Entity.build()
+            return this@Entity
         }
 
         fun getShort(key: String): Short? {
             return entityCompound.getShort(key).toString().toShortOrNull()
         }
 
-        fun setByte(key: String, value: Byte): org.bukkit.entity.Entity {
+        fun setByte(key: String, value: Byte): MineNBT.Entity {
             nmsEntity.c(entityCompound)
             entityCompound.setByte(key, value)
             nmsEntity.f(entityCompound)
-            return this@Entity.build()
+            return this@Entity
         }
 
         fun getByte(key: String): Byte? {
@@ -258,20 +251,17 @@ object MineNBT {
             return entityCompound.hasKey(key)
         }
 
-        fun removeKey(key: String): org.bukkit.entity.Entity {
+        fun removeKey(key: String): MineNBT.Entity {
             nmsEntity.c(entityCompound)
             entityCompound.remove(key)
             nmsEntity.f(entityCompound)
-            return this@Entity.build()
+            return this@Entity
         }
 
         /**
-         * This is internal only.
-         * 3rd-party plugins should not be able to use this function.
-         *
          * @return the final [Entity] with all values defined.
          */
-        internal fun build(): org.bukkit.entity.Entity {
+         fun toBukkitEntity(): org.bukkit.entity.Entity {
             nmsEntity.f(entityCompound)
             return nmsEntity.bukkitEntity
         }
