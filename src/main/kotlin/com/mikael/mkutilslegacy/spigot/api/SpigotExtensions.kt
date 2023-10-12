@@ -724,7 +724,7 @@ fun Player.moveTo(targetLoc: Location, xzForce: Double = 4.0, yForce: Double = 1
 /**
  * @author Mikael
  */
-fun Player.moveToMounted(player: Player, targetLoc: Location, particleEffect: Boolean = true) {
+fun Player.moveToMounted(player: Player, targetLoc: Location, yTendency: Double = 100.0, particleEffect: Boolean = true) {
     val startLoc = player.location.toCenterLocation()
     val navigator = startLoc.world.spawn(startLoc.clone().add(0.0, 1.0, 0.0), Horse::class.java)
     navigator.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1))
@@ -736,7 +736,7 @@ fun Player.moveToMounted(player: Player, targetLoc: Location, particleEffect: Bo
     navigator.inventory.saddle = ItemBuilder(Material.SADDLE)
     navigator.passenger = player
 
-    val cloudParticle = Particle(
+    val effectParticle = Particle(
         ParticleType.DRIP_LAVA,
         15,
         0f,
@@ -784,7 +784,7 @@ fun Player.moveToMounted(player: Player, targetLoc: Location, particleEffect: Bo
                 targetLoc.toVector().subtract(currentLocation.toVector()).setY(0).normalize()
             navigator.velocity = horizontalDirection.multiply(2.0).setY(yOffset)
             if (particleEffect) {
-                Mine.getPlayers().forEach { cloudParticle.create(it, player.eyeLocation) }
+                Mine.getPlayers().forEach { effectParticle.create(it, player.eyeLocation) }
             }
         }
     }.runTaskTimer(UtilsMain.instance, 0, 1)
