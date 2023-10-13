@@ -208,13 +208,8 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     }
 
     /**
-     * Opens the menu for a player using the [MenuPage] ID 1.
-     *
-     * @param player the player to open the menu.
-     * @return the [Inventory] builder of the [MenuPage].
-     * @throws IllegalStateException if the menu [autoAlignSkipLines] contains any Int different from 1, 2, 3, 4, 5 and 6.
-     * @throws IllegalStateException if the menu [autoAlignSkipLines] is higher than the menu [lineAmount].
-     */
+     * @see open
+     * */
     fun open(player: Player): Inventory {
         return open(player, 1)
     }
@@ -230,7 +225,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      * @throws IllegalStateException if the menu [autoAlignSkipLines] contains any Int different from 1, 2, 3, 4, 5 and 6.
      * @throws IllegalStateException if the menu [autoAlignSkipLines] is higher than the menu [lineAmount].
      */
-    fun open(player: Player, pageToOpen: Int): Inventory {
+    fun open(player: Player, pageToOpen: Int, updateOnly: Boolean = false): Inventory {
         update(player) // Rebuilds menu
         if (lineAmount !in 1..6) error("Menu lineAmount must be between 1 and 6")
         if (!isAutoAlignItems && pageToOpen != 1) error("Cannot open a non-autoAlignItems menu with a page different than 1")

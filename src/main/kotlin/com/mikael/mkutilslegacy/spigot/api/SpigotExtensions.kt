@@ -13,7 +13,6 @@ import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MineMenu
-import com.mikael.mkutilslegacy.spigot.api.npc.enums.NPCTextBalloonState
 import com.mikael.mkutilslegacy.spigot.api.util.MineNBT
 import com.mikael.mkutilslegacy.spigot.api.util.hooks.Vault
 import com.mikael.mkutilslegacy.spigot.listener.GeneralListener
