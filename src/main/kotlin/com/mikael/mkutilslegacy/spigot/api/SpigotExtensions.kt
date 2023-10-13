@@ -13,6 +13,7 @@ import com.mikael.mkutilslegacy.spigot.api.lib.book.MineBook
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MineMenu
+import com.mikael.mkutilslegacy.spigot.api.npc.enums.NPCTextBalloonState
 import com.mikael.mkutilslegacy.spigot.api.util.MineNBT
 import com.mikael.mkutilslegacy.spigot.api.util.hooks.Vault
 import com.mikael.mkutilslegacy.spigot.listener.GeneralListener
@@ -514,7 +515,8 @@ fun Player.giveArmorSet(
         if (this.inventory.boots != null) {
             droppedArmor.add(this.world.dropItemNaturally(this.eyeLocation, boots))
         } else {
-            this.inventory.boots = boots        }
+            this.inventory.boots = boots
+        }
     }
     return droppedArmor
 }
@@ -724,7 +726,13 @@ fun Player.moveTo(targetLoc: Location, xzForce: Double = 4.0, yForce: Double = 1
 /**
  * @author Mikael
  */
-fun Player.moveToMounted(player: Player, targetLoc: Location, yTendency: Double = 100.0, particleEffect: Boolean = true) {
+fun Player.moveToMounted(
+    player: Player,
+    targetLoc: Location,
+    yTendency: Double = 100.0,
+    particleEffect: Boolean = true,
+    reachTargetCallback: () -> Unit
+) {
     val startLoc = player.location.toCenterLocation()
     val navigator = startLoc.world.spawn(startLoc.clone().add(0.0, 1.0, 0.0), Horse::class.java)
     navigator.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1))
@@ -752,6 +760,9 @@ fun Player.moveToMounted(player: Player, targetLoc: Location, yTendency: Double 
         var hasReachedMiddle = false
         override fun run() {
             if (navigator.isDead || navigator.isOnGround || !player.isOnline || navigator.location.distance(targetLoc) <= 0.5) {
+                player.runBlock {
+                    reachTargetCallback.invoke()
+                }
                 if (!navigator.chunk.isLoaded) {
                     navigator.chunk.load(true)
                 }
@@ -760,7 +771,6 @@ fun Player.moveToMounted(player: Player, targetLoc: Location, yTendency: Double 
                 navigator.eject()
                 navigator.remove()
                 player.isFlying = false
-                // player.teleport(targetLoc)
                 cancel()
                 return
             }
