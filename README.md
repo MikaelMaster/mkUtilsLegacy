@@ -16,7 +16,7 @@ An utils plugin/lib for Minecraft Kotlin developers (For legacy Minecraft versio
 - MineCommand *Supporting an easy creation of subcommands* (Spigot-side)
 - MineListener (Spigot-side)
 - MineItem (Spigot-side)
-- MineMenu *One of more exciting API mkUtils have: Create menus with animated buttos, auto-pages, per-player, auto updates and more* (Spigot-side)
+- MineMenu *One of more exciting API mkUtils have: Create menus with animated buttons, auto-pages, per-player, auto updates and more* (Spigot-side)
 - MineHologram (Spigot-side)
 - MineBook (Spigot-side)
 - MineScoreboard (Spigot-side)
@@ -31,4 +31,4 @@ This is not only a lib, so you'll need to run the plugin shadow jar (mkUtilsLega
 
 This plugin/lib is developed by Mikael (vulgo MikaelMaster, TheSrMK, SrMK) and Vinícius (vulgo Koddy, KoddyDev). This project uses EduardAPI's (https://github.com/EduardMaster/EduardAPI) some utils methods and DB/SQL Manager, credits do Eduard (vulgo EduardMaster).
 
-- by Mikael, 2023/09
+- by Mikael, last update on 2023/17.
