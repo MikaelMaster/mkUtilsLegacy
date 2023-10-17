@@ -45,7 +45,7 @@ object MineScoreboard {
         val lastLines = lastScoreLines[player]
         if (oldScore != null && lastLines != null) {
             val sidebar = oldScore.getObjective(DisplaySlot.SIDEBAR)
-            if (sidebar != null && sidebar.displayName == title.cut(32) && lastLines == lines) {
+            if (sidebar != null && sidebar.displayName == title.cut(32) && lastLines == lines.map { it.cut(32) }) {
                 return oldScore
             }
         }
@@ -74,7 +74,7 @@ object MineScoreboard {
             val finalLine = line.cut(32)
             if (lastLines != null && lastLines.size == lines.size) {
                 val lastLine = lastLines.getOrNull(index)
-                if (lastLine != null && lastLine != line) {
+                if (lastLine != null && lastLine != finalLine) {
                     newScore.resetScores(lastLine)
                 }
             }
