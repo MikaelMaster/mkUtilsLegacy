@@ -27,7 +27,7 @@ An utils plugin/lib for Minecraft Kotlin developers (For legacy Minecraft versio
 - A lot of custom events complementing the BukkitAPI are also available! (Spigot-side, Extra)
 
 To use it to develop, you should download *mkUtilsLegacy-version.jar* and *EduardAPI-1.0-all.jar* and use them as depends in your project.
-This is not only a lib, so you'll need to run the plugin shadow jar (mkUtilsLegacy-version-all.jar) in your server with the others plugins with depends from it.
+This is not only a lib, so you'll need to run the plugin shadow jar (mkUtilsLegacy-version-all.jar) in your server with the others plugins that depends on it.
 
 This plugin/lib is developed by Mikael (vulgo MikaelMaster, TheSrMK, SrMK) and Vinícius (vulgo Koddy, KoddyDev). This project uses EduardAPI's (https://github.com/EduardMaster/EduardAPI) some utils methods and DB/SQL Manager, credits do Eduard (vulgo EduardMaster).
 
