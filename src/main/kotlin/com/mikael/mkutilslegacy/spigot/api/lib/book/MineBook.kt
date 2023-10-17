@@ -196,7 +196,7 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
         for (page in pages) {
             val pageLinesBuilder = StringBuilder()
             page.forEach { pageLine ->
-                pageLinesBuilder.append(pageLine)
+                pageLinesBuilder.append(pageLine.textLine)
                 pageLinesBuilder.append("\n")
             }
             bookMeta.addPage(pageLinesBuilder.toString())
