@@ -134,19 +134,10 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
     }
 
     /**
-     * Important:
-     * - A book can have only a MAXIMUM of 50 pages.
-     * - Each page cannot have more than 256 characters.
-     *
-     * @param pages the new pages to set on this book. Each page can have multiple [String] lines.
-     * @return this [MineBook].
-     * @throws IllegalStateException if the [pages] size is larger than 50.
-     * @throws IllegalStateException if any page's sum of all characters is greater than 256.
-     * @see [BookMeta.addPage]
-     * @see pages
+     * @see setPages
      */
+    @Deprecated("Use 'setPages()' with BookClickableLine.")
     fun setPages(vararg pages: List<String>): MineBook {
-
         // Verifications
         if (pages.size > 50) error("A book cannot have more than 50 pages")
         pages.forEach { page ->
@@ -187,9 +178,7 @@ open class MineBook(baseItem: MineItem) : MineItem(baseItem) {
      * @see pages
      */
     @JvmName("setPages1")
-    @Deprecated("Not done yet.")
     fun setPages(vararg pages: List<BookClickableLine>): MineBook {
-
         // Verifications
         if (pages.size > 50) error("A book cannot have more than 50 pages")
         pages.forEach { page ->
