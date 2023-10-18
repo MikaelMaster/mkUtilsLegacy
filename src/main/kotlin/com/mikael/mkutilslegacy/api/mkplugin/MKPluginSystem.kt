@@ -20,10 +20,25 @@ object MKPluginSystem {
         return loadedMKPlugins
     }
 
+    /**
+     * Registers the given [plugin] into [loadedMKPlugins].
+     * So mkUtilsLegacy can property manage the [MKPlugin] systems.
+     *
+     * Should be used on the end of the [plugin] onEnable.
+     *
+     * @param plugin the [MKPlugin] to register.
+     */
     fun registerMKPlugin(plugin: MKPlugin) {
         loadedMKPlugins.add(plugin)
     }
 
+    /**
+     * Unregisters the given [plugin].
+     *
+     * Should be used on the end of the [plugin] onDisable.
+     *
+     * @param plugin the [MKPlugin] to register.
+     */
     fun unregisterMKPlugin(plugin: MKPlugin) {
         loadedMKPlugins.remove(plugin)
     }

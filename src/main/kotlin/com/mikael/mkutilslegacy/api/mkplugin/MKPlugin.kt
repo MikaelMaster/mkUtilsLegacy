@@ -8,11 +8,13 @@ import net.eduard.api.lib.plugin.IPluginInstance
 import java.util.*
 
 /**
- * Represents an MK Plugin. Extends an [IPluginInstance].
+ * Represents an MK Plugin.
+ * Extends an [IPluginInstance] from EduardAPI to expand compability.
  *
  * @author Mikael
+ * @see IPluginInstance
+ * @see MKPluginSystem
  */
-
 interface MKPlugin: IPluginInstance {
 
     /**
@@ -41,14 +43,18 @@ interface MKPlugin: IPluginInstance {
      * Example for Spigot:
      * ```
      *  override fun log(vararg msg: String) {
-     *      Bukkit.getConsoleSender().sendMessage(msg)
+     *      msg.forEach {
+     *             Bukkit.getConsoleSender().sendMessage("§b[${systemName}] §f${it}")
+     *         }
      *  }
      *```
      *
      * Example for Bungee:
      * ```
      *  override fun log(vararg msg: String) {
-     *      ProxyServer.getInstance().console.sendMessage(*msg.map { it.toTextComponent() }.toTypedArray())
+     *      msg.forEach {
+     *             ProxyServer.getInstance().console.sendMessage("§b[${systemName}] §f${it}".toTextComponent())
+     *         }
      *  }
      *  ```
      *
