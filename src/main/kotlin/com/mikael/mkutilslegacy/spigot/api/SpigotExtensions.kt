@@ -725,11 +725,9 @@ fun Player.moveTo(targetLoc: Location, xzForce: Double = 4.0, yForce: Double = 1
 /**
  * @author Mikael
  */
-/*
 fun Player.moveToMounted(
     targetLoc: Location,
-    yTendency: Double = 100.0,
-    particleEffect: Boolean = true,
+    yForce: Double = 100.0,
     reachTargetCallback: () -> Unit
 ) {
     val player = this
@@ -744,18 +742,10 @@ fun Player.moveToMounted(
     navigator.inventory.saddle = ItemBuilder(Material.SADDLE)
     navigator.passenger = player
 
-    val effectParticle = Particle(
-        ParticleType.DRIP_LAVA,
-        15,
-        0f,
-        0.5f,
-        0.5f,
-        0.5f,
-    )
     object : BukkitRunnable() {
         val startY = startLoc.y
         val endY = targetLoc.y
-        val midY = (max(startY, endY) + yTendency)
+        val midY = (max(startY, endY) + yForce)
         val totalDistance = startLoc.distance(targetLoc)
         var hasReachedMiddle = false
         override fun run() {
@@ -793,72 +783,6 @@ fun Player.moveToMounted(
             val horizontalDirection =
                 targetLoc.toVector().subtract(currentLocation.toVector()).setY(0).normalize()
             navigator.velocity = horizontalDirection.multiply(2.0).setY(yOffset)
-            if (particleEffect) {
-                Mine.getPlayers().forEach { effectParticle.create(it, player.eyeLocation) }
-            }
-        }
-    }.runTaskTimer(UtilsMain.instance, 0, 1)
-}
- */
-
-/**
- * @author Mikael
- */
-fun Player.moveToMounted(
-    targetLoc: Location,
-    yForce: Double = 10.0,
-    reachTargetCallback: () -> Unit
-) {
-    val player = this
-    val startLoc = player.location.toCenterLocation()
-    val navigator = startLoc.world.spawn(startLoc.clone().add(0.0, 1.0, 0.0), Horse::class.java)
-    navigator.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1))
-    navigator.setInvincible(true)
-    navigator.owner = player
-    navigator.isTamed = true
-    navigator.setAdult()
-    navigator.variant = Horse.Variant.HORSE
-    navigator.inventory.saddle = ItemBuilder(Material.SADDLE)
-    navigator.passenger = player
-
-    val totalDistance = startLoc.distance(targetLoc)
-    object : BukkitRunnable() {
-        var hasReachedMiddle = false
-        override fun run() {
-            val curretLoc = navigator.location
-            if (navigator.isDead || navigator.isOnGround || !player.isOnline || curretLoc.distance(targetLoc) <= 0.5) {
-                player.runBlock {
-                    reachTargetCallback.invoke()
-                }
-                if (!navigator.chunk.isLoaded) {
-                    navigator.chunk.load(true)
-                }
-                navigator.fallDistance = 0f
-                player.fallDistance = 0f
-                navigator.eject()
-                navigator.remove()
-                player.isFlying = false
-                cancel()
-                return
-            }
-            navigator.fallDistance = 0f
-            player.fallDistance = 0f
-            navigator.passenger = player
-
-            val horizontalDirection = targetLoc.toVector().subtract(curretLoc.toVector()).setY(0).normalize()
-            val d = totalDistance
-            val h = yForce
-
-            val a = -(4 * h) / (d * d)
-            val b = 4 * h
-
-            val x = 2.0
-
-            val yS = "-7/"
-
-            val y = a * h * h + b * d * x
-            Mine.broadcast(y.toString())
-            navigator.velocity = horizontalDirection.multiply(2.0).setY(y)
         }
     }.runTaskTimer(UtilsMain.instance, 0, 1)
 }
@@ -966,12 +890,8 @@ fun Location.isInside(loc1: Location, loc2: Location): Boolean {
 /**
  * Get all blocks inside the given chunk.
  *
- * Use with moderation.
- * May lag the server with many usages at the same time.
- *
  * @return all the chunk [Block]s.
- * @see Chunk
- * @see Block
+
  */
 val Chunk.blocks: List<Block>
     get() {
@@ -980,6 +900,32 @@ val Chunk.blocks: List<Block>
             for (y in 0..255) {
                 for (z in 0..15) {
                     blocks.add(this.getBlock(x, y, z))
+                }
+            }
+        }
+        return blocks
+    }
+
+/**
+ * Get all blocks with ([Material] != [Material.AIR]) inside the given chunk.
+ *
+ * @return all the chunk non-air [Block]s.
+ */
+val Chunk.nonAirblocks: List<Block>
+    get() {
+        var yMax = 0
+        for (i in 0..255) {
+            if (!this.chunkSnapshot.isSectionEmpty(i)) continue
+            yMax = i
+            break
+        }
+        val blocks = mutableListOf<Block>()
+        for (x in 0..15) {
+            for (y in 0..yMax) {
+                for (z in 0..15) {
+                    val blockAt = this.getBlock(x, y, z)
+                    if (blockAt.type == Material.AIR) continue
+                    blocks.add(blockAt)
                 }
             }
         }
@@ -1015,23 +961,19 @@ fun Location.spawnParticle(particle: Particle, players: List<Player> = Mine.getP
 }
 
 /**
- * Changes the state of the block at the given [loc].
- *
+ * Changes the chest state of the block at the given [loc].
  * At the given [loc] should be a [Chest]. Otherwise, an error will be thrown.
  *
  * @param loc the block location to be changed.
- * @param open if the block (as [Chest]) will be open or close. (True to open, False to close)
+ * @param open if the block (as [Chest]) will be open or close (*True* to open, *False* to close).
  * @see Chest.open
  * @see Chest.close
  */
-@Deprecated("You should now use 'Chest.open()' or 'Chest.close()'.")
-fun changeChestState(loc: Location, open: Boolean) {
+private fun changeChestState(loc: Location, open: Boolean) {
     val block = loc.block as CraftBlock
     (loc.world as CraftWorld).handle.playBlockAction(
         BlockPosition(block.x, block.y, block.z),
-        CraftMagicNumbers.getBlock(block),
-        1,
-        if (open) 1 else 0
+        CraftMagicNumbers.getBlock(block), 1, if (open) 1 else 0
     )
 }
 
@@ -1039,10 +981,7 @@ fun changeChestState(loc: Location, open: Boolean) {
  * Opens the lid of the given [Chest].
  *
  * IMPORTANT: New players will always see the chest as closed.
- *
- * @see changeChestState
  */
-@Suppress("DEPRECATION")
 fun Chest.open() {
     changeChestState(this.location, true)
 }
@@ -1051,10 +990,7 @@ fun Chest.open() {
  * Closes the lid of the given [Chest].
  *
  * IMPORTANT: New players will always see the chest as closed.
- *
- * @see changeChestState
  */
-@Suppress("DEPRECATION")
 fun Chest.close() {
     changeChestState(this.location, false)
 }
@@ -1068,7 +1004,7 @@ fun Chest.close() {
  * @throws IllegalStateException if given [damage] is not between -1 and 9.
  */
 fun Block.setDamage(damage: Int) {
-    if (damage !in -1..9) error("Damage is not between -1 and 9; Given damage: ${damage}.")
+    if (damage !in -1..9) error("Damage is not between -1 and 9. Given damage: ${damage}.")
     this.world.players.forEach { player ->
         player.mineSendPacket(PacketPlayOutBlockBreakAnimation(0, BlockPosition(this.x, this.y, this.z), damage))
     }

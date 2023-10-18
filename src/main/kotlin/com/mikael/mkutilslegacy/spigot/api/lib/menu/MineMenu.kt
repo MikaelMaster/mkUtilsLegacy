@@ -175,7 +175,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     }
 
     /**
-     * Internal; Private.
+     * Private.
      */
     private fun invokePageNextAndBackButtons(page: MenuPage) {
         if (page.hasBackPage) {
@@ -219,6 +219,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      *
      * @param player the player to open the menu.
      * @param pageToOpen the [MenuPage] ID to open to the given [player].
+     * @param updateOnly set to *True* to just 'rebuilds' the menu if it's already open. If this menu is not open to the [player] and this is set to True, nothing will happen.
      * @return the [Inventory] builder of the [MenuPage].
      * @throws IllegalStateException if the [lineAmount] is not between 1 and 6.
      * @throws IllegalStateException if the menu [isAutoAlignItems] is false, and the [pageToOpen] is not 1.
