@@ -725,13 +725,14 @@ fun Player.moveTo(targetLoc: Location, xzForce: Double = 4.0, yForce: Double = 1
 /**
  * @author Mikael
  */
+/*
 fun Player.moveToMounted(
-    player: Player,
     targetLoc: Location,
     yTendency: Double = 100.0,
     particleEffect: Boolean = true,
     reachTargetCallback: () -> Unit
 ) {
+    val player = this
     val startLoc = player.location.toCenterLocation()
     val navigator = startLoc.world.spawn(startLoc.clone().add(0.0, 1.0, 0.0), Horse::class.java)
     navigator.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1))
@@ -798,6 +799,69 @@ fun Player.moveToMounted(
         }
     }.runTaskTimer(UtilsMain.instance, 0, 1)
 }
+ */
+
+/**
+ * @author Mikael
+ */
+fun Player.moveToMounted(
+    targetLoc: Location,
+    yForce: Double = 10.0,
+    reachTargetCallback: () -> Unit
+) {
+    val player = this
+    val startLoc = player.location.toCenterLocation()
+    val navigator = startLoc.world.spawn(startLoc.clone().add(0.0, 1.0, 0.0), Horse::class.java)
+    navigator.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1))
+    navigator.setInvincible(true)
+    navigator.owner = player
+    navigator.isTamed = true
+    navigator.setAdult()
+    navigator.variant = Horse.Variant.HORSE
+    navigator.inventory.saddle = ItemBuilder(Material.SADDLE)
+    navigator.passenger = player
+
+    val totalDistance = startLoc.distance(targetLoc)
+    object : BukkitRunnable() {
+        var hasReachedMiddle = false
+        override fun run() {
+            val curretLoc = navigator.location
+            if (navigator.isDead || navigator.isOnGround || !player.isOnline || curretLoc.distance(targetLoc) <= 0.5) {
+                player.runBlock {
+                    reachTargetCallback.invoke()
+                }
+                if (!navigator.chunk.isLoaded) {
+                    navigator.chunk.load(true)
+                }
+                navigator.fallDistance = 0f
+                player.fallDistance = 0f
+                navigator.eject()
+                navigator.remove()
+                player.isFlying = false
+                cancel()
+                return
+            }
+            navigator.fallDistance = 0f
+            player.fallDistance = 0f
+            navigator.passenger = player
+
+            val horizontalDirection = targetLoc.toVector().subtract(curretLoc.toVector()).setY(0).normalize()
+            val d = totalDistance
+            val h = yForce
+
+            val a = -(4 * h) / (d * d)
+            val b = 4 * h
+
+            val x = 2.0
+
+            val yS = "-7/"
+
+            val y = a * h * h + b * d * x
+            Mine.broadcast(y.toString())
+            navigator.velocity = horizontalDirection.multiply(2.0).setY(y)
+        }
+    }.runTaskTimer(UtilsMain.instance, 0, 1)
+}
 
 /**
  * Sends a [title] and a [subtitle] to the given [Player].
@@ -813,7 +877,7 @@ fun Player.title(title: String?, subtitle: String?, fadeIn: Int = 10, stay: Int 
  *
  * @see Player.sendMessages
  */
-@Deprecated("You should no use 'Player.sendMessages(...)' instead.")
+@Deprecated("You should now use 'Player.sendMessages(...)' instead.")
 fun Player.sendMessage(vararg messages: String) {
     this.sendMessages(*messages)
 }
