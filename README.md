@@ -31,4 +31,4 @@ This is not only a lib, so you'll need to run the plugin shadow jar (mkUtilsLega
 
 This plugin/lib is developed by Mikael (vulgo MikaelMaster, TheSrMK, SrMK) and Vinícius (vulgo Koddy, KoddyDev). This project uses EduardAPI's (https://github.com/EduardMaster/EduardAPI) some utils methods and DB/SQL Manager, credits do Eduard (vulgo EduardMaster).
 
-- by Mikael, last update on 2023/17.
+- by Mikael, last update on 2023/10.
