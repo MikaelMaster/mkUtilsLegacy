@@ -14,6 +14,12 @@ import org.bukkit.inventory.Inventory
  */
 object MenuSystem {
 
+    // Translations - Start
+    var BACK_PAGE_BUTTON_DEFAULT_NAME = "§aPage %page%"
+    var NEXT_PAGE_BUTTON_DEFAULT_NAME = "§aPage %page%"
+    var ASYNC_BUTTON_LOADING_NAME = "§8Loading..."
+    // Translations - End
+
     /**
      * All registered [MineMenu]s.
      *

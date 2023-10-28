@@ -333,11 +333,11 @@ val MKPlugin.serverPort: Int
     }
 
 /**
- * @return A new Lis([String]) with all given elements replaced.
+ * @return A new Collection([String]) with all given elements replaced.
  * @author Mikael
  * @see String.replace
  */
-fun List<String>.replaceAll(oldValue: String, newValue: String, ignoreCase: Boolean = false): List<String> {
+fun Collection<String>.replaceAll(oldValue: String, newValue: String, ignoreCase: Boolean = false): Collection<String> {
     return this.map { it.replace(oldValue, newValue, ignoreCase) }
 }
 
@@ -369,7 +369,7 @@ fun String.mineColored(justColors: Boolean = true): String {
  * @author Mikael
  * @see String.mineColored
  */
-fun List<String>.mineColored(justColors: Boolean = true): List<String> {
+fun Collection<String>.mineColored(justColors: Boolean = true): Collection<String> {
     return this.map { it.mineColored(justColors) }
 }
 

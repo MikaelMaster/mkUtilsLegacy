@@ -10,7 +10,7 @@ import org.bukkit.scheduler.BukkitTask
 /**
  * Represents a [MenuPage] button.
  *
- * @param name the name/id of this button.
+ * @param name the name ("id") of this button.
  * @author Mikael
  * @see MineMenu
  * @see MenuPage
@@ -19,12 +19,11 @@ import org.bukkit.scheduler.BukkitTask
 open class MenuButton(var name: String) {
 
     /**
-     * Invokes a new [MenuButton] using 'null-name-button' as the param *name*.
+     * Invokes a new [MenuButton] using 'null-name-button' as the param [name].
      */
     constructor() : this("null-name-button")
 
     // Button Properties - Start
-
     internal var positionX = 1
     internal var positionY = 1
     internal var fixed = false
@@ -35,7 +34,6 @@ open class MenuButton(var name: String) {
     var frames = mutableListOf<ItemStack>() // Animated Button property
 
     internal var inventory: Inventory? = null
-    internal var menuId = 0
     internal var autoEffectiveSlot: Int? = null
     internal val effectiveSlot: Int
         get() {
@@ -46,23 +44,7 @@ open class MenuButton(var name: String) {
 
     var icon: ItemStack? = frames.firstOrNull() ?: MineItem(Material.BARRIER) // Default icon = Barrier; This can NOT be set to null (AIR)
     var click: ((InventoryClickEvent) -> Unit) = click@{ /* it = InventoryClickEvent */ } // Default click = do nothing
-
     // Button Properties - End
-
-    /**
-     * Changes the position of this button.
-     *
-     * Deprecated in favor of new buttons' builder ([MineMenu.button]) setter property.
-     * So, the [x] and [y] position is now set inside of button{ ... } builder.
-     *
-     * @param x the new [positionX] of this button.
-     * @param y the new [positionY] of this button.
-     */
-    @Deprecated("Deprecated since mkUtilsLegacy v1.2; Use the 'button { ... }' builder setter property instead.")
-    open fun setPosition(x: Int, y: Int) {
-        positionX = x
-        positionY = y
-    }
 
     /**
      * @return the button [positionX].
@@ -100,13 +82,6 @@ open class MenuButton(var name: String) {
      */
     fun getInventory(): Inventory? {
         return inventory
-    }
-
-    /**
-     * @return the ID of the menu 'owner' of this button. ([menuId])
-     */
-    fun getMenuId(): Int {
-        return menuId
     }
 
     /**
