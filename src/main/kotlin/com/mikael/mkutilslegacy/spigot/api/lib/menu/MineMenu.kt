@@ -416,7 +416,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      * @param y the new [Int] to be set as [backPageButtonPosY]. Default: 1.
      * @throws IllegalStateException If [isAutoAlignItems] of this [MineMenu] is false.
      */
-    fun setupBackButton(item: MineItem, x: Int = 1, y: Int = 1) {
+    fun setupBackButton(item: MineItem = backPageButtonItem, x: Int = 1, y: Int = 1) {
         backPageButtonItem = item.clone()
         backPageButtonPosX = x
         backPageButtonPosY = y
@@ -435,7 +435,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      * @param y the new [Int] to be set as [nextPageButtonPosY]. Default: 1.
      * @throws IllegalStateException If [isAutoAlignItems] of this [MineMenu] is false.
      */
-    fun setupNextButton(item: MineItem, x: Int = 9, y: Int = 1) {
+    fun setupNextButton(item: MineItem = nextPageButtonItem, x: Int = 9, y: Int = 1) {
         nextPageButtonItem = item.clone()
         nextPageButtonPosX = x
         nextPageButtonPosY = y
