@@ -7,6 +7,8 @@ import com.mikael.mkutilslegacy.spigot.api.*
 import com.mikael.mkutilslegacy.spigot.api.event.menu.MineMenuOpenEvent
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import com.mikael.mkutilslegacy.spigot.api.lib.MineListener
+import com.mikael.mkutilslegacy.spigot.api.lib.menu.button.MenuAnimatedButton
+import com.mikael.mkutilslegacy.spigot.api.lib.menu.button.MenuButton
 import net.eduard.api.lib.kotlin.mineCallEvent
 import net.eduard.api.lib.modules.BukkitTimeHandler
 import org.bukkit.Bukkit
@@ -19,12 +21,9 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 
 /**
- * [MineMenu] util class
+ * Represents a mkUtils 'menu' created using Bukkit Inventories.
  *
  * This class extends a [MineListener].
- *
- * You can learn how to use it on [com.mikael.mkutilslegacy.spigot.api.lib.menu.example].
- * There, you'll find examples about how to create all different types of menu available.
  *
  * To create a new MineMenu, extends it in a Class. As the example below:
  * - class TestMenu : MineMenu(title: [String], lineAmount: [Int]) { *class code* }
@@ -32,13 +31,14 @@ import org.bukkit.inventory.Inventory
  * @author Mikael
  * @see MineListener
  * @see MenuButton
+ * @see AnimatedMenuButton
  * @see MenuPage
  * @see MenuSystem
  */
+@Suppress("WARNINGS")
 open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
 
     // Menu Properties - Start
-
     var isAutoUpdate = true // Auto update this menu
     var canReceiveItems = false // If this menu will be able to 'receive' items
 
@@ -64,7 +64,6 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     private var nextPageButtonPosX = 9
     private var nextPageButtonPosY = 1
     // Back and Next Page buttons options - End
-
     // Menu Properties - End
 
     val buttonsToRegister = mutableSetOf<MenuButton>()
@@ -249,7 +248,6 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     if ((lastSlot + 1) < 9 * lineAmount) {
                         lastSlot++
                     }
-                    // button.menuId = buttonId
                     val idToVerify = buttonId - 1
                     if (autoAlignIgnoreColumns && idToVerify != 0 &&
                         idToVerify != 1 &&
@@ -303,7 +301,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 }
 
                 for (button in menuPage.buttons) {
-                    if (button.isAnimated) {
+                    if (button is MenuAnimatedButton) {
                         var lastId = 0
                         button.runAnimationTask = UtilsMain.instance.syncTimer(0, button.changeFrameDelay) {
                             button.inventory?.let { buttonInv ->
@@ -360,7 +358,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 button.inventory = singlePage.inventory!! // pageInventory
                 if (button.icon != null) {
                     pageInv.setItem(button.effectiveSlot, button.icon)
-                    if (button.isAnimated) {
+                    if (button is MenuAnimatedButton) {
                         var lastId = 0
                         button.runAnimationTask = UtilsMain.instance.syncTimer(0, button.changeFrameDelay) {
                             button.inventory?.let { buttonInv ->
@@ -474,7 +472,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     }
 
     /**
-     * Creates a new animated [MenuButton] inside the menu.
+     * Creates a new [MenuAnimatedButton] inside the menu.
      *
      * IMPORTANT: if the param [x] and [y] is not set, the button will automatically
      * be an auto-align button. Otherwise, the button will follow the given [x] and [y]
@@ -484,8 +482,8 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
      * @param x the icon X position. Default: null. (If null the button will be auto align)
      * @param y the icon Y position. Default: null. (If null the button will be auto align)
      * @param changeFrameDelay the time to change between icons (frames). Defined in ticks (20 = 1s).
-     * @param setup the [MenuButton] builder.
-     * @return the built [MenuButton].
+     * @param setup the [MenuAnimatedButton] builder.
+     * @return the built [MenuAnimatedButton].
      * @throws IllegalStateException if [changeFrameDelay] is less than 1.
      */
     fun animatedButton(
@@ -494,21 +492,20 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         y: Int? = null,
         changeFrameDelay: Long = 20,
         setup: (MenuButton.() -> Unit)
-    ): MenuButton {
-        if (changeFrameDelay < 1) error("MenuButton property 'changeFrameDelay' cannot be less than 1.")
-        val newButton = if (buttonName != null) MenuButton(buttonName) else MenuButton()
-        newButton.setup()
+    ): MenuAnimatedButton {
+        if (changeFrameDelay < 1) error("MenuAnimatedButton property 'changeFrameDelay' cannot be less than 1.")
+        val newAnimatedButton = if (buttonName != null) MenuAnimatedButton(buttonName) else MenuAnimatedButton()
+        newAnimatedButton.setup()
         if (x != null && y != null) {
-            newButton.fixed = true
-            newButton.positionX = x
-            newButton.positionY = y
+            newAnimatedButton.fixed = true
+            newAnimatedButton.positionX = x
+            newAnimatedButton.positionY = y
         } else {
-            newButton.fixed = false
+            newAnimatedButton.fixed = false
         }
-        newButton.changeFrameDelay = changeFrameDelay
-        newButton.isAnimated = true
-        buttonsToRegister.add(newButton)
-        return newButton
+        newAnimatedButton.changeFrameDelay = changeFrameDelay
+        buttonsToRegister.add(newAnimatedButton)
+        return newAnimatedButton
     }
 
     /**
@@ -589,9 +586,9 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onInvClick(e: InventoryClickEvent) {
-        if (e.clickedInventory == null) return
         val player = e.player
         player.runBlock {
+            if (e.clickedInventory == null) return@runBlock
             if (player.openedMineMenu != this) return@runBlock
             val playerPages = pages[player] ?: return@runBlock
             if (this.canReceiveItems && !e.isShiftClick && e.rawSlot > this.lineAmount * 9 - 1) return@runBlock

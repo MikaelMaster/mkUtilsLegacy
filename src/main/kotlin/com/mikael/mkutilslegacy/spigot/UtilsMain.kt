@@ -11,8 +11,6 @@ import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
 import com.mikael.mkutilslegacy.spigot.api.lib.hologram.listener.MineHologramListener
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
-import com.mikael.mkutilslegacy.spigot.api.lib.menu.example.ExampleMenuCommand
-import com.mikael.mkutilslegacy.spigot.api.lib.menu.example.SinglePageExampleMenu
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPCAPI
 import com.mikael.mkutilslegacy.spigot.api.npc.listener.NPCSystemListener
 import com.mikael.mkutilslegacy.spigot.api.storable.LocationStorable
@@ -118,11 +116,12 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         BungeeAPI.bukkit.register(this) // EduardAPI
 
         log(LangSystem.getText(Translation.LOADING_SYSTEMS))
-        prepareDebugs(); prepareMySQL(); prepareRedis(); prepareCommandMap()
+        prepareMySQL()
+        prepareRedis()
+        prepareCommandMap()
 
         // Commands
         VersionCommand().registerCommand(this)
-        // TestWorldEditAPICommand().registerCommand(this) // Dev
 
         // Listeners
         GeneralListener().registerListener(this)
@@ -260,13 +259,6 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         }
     }
 
-    private fun prepareDebugs() {
-        if (config.getBoolean("MenuAPI.debugMode")) {
-            SinglePageExampleMenu().registerMenu(this)
-            ExampleMenuCommand().registerCommand(this)
-        }
-    }
-
     private fun prepareBasics() {
         // mkUtils Menu System - Debug Mode
         Menu.isDebug = false // EduardAPI legacy Menu System - Debug Mode
@@ -349,12 +341,6 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
             60L,
             "Time to update players opened mkUtils MenuAPI menus.",
             "Values less than 20 may cause lag. 20 ticks = 1s."
-        )
-        config.add(
-            "MenuAPI.debugMode",
-            false,
-            "If true, example/test menus and test menus commands will be registered.",
-            "Also, some mkUtils MenuAPI actions will be logged to console."
         )
         config.add(
             "CustomKick.isEnabled",

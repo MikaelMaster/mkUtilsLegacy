@@ -1,5 +1,7 @@
 package com.mikael.mkutilslegacy.spigot.api.lib.menu
 
+import com.mikael.mkutilslegacy.spigot.api.lib.menu.button.MenuAnimatedButton
+import com.mikael.mkutilslegacy.spigot.api.lib.menu.button.MenuButton
 import com.mikael.mkutilslegacy.spigot.api.openedMineMenu
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
@@ -11,7 +13,9 @@ import org.bukkit.inventory.Inventory
  * @see MineMenu
  * @see MenuPage
  * @see MenuButton
+ * @see MenuAnimatedButton
  */
+@Suppress("WARNINGS")
 object MenuSystem {
 
     // Translations - Start
@@ -74,8 +78,8 @@ object MenuSystem {
     // mkUtils onDisable
     internal fun onDisable() {
         registeredMenus.forEach { menu ->
-            menu.buttons.values.forEach {
-                it.forEach { button ->
+            menu.buttons.values.forEach { buttons ->
+                buttons.filterIsInstance<MenuAnimatedButton>().forEach { button ->
                     button.runAnimationTask?.cancel()
                     button.runAnimationTask = null
                 }

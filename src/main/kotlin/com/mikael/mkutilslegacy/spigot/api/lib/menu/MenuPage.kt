@@ -1,5 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.api.lib.menu
 
+import com.mikael.mkutilslegacy.spigot.api.lib.menu.button.MenuButton
 import org.bukkit.inventory.Inventory
 
 /**
@@ -8,6 +9,7 @@ import org.bukkit.inventory.Inventory
  * @author Mikael
  * @see MineMenu
  */
+@Suppress("WARNINGS")
 open class MenuPage {
 
     /**

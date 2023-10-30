@@ -1,11 +1,10 @@
-package com.mikael.mkutilslegacy.spigot.api.lib.menu
+package com.mikael.mkutilslegacy.spigot.api.lib.menu.button
 
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.scheduler.BukkitTask
 
 /**
  * Represents a [MenuPage] button.
@@ -28,11 +27,6 @@ open class MenuButton(var name: String) {
     internal var positionY = 1
     internal var fixed = false
 
-    internal var isAnimated = false // Animated Button property
-    internal var changeFrameDelay = 20L // Animated Button property
-    internal var runAnimationTask: BukkitTask? = null // Animated Button property
-    var frames = mutableListOf<ItemStack>() // Animated Button property
-
     internal var inventory: Inventory? = null
     internal var autoEffectiveSlot: Int? = null
     internal val effectiveSlot: Int
@@ -42,8 +36,8 @@ open class MenuButton(var name: String) {
             return y * 9 + positionX - 1
         }
 
-    var icon: ItemStack? = frames.firstOrNull() ?: MineItem(Material.BARRIER) // Default icon = Barrier; This can NOT be set to null (AIR)
-    var click: ((InventoryClickEvent) -> Unit) = click@{ /* it = InventoryClickEvent */ } // Default click = do nothing
+    var icon: ItemStack? = MineItem(Material.BARRIER) // Default icon = Barrier; This can NOT be set to null (AIR)
+    var click: ((InventoryClickEvent) -> Unit) = click@{ /* it = InventoryClickEvent */ } // Default click = Do nothing
     // Button Properties - End
 
     /**
@@ -70,11 +64,11 @@ open class MenuButton(var name: String) {
     }
 
     /**
-     * @return True if this button is animated. Otherwise, false. ([isAnimated])
-     * @see MineMenu.animatedButton
+     * @return True if this button is animated. Otherwise, false.
+     * @see MenuAnimatedButton
      */
     fun isAnimated(): Boolean {
-        return isAnimated
+        return this is MenuAnimatedButton
     }
 
     /**
@@ -99,4 +93,5 @@ open class MenuButton(var name: String) {
     fun getEffectiveSlot(): Int {
         return effectiveSlot
     }
+
 }
