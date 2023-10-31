@@ -491,7 +491,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         x: Int? = null,
         y: Int? = null,
         changeFrameDelay: Long = 20,
-        setup: (MenuButton.() -> Unit)
+        setup: (MenuAnimatedButton.() -> Unit)
     ): MenuAnimatedButton {
         if (changeFrameDelay < 1) error("MenuAnimatedButton property 'changeFrameDelay' cannot be less than 1.")
         val newAnimatedButton = if (buttonName != null) MenuAnimatedButton(buttonName) else MenuAnimatedButton()
