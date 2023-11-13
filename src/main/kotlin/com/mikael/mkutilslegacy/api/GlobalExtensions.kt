@@ -216,17 +216,16 @@ fun Number.formatValue(): String {
     return NumberFormat.getNumberInstance(mkPlugin.regionFormatter).format(this)
 }
 
-
 private val values = intArrayOf(1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1)
 private val numerals = arrayOf("M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I")
 /**
  * @return a [String] with the given [Int] as a Roman number.
- * @throws IllegalArgumentException if the given [Int] is not between 1 and 3999.
  * @author Mikael
  */
 fun Int.formatRoman(): String {
     if (this <= 0 || this >= 4000) {
-        throw IllegalArgumentException("The number should be an Int between 1 and 3999.")
+        // throw IllegalArgumentException("The number should be an Int between 1 and 3999.")
+        return this.toString()
     }
     var result = ""
     var num = this
