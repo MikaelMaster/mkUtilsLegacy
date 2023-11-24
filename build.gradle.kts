@@ -1,6 +1,6 @@
 plugins {
     java
-    kotlin("jvm") version "1.9.20"
+    kotlin("jvm") version "1.9.21"
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
