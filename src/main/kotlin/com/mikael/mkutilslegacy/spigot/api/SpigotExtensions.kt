@@ -1037,6 +1037,11 @@ val JSONObject.asSimpleLocation: SimpleLocation
     }
 
 /**
+ * @return a new [SimpleLocation] created using the [x], [y] and [z] of given [Location].
+ */
+val Location.asSimpleLocation get() = SimpleLocation(this.x, this.y, this.z)
+
+/**
  * This will render the given [Image] into a [MapView] and return it.
  *
  * For better results, the image should have 128x128 pixels.
