@@ -14,6 +14,7 @@ import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuPage
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MineMenu
 import com.mikael.mkutilslegacy.spigot.api.util.MineNBT
+import com.mikael.mkutilslegacy.spigot.api.util.SimpleLocation
 import com.mikael.mkutilslegacy.spigot.api.util.hooks.Vault
 import com.mikael.mkutilslegacy.spigot.listener.GeneralListener
 import net.eduard.api.lib.game.ItemBuilder
@@ -1011,34 +1012,28 @@ fun Block.setDamage(damage: Int) {
 }
 
 /**
- * @return a [JSONObject] with the given [Location] data.
+ * @return a [JSONObject] with the given [SimpleLocation] x, y and z.
  * @see JSONObject.asLocation
  */
-fun Location.toJSONObject(): JSONObject {
-    return JSONObject()
-        .put("world", this.world.name)
-        .put("locX", this.x)
-        .put("locY", this.y)
-        .put("locZ", this.z)
-        .put("locPith", this.pitch)
-        .put("locYaw", this.yaw)
-}
+val SimpleLocation.asJSONObject: JSONObject
+    get() {
+        return JSONObject().apply {
+            put("x", this@asJSONObject.x)
+            put("y", this@asJSONObject.y)
+            put("z", this@asJSONObject.z)
+        }
+    }
 
 /**
- * @return a [Location] created using the given [JSONObject].
- * @throws NullPointerException if the given [Location] world is not loaded.
- * @see Location.toJSONObject
+ * @return a [SimpleLocation] created using the given [JSONObject].
+ * @see SimpleLocation.asJSONObject
  */
-val JSONObject.asLocation: Location
+val JSONObject.asSimpleLocation: SimpleLocation
     get() {
-        val world =
-            Bukkit.getWorld(this.getString("world")) ?: throw NullPointerException("Location world is not loaded.")
-        val x = this.getDouble("locX")
-        val y = this.getDouble("locY")
-        val z = this.getDouble("locZ")
-        val pitch = this.getFloat("locPitch")
-        val yaw = this.getFloat("locYaw")
-        return Location(world, x, y, z, yaw, pitch)
+        val x = this.getDouble("x")
+        val y = this.getDouble("y")
+        val z = this.getDouble("z")
+        return SimpleLocation(x, y, z)
     }
 
 /**
