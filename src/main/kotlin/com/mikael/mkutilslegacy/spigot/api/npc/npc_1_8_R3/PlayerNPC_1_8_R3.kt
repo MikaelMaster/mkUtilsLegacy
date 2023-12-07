@@ -1,4 +1,4 @@
-@file:Suppress("ClassName")
+@file:Suppress("ClassName", "WARNINGS")
 
 package com.mikael.mkutilslegacy.spigot.api.npc.npc_1_8_R3
 
