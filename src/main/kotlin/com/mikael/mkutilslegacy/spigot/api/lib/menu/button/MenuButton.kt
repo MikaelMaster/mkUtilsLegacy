@@ -27,7 +27,7 @@ open class MenuButton(var name: String) {
     internal var positionY = 1
     internal var fixed = false
 
-    internal var inventory: Inventory? = null
+    internal var inventories: MutableList<Inventory> = mutableListOf() // List of inventories that have this button
     internal var autoEffectiveSlot: Int? = null
     internal val effectiveSlot: Int
         get() {
@@ -72,10 +72,10 @@ open class MenuButton(var name: String) {
     }
 
     /**
-     * @return the [Inventory]? holding this button. ([inventory]?)
+     * @return the list of [Inventory]ies holding this button.
      */
-    fun getInventory(): Inventory? {
-        return inventory
+    fun getInventories(): List<Inventory> {
+        return inventories
     }
 
     /**

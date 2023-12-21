@@ -269,12 +269,13 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     backPageButton.fixed = true
                     backPageButton.positionX = backPageButtonPosX
                     backPageButton.positionY = backPageButtonPosY
-                    backPageButton.icon = backPageButtonItem.clone().name(backPageButtonItem.getName().replace("%page%", "$backPageId", true))
+                    backPageButton.icon = backPageButtonItem.clone()
+                        .name(backPageButtonItem.getName().replace("%page%", "$backPageId", true))
                     backPageButton.click = click@{
                         player.soundClick(2f, 2f)
                         open(player, backPageId)
                     }
-                    backPageButton.inventory = menuPageInv
+                    backPageButton.inventories.add(menuPageInv)
                     menuPage.buttons.add(backPageButton)
                     menuPageInv.setItem(backPageButton.effectiveSlot, backPageButton.icon)
                 }
@@ -284,19 +285,20 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     nextPageButton.fixed = true
                     nextPageButton.positionX = nextPageButtonPosX
                     nextPageButton.positionY = nextPageButtonPosY
-                    nextPageButton.icon = nextPageButtonItem.clone().name(nextPageButtonItem.getName().replace("%page%", "$nextPageId", true))
+                    nextPageButton.icon = nextPageButtonItem.clone()
+                        .name(nextPageButtonItem.getName().replace("%page%", "$nextPageId", true))
                     nextPageButton.click = click@{
                         player.soundClick(2f, 2f)
                         open(player, nextPageId)
                     }
-                    nextPageButton.inventory = menuPageInv
+                    nextPageButton.inventories.add(menuPageInv)
                     menuPage.buttons.add(nextPageButton)
                     menuPageInv.setItem(nextPageButton.effectiveSlot, nextPageButton.icon)
                 }
 
                 for (fixedButton in buttonsToRegister.filter { it.fixed }) {
                     menuPageInv.setItem(fixedButton.effectiveSlot, fixedButton.icon)
-                    fixedButton.inventory = menuPageInv
+                    fixedButton.inventories.add(menuPageInv)
                     menuPage.buttons.add(fixedButton)
                 }
 
@@ -304,7 +306,8 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     if (button is MenuAnimatedButton) {
                         var lastId = 0
                         button.runAnimationTask = UtilsMain.instance.syncTimer(0, button.changeFrameDelay) {
-                            button.inventory?.let { buttonInv ->
+                            button.inventories.forEach { buttonInv ->
+                                if (buttonInv.viewers.isEmpty()) return@forEach // The inventory have no players seeing it
                                 if (lastId + 1 > button.frames.size) {
                                     lastId = 0
                                 }
@@ -319,18 +322,18 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                                     buttonInv.setItem(button.effectiveSlot, button.icon)
                                     player.updateInventory()
                                 }
-
-                                if (buttonInv.viewers.isEmpty()) {
-                                    button.runAnimationTask?.cancel()
-                                    button.runAnimationTask = null
-                                }
+                            }
+                            if (button.inventories.all { it.viewers.isEmpty() }) {
+                                button.runAnimationTask?.cancel()
+                                button.runAnimationTask = null
                             }
                         }
                     }
                 }
             }
             buttonsToRegister.clear()
-            val finalPageToOpen = playerPages.firstOrNull { it.pageId == pageToOpen } ?: error("Cannot open page $pageToOpen; Pages size: ${playerPages.size}.")
+            val finalPageToOpen = playerPages.firstOrNull { it.pageId == pageToOpen }
+                ?: error("Cannot open page $pageToOpen; Pages size: ${playerPages.size}.")
             val finalPageInv = finalPageToOpen.inventory!!
             player.openInventory(finalPageInv)
             player.openedMineMenu = this@MineMenu
@@ -355,29 +358,31 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
 
             val pageInv = singlePage.inventory!!
             for (button in buttonsToRegister) {
-                button.inventory = singlePage.inventory!! // pageInventory
+                button.inventories.add(singlePage.inventory!!) // pageInventory
                 if (button.icon != null) {
                     pageInv.setItem(button.effectiveSlot, button.icon)
                     if (button is MenuAnimatedButton) {
                         var lastId = 0
                         button.runAnimationTask = UtilsMain.instance.syncTimer(0, button.changeFrameDelay) {
-                            button.inventory?.let { buttonInv ->
-                                if (lastId + 1 > button.frames.size) {
-                                    lastId = 0
-                                }
-                                button.icon = button.frames[lastId]
-                                lastId++
+                            button.runAnimationTask = UtilsMain.instance.syncTimer(0, button.changeFrameDelay) {
+                                button.inventories.forEach { buttonInv ->
+                                    if (buttonInv.viewers.isEmpty()) return@forEach // The inventory have no players seeing it
+                                    if (lastId + 1 > button.frames.size) {
+                                        lastId = 0
+                                    }
+                                    button.icon = button.frames[lastId]
+                                    lastId++
 
-                                val currentAutoSlot = button.autoEffectiveSlot
-                                if (currentAutoSlot != null) {
-                                    buttonInv.setItem(currentAutoSlot, button.icon)
-                                    player.updateInventory()
-                                } else {
-                                    buttonInv.setItem(button.effectiveSlot, button.icon)
-                                    player.updateInventory()
+                                    val currentAutoSlot = button.autoEffectiveSlot
+                                    if (currentAutoSlot != null) {
+                                        buttonInv.setItem(currentAutoSlot, button.icon)
+                                        player.updateInventory()
+                                    } else {
+                                        buttonInv.setItem(button.effectiveSlot, button.icon)
+                                        player.updateInventory()
+                                    }
                                 }
-
-                                if (buttonInv.viewers.isEmpty()) {
+                                if (button.inventories.all { it.viewers.isEmpty() }) {
                                     button.runAnimationTask?.cancel()
                                     button.runAnimationTask = null
                                 }
@@ -544,7 +549,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 newButton.setup()
                 UtilsMain.instance.syncTask {
                     try {
-                        newButton.inventory?.let { buttonInv ->
+                        newButton.inventories?.forEach { buttonInv ->
                             val currentAutoSlot = newButton.autoEffectiveSlot
                             if (currentAutoSlot != null) {
                                 buttonInv.setItem(currentAutoSlot, newButton.icon)
