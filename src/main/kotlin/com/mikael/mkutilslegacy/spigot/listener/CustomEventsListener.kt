@@ -77,7 +77,7 @@ class CustomEventsListener : MineListener() {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerOpenOrCloseOpenable(e: PlayerInteractEvent) {
         val player = e.player
         player.runBlock {
@@ -85,7 +85,7 @@ class CustomEventsListener : MineListener() {
             val isOpen = when {
                 isDoor(block.location) -> isDoorOpen(block.location)
                 isTrapdoor(block.location) -> isTrapdoorOpen(block.location)
-                else -> false
+                else -> return@runBlock
             }
             // !isOpen because the PlayerInteractEvent is called BEFORE the change is made and
             // the PlayerChangeOpenableEvent requires a toSate, so the state after the change is made.
