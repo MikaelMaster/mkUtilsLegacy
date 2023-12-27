@@ -54,6 +54,7 @@ import org.json.JSONObject
 import java.awt.Image
 import java.awt.image.BufferedImage
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Shortcut to get the [UtilsMain.instance].
@@ -932,6 +933,32 @@ val Chunk.nonAirblocks: List<Block>
         }
         return blocks
     }
+
+/**
+ * @return all [Block]s inside given area as a [Pair] of [Location]s.
+ */
+val Pair<Location, Location>.blocksInsideArea: List<Block> get() {
+    val loc1 = first!!
+    val loc2 = second!!
+    if (loc1.world != loc2.world) error("Given Pair of Locations showld be part of the same World.")
+    val minX = min(loc1.blockX, loc2.blockX)
+    val minY = min(loc1.blockY, loc2.blockY)
+    val minZ = min(loc1.blockZ, loc2.blockZ)
+    val maxX = max(loc1.blockX, loc2.blockX)
+    val maxY = max(loc1.blockY, loc2.blockY)
+    val maxZ = max(loc1.blockZ, loc2.blockZ)
+    val blocks = mutableListOf<Block>()
+    val world = first.world
+    for (x in minX..maxX) {
+        for (y in minY..maxY) {
+            for (z in minZ..maxZ) {
+                val block = world.getBlockAt(x, y, z)
+                blocks.add(block)
+            }
+        }
+    }
+    return blocks
+}
 
 /**
  * @return the given [Entity]'s chunk. (Entity.[Location.getChunk])
