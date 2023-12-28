@@ -589,7 +589,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGH)
     fun onInvClick(e: InventoryClickEvent) {
         val player = e.player
         player.runBlock {
