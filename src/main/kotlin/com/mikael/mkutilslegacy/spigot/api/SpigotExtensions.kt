@@ -16,28 +16,51 @@ import com.mikael.mkutilslegacy.spigot.api.lib.menu.MineMenu
 import com.mikael.mkutilslegacy.spigot.api.util.MineNBT
 import com.mikael.mkutilslegacy.spigot.api.util.SimpleLocation
 import com.mikael.mkutilslegacy.spigot.api.util.hooks.Vault
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapColorsData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapDirtsData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapGoldenAppleData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapPrismarinesData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapQuartzData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapRedSandstonesData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapSandstonesData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapSpongesData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapStoneBrinksData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapStonesData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapWoodsData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapWoodsLeavesData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapWoodsLeavesData2
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapWoodsLogsData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapWoodsLogsData2
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapWoodsPlanksSlabsData
+import com.mikael.mkutilslegacy.spigot.enums.MinecraftItemName.Companion.mapWoodsSaplingsData
 import com.mikael.mkutilslegacy.spigot.listener.GeneralListener
+import com.mojang.authlib.GameProfile
+import com.mojang.authlib.properties.Property
 import net.eduard.api.lib.game.ItemBuilder
 import net.eduard.api.lib.game.Particle
 import net.eduard.api.lib.game.ParticleType
+import net.eduard.api.lib.kotlin.mineName
 import net.eduard.api.lib.kotlin.mineSendActionBar
 import net.eduard.api.lib.kotlin.mineSendPacket
 import net.eduard.api.lib.kotlin.mineSendTitle
 import net.eduard.api.lib.modules.Extra
 import net.eduard.api.lib.modules.Mine
 import net.eduard.api.lib.modules.MineReflect
-import net.minecraft.server.v1_8_R3.BlockPosition
-import net.minecraft.server.v1_8_R3.PacketPlayOutBlockBreakAnimation
-import net.minecraft.server.v1_8_R3.PacketPlayOutExplosion
-import net.minecraft.server.v1_8_R3.Vec3D
+import net.minecraft.server.v1_8_R3.*
 import org.bukkit.*
+import org.bukkit.Chunk
+import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.Chest
+import org.bukkit.block.Skull
 import org.bukkit.command.CommandSender
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlock
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers
 import org.bukkit.entity.*
+import org.bukkit.entity.Entity
+import org.bukkit.entity.Item
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -45,16 +68,20 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.map.MapCanvas
 import org.bukkit.map.MapRenderer
 import org.bukkit.map.MapView
+import org.bukkit.material.MaterialData
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.util.Vector
 import org.json.JSONObject
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder
 import java.awt.Image
 import java.awt.image.BufferedImage
+import java.util.*
 import kotlin.math.max
 import kotlin.math.min
+
 
 /**
  * Shortcut to get the [UtilsMain.instance].
@@ -1107,3 +1134,100 @@ fun Player.removeMineScoreboard() {
     return MineScoreboard.removeScore(this)
 }
 // Extra for MineScoreboard - End
+
+fun setSkullUrl(skinUrl: String, block: Block) {
+    block.type = Material.SKULL
+    val skullData = block.state as Skull
+    skullData.skullType = SkullType.PLAYER
+    val skullTile =
+        (block.world as CraftWorld).handle.getTileEntity(BlockPosition(block.x, block.y, block.z)) as TileEntitySkull
+    skullTile.gameProfile = getNonPlayerProfile(skinUrl)
+    block.state.update(true)
+}
+
+fun Block.skullUrl(skinUrl: String) {
+    setSkullUrl(skinUrl, this)
+}
+
+fun getNonPlayerProfile(skinURL: String): GameProfile {
+    val newSkinProfile = GameProfile(UUID.randomUUID(), null)
+    newSkinProfile.properties.put(
+        "textures", Property(
+            "textures", Base64Coder.encodeString(
+                "{textures:{SKIN:{url:\"$skinURL\"}}}"
+            )
+        )
+    )
+    return newSkinProfile
+}
+
+@Suppress("DEPRECATION")
+val ItemStack.nameBR: String
+    get() {
+        val name = this.mineName
+        return name.ifEmpty {
+            MinecraftItemName.valueOf(
+                when (this.type) {
+                    Material.STAINED_CLAY -> "${mapColorsData[this.data.data.toInt()] ?: return ""}_STAINED_CLAY"
+                    Material.STAINED_GLASS -> "${mapColorsData[this.data.data.toInt()] ?: return ""}_STAINED_GLASS"
+                    Material.STAINED_GLASS_PANE -> "${mapColorsData[this.data.data.toInt()] ?: return ""}_STAINED_GLASS_PANE"
+                    Material.WOOL -> "${mapColorsData[this.data.data.toInt()] ?: return ""}_WOOL"
+                    Material.CARPET -> "${mapColorsData[this.data.data.toInt()] ?: return ""}_CARPET"
+                    Material.STONE -> mapStonesData[this.data.data.toInt()]!!
+                    Material.DIRT -> mapDirtsData[this.data.data.toInt()]!!
+                    Material.WOOD -> mapWoodsData[this.data.data.toInt()]!!
+                    Material.LOG -> mapWoodsLogsData[this.data.data.toInt()]!!
+                    Material.LOG_2 -> mapWoodsLogsData2[this.data.data.toInt()]!!
+                    Material.SAPLING -> mapWoodsSaplingsData[this.data.data.toInt()]!!
+                    Material.SANDSTONE -> mapSandstonesData[this.data.data.toInt()]!!
+                    Material.QUARTZ_BLOCK -> mapQuartzData[this.data.data.toInt()]!!
+                    Material.LEAVES -> mapWoodsLeavesData[this.data.data.toInt()]!!
+                    Material.LEAVES_2 -> mapWoodsLeavesData2[this.data.data.toInt()]!!
+                    Material.STEP -> mapWoodsPlanksSlabsData[this.data.data.toInt()]!!
+                    Material.WOOD_STEP -> mapWoodsPlanksSlabsData[this.data.data.toInt()]!!
+                    Material.PRISMARINE -> mapPrismarinesData[this.data.data.toInt()]!!
+                    Material.SMOOTH_BRICK -> mapStoneBrinksData[this.data.data.toInt()]!!
+                    Material.RED_SANDSTONE -> mapRedSandstonesData[this.data.data.toInt()]!!
+                    Material.SPONGE -> mapSpongesData[this.data.data.toInt()]!!
+                    Material.GOLDEN_APPLE -> mapGoldenAppleData[this.data.data.toInt()]!!
+                    else -> this.type.name
+                }
+            ).translatedName
+        }
+    }
+
+@Suppress("DEPRECATION")
+val Material.nameBR: String
+    get() {
+        val name = this.name
+        val data = (this.data as? MaterialData)?.data?.toInt()?:0
+        return name.ifEmpty {
+            MinecraftItemName.valueOf(
+                when (this) {
+                    Material.STAINED_CLAY -> "${mapColorsData[data] ?: return ""}_STAINED_CLAY"
+                    Material.STAINED_GLASS -> "${mapColorsData[data] ?: return ""}_STAINED_GLASS"
+                    Material.STAINED_GLASS_PANE -> "${mapColorsData[data] ?: return ""}_STAINED_GLASS_PANE"
+                    Material.WOOL -> "${mapColorsData[data] ?: return ""}_WOOL"
+                    Material.CARPET -> "${mapColorsData[data] ?: return ""}_CARPET"
+                    Material.STONE -> mapStonesData[data]!!
+                    Material.DIRT -> mapDirtsData[data]!!
+                    Material.WOOD -> mapWoodsData[data]!!
+                    Material.LOG -> mapWoodsLogsData[data]!!
+                    Material.LOG_2 -> mapWoodsLogsData2[data]!!
+                    Material.SAPLING -> mapWoodsSaplingsData[data]!!
+                    Material.SANDSTONE -> mapSandstonesData[data]!!
+                    Material.QUARTZ_BLOCK -> mapQuartzData[data]!!
+                    Material.LEAVES -> mapWoodsLeavesData[data]!!
+                    Material.LEAVES_2 -> mapWoodsLeavesData2[data]!!
+                    Material.STEP -> mapWoodsPlanksSlabsData[data]!!
+                    Material.WOOD_STEP -> mapWoodsPlanksSlabsData[data]!!
+                    Material.PRISMARINE -> mapPrismarinesData[data]!!
+                    Material.SMOOTH_BRICK -> mapStoneBrinksData[data]!!
+                    Material.RED_SANDSTONE -> mapRedSandstonesData[data]!!
+                    Material.SPONGE -> mapSpongesData[data]!!
+                    Material.GOLDEN_APPLE -> mapGoldenAppleData[data]!!
+                    else -> this.name
+                }
+            ).translatedName
+        }
+    }

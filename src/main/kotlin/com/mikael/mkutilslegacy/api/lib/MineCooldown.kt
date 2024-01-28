@@ -39,6 +39,8 @@ class MineCooldown(var duration: Long) {
      */
     var messageOnCooldown: String? = "§cPlease wait §e%time%s §cto use this again."
 
+    var bypassPerm: String? = null
+
     /**
      * Sets the [messageOnCooldown] to null.
      * Then, No message will be sent to players during cooldown.
@@ -78,6 +80,12 @@ class MineCooldown(var duration: Long) {
     val cooldowns = mutableMapOf<String, Map<Long, Long>>()
 
     fun cooldown(playerName: String): Boolean {
+        if (bypassPerm != null) {
+            val isProxy = isProxyServer // evitar 2 vezes, pode lagar
+            if (isProxy && ProxyServer.getInstance().getPlayer(playerName)?.hasPermission(bypassPerm) == true) return true
+            if (!isProxy && Bukkit.getPlayer(playerName)?.hasPermission(bypassPerm) == true) return true
+        }
+
         if (onCooldown(playerName)) {
             sendOnCooldown(playerName)
             return false

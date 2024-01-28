@@ -340,6 +340,16 @@ fun Collection<String>.replaceAll(oldValue: String, newValue: String, ignoreCase
     return this.map { it.replace(oldValue, newValue, ignoreCase) }
 }
 
+fun Collection<String>.replaceAll(list: Map<String, String>, ignoreCase: Boolean = false): Collection<String> {
+    return this.map { string ->
+        var newString = string
+        for (pair in list) {
+            newString = newString.replace(pair.key, pair.value, ignoreCase)
+        }
+        newString
+    }
+}
+
 /**
  * This function is more fast when comparing to [ChatColor.translateAlternateColorCodes] since this
  * uses the Kotlin String Replace and ignore the next chars after '&' and '§'.

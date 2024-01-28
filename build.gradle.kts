@@ -24,20 +24,30 @@ repositories {
 dependencies {
     compileOnly("org.github.paperspigot:paperspigot-api:1.8.8-R0.1-SNAPSHOT")
     compileOnly("io.github.waterfallmc:waterfall-api:1.19-R0.1-SNAPSHOT")
-    compileOnly(files("libs/spigot-1.8.8.jar"))
+    compileOnly(
+        files(
+            "libs/spigot-1.8.8.jar",// "C:\\Users\\Koddy\\Desktop\\IntelliJ Global Depends\\ProtocolSupport.jar\\",
+        )
+    )
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
     api("redis.clients:jedis:4.3.1")
+    api("org.java-websocket:Java-WebSocket:1.5.4")
     api("org.slf4j:slf4j-api:2.0.5")
     api("org.slf4j:slf4j-log4j12:2.0.5")
-    api(files("C:\\Users\\Usuario\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar\\"))
+    api(
+        files(
+            "C:\\Users\\Koddy\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar"
+        )
+    )
+    implementation(kotlin("script-runtime"))
 }
 
 tasks {
     jar {
         destinationDirectory
-            .set(file("C:\\Users\\Usuario\\Desktop\\Rede Sweet - Plugins\\"))
+            .set(file("C:\\Users\\Koddy\\Desktop\\Rede Sweet - Plugins\\"))
     }
     compileJava {
         options.encoding = "UTF-8"
@@ -52,7 +62,7 @@ tasks {
         archiveVersion.set("4.0")
         archiveBaseName.set("mkUtilsLegacy")
         destinationDirectory.set(
-            file("C:\\Users\\Usuario\\Desktop\\Rede Sweet - Plugins\\")
+            file("C:\\Users\\Koddy\\Desktop\\Rede Sweet - Plugins\\")
         )
     }
 }
