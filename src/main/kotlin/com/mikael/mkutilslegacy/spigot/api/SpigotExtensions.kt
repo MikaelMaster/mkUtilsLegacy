@@ -82,7 +82,6 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-
 /**
  * Shortcut to get the [UtilsMain.instance].
  *
@@ -1003,7 +1002,7 @@ fun Location.spawnParticle(
     yRandom: Float = 0f,
     zRandom: Float = 0f
 ) {
-    this.spawnParticle(Particle(type, amount, speed, xRandom, yRandom, zRandom))
+    this.spawnParticle(net.eduard.api.lib.game.Particle(type, amount, speed, xRandom, yRandom, zRandom))
 }
 
 /**
