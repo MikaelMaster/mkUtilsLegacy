@@ -66,7 +66,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     // Back and Next Page buttons options - End
     // Menu Properties - End
 
-    val buttonsToRegister = mutableSetOf<MenuButton>()
+    val buttonsToRegister = mutableListOf<MenuButton>()
     private val pages = mutableMapOf<Player, MutableList<MenuPage>>()
 
     /**
@@ -272,7 +272,11 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                         lastSlot += 2
                     }
                     button.autoEffectiveSlot = lastSlot
-                    lastPage.inventory!!.setItem(lastSlot, button.icon)
+                    val lastIcon = lastPage.inventory!!.getItem(lastSlot)
+                    if (lastIcon == null || lastIcon != button.icon) {
+                        lastPage.inventory!!.setItem(lastSlot, button.icon)
+                    }
+                    lastPage.buttons.removeIf { it.effectiveSlot == lastSlot } // Remove old buttom from there
                     lastPage.buttons.add(button)
                     buttonId++
                 }
@@ -293,8 +297,12 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                         open(player, backPageId)
                     }
                     backPageButton.inventories.add(menuPageInv)
+                    menuPage.buttons.removeIf { it.effectiveSlot == backPageButton.effectiveSlot } // Remove old buttom from there
                     menuPage.buttons.add(backPageButton)
-                    menuPageInv.setItem(backPageButton.effectiveSlot, backPageButton.icon)
+                    val lastBackPageIcon = menuPageInv.getItem(backPageButton.effectiveSlot)
+                    if (lastBackPageIcon == null || lastBackPageIcon != backPageButton.icon) {
+                        menuPageInv.setItem(backPageButton.effectiveSlot, backPageButton.icon)
+                    }
                 }
                 if (menuPage.hasNextPage) {
                     val nextPageId = menuPage.nextPage!!.pageId
@@ -309,13 +317,21 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                         open(player, nextPageId)
                     }
                     nextPageButton.inventories.add(menuPageInv)
+                    menuPage.buttons.removeIf { it.effectiveSlot == nextPageButton.effectiveSlot } // Remove old buttom from there
                     menuPage.buttons.add(nextPageButton)
-                    menuPageInv.setItem(nextPageButton.effectiveSlot, nextPageButton.icon)
+                    val lastNextPageIcon = menuPageInv.getItem(nextPageButton.effectiveSlot)
+                    if (lastNextPageIcon == null || lastNextPageIcon != nextPageButton.icon) {
+                        menuPageInv.setItem(nextPageButton.effectiveSlot, nextPageButton.icon)
+                    }
                 }
 
                 for (fixedButton in buttonsToRegister.filter { it.fixed }) {
-                    menuPageInv.setItem(fixedButton.effectiveSlot, fixedButton.icon)
+                    val lastFixedIcon = menuPageInv.getItem(fixedButton.effectiveSlot)
+                    if (lastFixedIcon == null || lastFixedIcon != fixedButton.icon) {
+                        menuPageInv.setItem(fixedButton.effectiveSlot, fixedButton.icon)
+                    }
                     fixedButton.inventories.add(menuPageInv)
+                    menuPage.buttons.removeIf { it.effectiveSlot == fixedButton.effectiveSlot } // Remove old buttom from there
                     menuPage.buttons.add(fixedButton)
                 }
 
@@ -383,7 +399,10 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             for (button in buttonsToRegister) {
                 button.inventories.add(singlePage.inventory!!) // pageInventory
                 if (button.icon != null) {
-                    pageInv.setItem(button.effectiveSlot, button.icon)
+                    val lastIcon = pageInv.getItem(button.effectiveSlot)
+                    if (lastIcon == null || lastIcon != button.icon) {
+                        pageInv.setItem(button.effectiveSlot, button.icon)
+                    }
                     if (button is MenuAnimatedButton) {
                         var lastId = 0
                         button.runAnimationTask = UtilsMain.instance.syncTimer(0, button.changeFrameDelay) {
@@ -410,6 +429,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                             }
                         }
                     }
+                    singlePage.buttons.removeIf { it.effectiveSlot == button.effectiveSlot } // Remove old buttom from there
                     singlePage.buttons.add(button)
                 }
             }

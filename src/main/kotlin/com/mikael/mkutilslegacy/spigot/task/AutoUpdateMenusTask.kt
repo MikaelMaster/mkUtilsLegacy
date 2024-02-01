@@ -21,7 +21,8 @@ internal class AutoUpdateMenusTask : TimeManager(UtilsMain.instance.config.getLo
         }
          */
 
-        for ((player, menu) in MenuSystem.openedMenu) { // mkUtils new Menu System
+        val openCopy = MenuSystem.openedMenu.toMap()
+        for ((player, menu) in openCopy) { // mkUtils new Menu System
             if (!menu.isAutoUpdate) continue
             val pageOpened = menu.getPageOpened(player) ?: continue
             // if (player.openInventory == null) continue // Useless?
