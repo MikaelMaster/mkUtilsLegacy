@@ -134,6 +134,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         return player.openedMineMenuPage?.pageId
     }
 
+    /* // Legacy
     /**
      * Remove all buttons from the menu. You should use it only inside [update] fun before register buttons.
      *
@@ -142,6 +143,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
     fun removeAllButtons(player: Player) {
         pages[player]?.let { pages -> pages.forEach { it.buttons.clear() } }
     }
+     */
 
     /**
      * Here all buttons and menu code will be done.
@@ -187,7 +189,6 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
         update(player) // Rebuilds menu
         if (lineAmount !in 1..6) error("Menu lineAmount must be between 1 and 6.")
         if (!isAutoAlignItems && pageToOpen != 1) error("Cannot open a non-autoAlignItems menu with a page different than 1.")
-        // if (pageToOpen > 1 && inventories[pageToOpen] == null) error("the required page $pageToOpen is not registered; pages size: ${pages.size}") // legacy
         autoAlignSkipLines.forEach {
             if (it !in 1..6) error("Menu autoAlignSkipLines can't contains any Int different from 1, 2, 3, 4, 5 and 6.")
             if (it > lineAmount) error("This menu just have $lineAmount lines, can't apply rule to skip line ${it}.")
@@ -197,7 +198,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             playerPages.clear()
         } else {
             playerPages.forEach { p ->
-                p.inventory?.clear()
+                // p.inventory?.clear()
                 p.buttons.filterIsInstance<MenuAnimatedButton>().forEach { b ->
                     b.runAnimationTask?.cancel()
                 }
@@ -365,6 +366,11 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 }
             }
             buttonsToRegister.clear()
+            playerPages.forEach { p ->
+                p.inventory?.removeAll {  i ->
+                    buttons[player]?.none { it.icon == i } == true
+                }
+            }
             val finalPageToOpen = playerPages.firstOrNull { it.pageId == pageToOpen }
                 ?: error("Cannot open page $pageToOpen; Pages size: ${playerPages.size}.")
             val finalPageInv = finalPageToOpen.inventory!!
@@ -434,6 +440,11 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 }
             }
             buttonsToRegister.clear()
+            playerPages.forEach { p ->
+                p.inventory?.removeAll {  i ->
+                    buttons[player]?.none { it.icon == i } == true
+                }
+            }
             player.openInventory(pageInv)
             player.openedMineMenu = this@MineMenu
             player.openedMineMenuPage = singlePage
