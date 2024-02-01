@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit
 @Suppress("WARNINGS")
 class MineCooldown(var duration: Long) {
 
+    // Cooldown Properties - Start
     /**
      * The message sent to players during the cooldown.
      *
@@ -39,6 +40,12 @@ class MineCooldown(var duration: Long) {
      */
     var messageOnCooldown: String? = "§cPlease wait §e%time%s §cto use this again."
 
+    /**
+     * A permission to bypass the cooldown.
+     * If the player has this permission, the cooldown will be bypassed.
+     *
+     * Default: *null*. (No bypass permission setted, so no one can bypass the cooldown.)
+     */
     var bypassPerm: String? = null
 
     /**
@@ -70,6 +77,31 @@ class MineCooldown(var duration: Long) {
      */
     var redisSyncId = this.toString()
 
+    /**
+     * The cooldowns by permission.
+     * This is a map of permissions and their cooldowns. The key is the permission and the value is the cooldown duration.
+     * If the cooldown is set to *null*, this means the permission (player with that permission) will bypass the cooldown.
+     * If a player has a permission, the cooldown defined for that permission will be used and [duration] ignored.
+     *
+     * Example:
+     * ```
+     * cooldownsByPermission = mapOf(
+     *    "mkutils.cooldowns.1" to 20 * 5, // 5 seconds
+     *    "mkutils.cooldowns.2" to 20 * 2, // 2 seconds
+     *    "mkutils.cooldowns.3" to null // Bypass (no cooldown)
+     * )
+     *    ````
+     *    In this example, players with the permission "mkutils.cooldowns.1" will have a 60 seconds cooldown.
+     *    Players with the permission "mkutils.cooldowns.2" will have a 120 seconds cooldown.
+     *    Players with the permission "mkutils.cooldowns.3" will bypass the cooldown.
+     *    Players without any of these permissions will have the default cooldown defined by [duration].
+     *    Players with all on more than one of these permissions will have
+     *    the cooldown defined by the lowest cooldown (null is the lowest as possible).
+     */
+    var cooldownsByPermission = mapOf<String, Long?>()
+    // Cooldown Properties - End
+
+    // Cooldown System - Start
     init {
         if (redisSync && !RedisAPI.isInitialized()) {
             error("Cannot use redis to sync cooldown data; RedisAPI is not initialized.")
@@ -80,43 +112,67 @@ class MineCooldown(var duration: Long) {
     val cooldowns = mutableMapOf<String, Map<Long, Long>>()
 
     fun cooldown(playerName: String): Boolean {
-        if (bypassPerm != null) {
-            val isProxy = isProxyServer // evitar 2 vezes, pode lagar
-            if (isProxy && ProxyServer.getInstance().getPlayer(playerName)?.hasPermission(bypassPerm) == true) return true
-            if (!isProxy && Bukkit.getPlayer(playerName)?.hasPermission(bypassPerm) == true) return true
-        }
-
         if (onCooldown(playerName)) {
             sendOnCooldown(playerName)
             return false
         }
-        setOnCooldown(playerName)
+
+        var customDuration = duration
+        if (cooldownsByPermission.isNotEmpty()) {
+            if (isProxyServer) {
+                val player = ProxyServer.getInstance().getPlayer(playerName)
+                val cooldowns = cooldownsByPermission.filter { player.hasPermission(it.key) }
+                if (cooldowns.isNotEmpty()) {
+                    customDuration = cooldowns.values.minBy { it ?: 0 } ?: duration
+                    if (0 > getResult(playerName)) return true
+                }
+            } else {
+                val player = Bukkit.getPlayer(playerName)
+                val cooldowns = cooldownsByPermission.filter { player.hasPermission(it.key) }
+                if (cooldowns.isNotEmpty()) {
+                    customDuration = cooldowns.values.minBy { it ?: 0 } ?: duration
+                    if (0 > getResult(playerName)) return true
+                }
+            }
+        }
+
+        setOnCooldown(playerName, customDuration)
         return true
     }
 
     fun stopCooldown(playerName: String) {
         if (redisSync) {
-            RedisAPI.delete("mkUtils:MineCooldown:Cooldown:${redisSyncId}:${playerName}")
+            RedisAPI.mapDelete("mkUtils:MineCooldown:Cooldown:${redisSyncId}", playerName)
         } else {
             cooldowns.remove(playerName)
         }
     }
 
     fun onCooldown(playerName: String): Boolean {
+        if (bypassPerm != null) {
+            val isProxy = isProxyServer
+            return if (isProxyServer) {
+                ProxyServer.getInstance().getPlayer(playerName)?.hasPermission(bypassPerm!!) == true
+            } else {
+                Bukkit.getPlayer(playerName)?.hasPermission(bypassPerm!!) == true
+            }
+        }
         return getResult(playerName) > 0
     }
 
-    fun setOnCooldown(playerName: String): MineCooldown {
+    fun setOnCooldown(playerName: String, customDuration: Long): MineCooldown {
         if (onCooldown(playerName)) {
             stopCooldown(playerName)
         }
         if (redisSync) {
-            RedisAPI.insert(
-                "mkUtils:MineCooldown:Cooldown:${redisSyncId}:${playerName}",
-                "${System.currentTimeMillis()};${duration}"
+            RedisAPI.insertMap(
+                "mkUtils:MineCooldown:Cooldown:${redisSyncId}",
+                mapOf(
+                    playerName to "${System.currentTimeMillis()};${customDuration}"
+                )
             )
         } else {
-            cooldowns[playerName] = mapOf(System.currentTimeMillis() to duration)
+            cooldowns[playerName] = mapOf(System.currentTimeMillis() to customDuration)
         }
         return this
     }
@@ -146,7 +202,7 @@ class MineCooldown(var duration: Long) {
     fun getResult(playerName: String): Long {
         val timeManager = if (redisSync) {
             val redisData =
-                RedisAPI.getString("mkUtils:MineCooldown:Cooldown:${redisSyncId}:${playerName}")?.split(";") ?: return 0
+                RedisAPI.getMapValue("mkUtils:MineCooldown:Cooldown:${redisSyncId}", playerName)?.split(";") ?: return 0
             mapOf(redisData[0].toLong() to redisData[1].toLong())
         } else {
             cooldowns[playerName] ?: return 0
@@ -162,4 +218,6 @@ class MineCooldown(var duration: Long) {
     fun getCooldown(playerName: String): Int {
         return (getResult(playerName) / 20).toInt() + 1
     }
+    // Cooldown System - End
+
 }

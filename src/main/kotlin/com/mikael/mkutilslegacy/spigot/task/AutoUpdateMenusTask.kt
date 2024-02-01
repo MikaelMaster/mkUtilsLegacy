@@ -26,7 +26,7 @@ internal class AutoUpdateMenusTask : TimeManager(UtilsMain.instance.config.getLo
             val pageOpened = menu.getPageOpened(player) ?: continue
             // if (player.openInventory == null) continue // Useless?
             player.runBlock {
-                menu.open(player, pageOpened)
+                menu.open(player, pageOpened, true)
             }
         }
     }
