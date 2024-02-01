@@ -19,6 +19,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.ItemStack
 
 /**
  * Represents a mkUtils 'menu' created using Bukkit Inventories.
@@ -367,9 +368,14 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             }
             buttonsToRegister.clear()
             playerPages.forEach { p ->
-                p.inventory?.removeAll {  i ->
-                    buttons[player]?.none { it.icon == i } == true
+                val toRemove = mutableListOf<ItemStack>()
+                p.inventory?.contents?.forEach { i ->
+                    if (i == null) return@forEach
+                    if (buttons[player]?.none { it.icon == i } == true) {
+                        toRemove.add(i)
+                    }
                 }
+                p.inventory?.removeItem(*toRemove.toTypedArray())
             }
             val finalPageToOpen = playerPages.firstOrNull { it.pageId == pageToOpen }
                 ?: error("Cannot open page $pageToOpen; Pages size: ${playerPages.size}.")
@@ -441,9 +447,14 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             }
             buttonsToRegister.clear()
             playerPages.forEach { p ->
-                p.inventory?.removeAll {  i ->
-                    buttons[player]?.none { it.icon == i } == true
+                val toRemove = mutableListOf<ItemStack>()
+                p.inventory?.contents?.forEach { i ->
+                    if (i == null) return@forEach
+                    if (buttons[player]?.none { it.icon == i } == true) {
+                        toRemove.add(i)
+                    }
                 }
+                p.inventory?.removeItem(*toRemove.toTypedArray())
             }
             player.openInventory(pageInv)
             player.openedMineMenu = this@MineMenu
