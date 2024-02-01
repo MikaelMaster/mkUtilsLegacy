@@ -277,7 +277,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     buttonId++
                 }
             }
-            playerPages.removeIf { it.buttons.isEmpty() }
+            playerPages.removeIf { it.pageId != 1 && it.inventory?.contents?.isEmpty() == true }
             for (menuPage in playerPages) {
                 val menuPageInv = menuPage.inventory!!
                 if (menuPage.hasBackPage) {
