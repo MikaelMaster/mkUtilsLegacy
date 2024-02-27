@@ -1,6 +1,7 @@
 package com.mikael.mkutilslegacy.spigot.listener
 
 import com.mikael.mkutilslegacy.spigot.UtilsMain
+import com.mikael.mkutilslegacy.spigot.api.entitiesMKPluginQuickCheckList
 import com.mikael.mkutilslegacy.spigot.api.event.PlayerStartFishingEvent
 import com.mikael.mkutilslegacy.spigot.api.event.PlayerStopFishingEvent
 import com.mikael.mkutilslegacy.spigot.api.lib.MineListener
@@ -25,6 +26,11 @@ class GeneralListener : MineListener() {
         UtilsMain.instance.syncTimer(20 * 3, 20 * 3) { // Lists 'optimizer'
             invincibleEntities.removeIf { it.isDead }
             fishingPlayers.removeIf { !it.isOnline }
+
+            /**
+             * @see entitiesMKPluginQuickCheckList
+             */
+            entitiesMKPluginQuickCheckList.keys.removeIf { it.isDead }
         }
     }
 
@@ -33,7 +39,6 @@ class GeneralListener : MineListener() {
      *
      * @see Entity.isInvincible
      */
-
     internal val invincibleEntities = mutableSetOf<Entity>()
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -66,6 +71,7 @@ class GeneralListener : MineListener() {
                         e.isCancelled = true
                     }
                 }
+
                 else -> {
                     val playerStopFishEvent = PlayerStopFishingEvent(player, hook)
                     playerStopFishEvent.mineCallEvent() // Calls this event

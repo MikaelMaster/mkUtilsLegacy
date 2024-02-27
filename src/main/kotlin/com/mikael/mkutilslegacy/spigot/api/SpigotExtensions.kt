@@ -322,6 +322,8 @@ val Entity.isPeaceful: Boolean
         return true
     }
 
+internal val entitiesMKPluginQuickCheckList = mutableMapOf<Entity, MKPlugin>()
+
 /**
  * Defines the given [Entity] MKPlugin's owner using the given [MKPlugin].
  *
@@ -331,6 +333,7 @@ val Entity.isPeaceful: Boolean
  * @param plugin the [MKPlugin] to set as the owner of the given [Entity].
  */
 fun Entity.setMKPluginOwner(plugin: MKPlugin) {
+    entitiesMKPluginQuickCheckList[this] = plugin
     MineNBT.Entity(this).setString("MKPluginOwner", plugin.systemName)
 }
 
@@ -339,10 +342,14 @@ fun Entity.setMKPluginOwner(plugin: MKPlugin) {
  */
 val Entity.getMKPluginOwner: MKPlugin?
     get() {
+        val quickCheck = entitiesMKPluginQuickCheckList[this]
+        if (quickCheck != null) {
+            return quickCheck
+        }
         val nbt = MineNBT.Entity(this)
         if (nbt.hasKey("MKPluginOwner")) {
             val pluginName = nbt.getString("MKPluginOwner")
-            return MKPluginSystem.loadedMKPlugins.first { it.systemName == pluginName }
+            return MKPluginSystem.loadedMKPlugins.firstOrNull { it.systemName == pluginName }
         }
         return null
     }
@@ -803,6 +810,7 @@ fun Player.moveToMounted(
     navigator.variant = Horse.Variant.HORSE
     navigator.inventory.saddle = ItemBuilder(Material.SADDLE)
     navigator.passenger = player
+    navigator.setMKPluginOwner(utilsMain)
 
     object : BukkitRunnable() {
         val startY = startLoc.y

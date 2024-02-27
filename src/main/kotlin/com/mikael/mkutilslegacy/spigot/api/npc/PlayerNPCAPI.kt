@@ -6,7 +6,9 @@ import com.mikael.mkutilslegacy.spigot.api.lib.hologram.MineHologram
 import com.mikael.mkutilslegacy.spigot.api.npc.enums.NPCTextBalloonState
 import com.mikael.mkutilslegacy.spigot.api.npc.listener.NPCSystemListener
 import com.mikael.mkutilslegacy.spigot.api.npc.npc_1_8_R3.PlayerNPC_1_8_R3
+import com.mikael.mkutilslegacy.spigot.api.setMKPluginOwner
 import com.mikael.mkutilslegacy.spigot.api.soundClick
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import org.bukkit.World
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
@@ -86,6 +88,7 @@ object PlayerNPCAPI {
         nickHider.isCustomNameVisible = false
         nickHider.isVisible = false
         nickHider.setGravity(false)
+        nickHider.setMKPluginOwner(utilsMain)
         npcPlayer.passenger = nickHider
         nickHiders[npc] = nickHider
     }

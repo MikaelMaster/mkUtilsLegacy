@@ -9,6 +9,9 @@ import com.mikael.mkutilslegacy.api.mkplugin.language.Translation
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
+import com.mikael.mkutilslegacy.spigot.api.chunk
+import com.mikael.mkutilslegacy.spigot.api.entitiesMKPluginQuickCheckList
+import com.mikael.mkutilslegacy.spigot.api.hasMKPluginOwner
 import com.mikael.mkutilslegacy.spigot.api.lib.hologram.listener.MineHologramListener
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPCAPI
@@ -137,18 +140,31 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         MKPluginSystem.registerMKPlugin(this@UtilsMain)
 
         syncDelay(20) {
-            log("§aPreparing MineReflect...")
+            log("§ePreparing MineReflect...")
             try {
                 MineReflect.getVersion() // Prints the server (reflect) version
             } catch (ex: Exception) {
                 Mine.console("§b[MineReflect] §cThe current version is not supported. Some custom features will not work, mkUtils will run with default Paper ones.")
             }
 
-            // Show MK Plugins
+            //  MK Plugins - Start
             log("§aLoaded MK Plugins:")
             for (mkPlugin in MKPluginSystem.loadedMKPlugins) {
                 log(" §7▪ §e${mkPlugin}")
             }
+
+            log("§eCleaning up loaded MK Plugins spawned entities...")
+            for (world in Bukkit.getWorlds()) {
+                for (entity in world.entities) {
+                    if (entity.hasMKPluginOwner && !entitiesMKPluginQuickCheckList.containsKey(entity)) {
+                        if (!entity.chunk.isLoaded) {
+                            entity.chunk.load(true)
+                        }
+                        entity.remove()
+                    }
+                }
+            }
+            // MK Plugins - End
 
             // MySQL queue updater timer
             if (UtilsManager.sqlManager.hasConnection()) {

@@ -3,7 +3,9 @@
 package com.mikael.mkutilslegacy.spigot.api.npc.npc_1_8_R3
 
 import com.mikael.mkutilslegacy.spigot.api.blockLoc
+import com.mikael.mkutilslegacy.spigot.api.setMKPluginOwner
 import com.mikael.mkutilslegacy.spigot.api.toCenterLocation
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.minecraft.server.v1_8_R3.EntityArmorStand
 import net.minecraft.server.v1_8_R3.Pathfinder
 import net.minecraft.server.v1_8_R3.PathfinderNormal
@@ -34,10 +36,12 @@ class NPCPathFinder_1_8_R3(private val startPoint: Location, private val targetP
         fromStand.isVisible = false
         fromStand.isCustomNameVisible = false
         fromStand.isSmall = true
+        fromStand.setMKPluginOwner(utilsMain)
         val toStand = to.world.spawn(to, ArmorStand::class.java)
         toStand.isVisible = false
         toStand.isCustomNameVisible = false
         toStand.isSmall = true
+        toStand.setMKPluginOwner(utilsMain)
 
         val calcPath = Pathfinder(pathfinderNormal).a(
             (fromStand.world as CraftWorld).handle,

@@ -2,6 +2,8 @@ package com.mikael.mkutilslegacy.spigot.api.lib.hologram
 
 import com.mikael.mkutilslegacy.spigot.api.chunk
 import com.mikael.mkutilslegacy.spigot.api.lib.hologram.listener.MineHologramListener
+import com.mikael.mkutilslegacy.spigot.api.setMKPluginOwner
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.abstraction.Hologram
 import org.bukkit.Location
 import org.bukkit.entity.ArmorStand
@@ -97,6 +99,7 @@ open class MineHologram(vararg var lines: String?) {
                 holo.isCustomNameVisible = false
                 holo.customName = "§r" // empty line
             }
+            holo.setMKPluginOwner(utilsMain)
             holos.add(holo)
             location = if (toDown) {
                 loc.subtract(0.0, 0.3, 0.0)
