@@ -156,10 +156,10 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
             log("§eCleaning up loaded MK Plugins spawned entities...")
             for (world in Bukkit.getWorlds()) {
                 for (entity in world.entities) {
+                    if (!entity.chunk.isLoaded) {
+                        entity.chunk.load(true)
+                    }
                     if (entity.hasMKPluginOwner && !entitiesMKPluginQuickCheckList.containsKey(entity)) {
-                        if (!entity.chunk.isLoaded) {
-                            entity.chunk.load(true)
-                        }
                         entity.remove()
                     }
                 }
