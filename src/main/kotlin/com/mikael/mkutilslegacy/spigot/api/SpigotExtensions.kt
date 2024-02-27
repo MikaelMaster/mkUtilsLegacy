@@ -6,6 +6,7 @@ import com.mikael.mkutilslegacy.api.chatClear
 import com.mikael.mkutilslegacy.api.formatPersonal
 import com.mikael.mkutilslegacy.api.formatValue
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
+import com.mikael.mkutilslegacy.api.mkplugin.MKPluginSystem
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem
 import com.mikael.mkutilslegacy.spigot.api.lib.MineScoreboard
@@ -319,6 +320,39 @@ val Entity.isPeaceful: Boolean
             return this !is Monster
         }
         return true
+    }
+
+/**
+ * Defines the given [Entity] MKPlugin's owner using the given [MKPlugin].
+ *
+ * This is usefull to remove entities after the server restarts, for example as
+ * all lists and maps will be cleared when the plugin is disabled.
+ *
+ * @param plugin the [MKPlugin] to set as the owner of the given [Entity].
+ */
+fun Entity.setMKPluginOwner(plugin: MKPlugin) {
+    MineNBT.Entity(this).setString("MKPluginOwner", plugin.systemName)
+}
+
+/**
+ * @return The [MKPlugin] owner of the given [Entity].
+ */
+val Entity.getMKPluginOwner: MKPlugin?
+    get() {
+        val nbt = MineNBT.Entity(this)
+        if (nbt.hasKey("MKPluginOwner")) {
+            val pluginName = nbt.getString("MKPluginOwner")
+            return MKPluginSystem.loadedMKPlugins.first { it.systemName == pluginName }
+        }
+        return null
+    }
+
+/**
+ * @return True if the given [Entity] has a MKPlugin owner. Otherwise, false.
+ */
+val Entity.hasMKPluginOwner: Boolean
+    get() {
+        return this.getMKPluginOwner != null
     }
 
 /**
@@ -963,28 +997,29 @@ val Chunk.nonAirblocks: List<Block>
 /**
  * @return all [Block]s inside given area as a [Pair] of [Location]s.
  */
-val Pair<Location, Location>.blocksInsideArea: List<Block> get() {
-    val loc1 = first!!
-    val loc2 = second!!
-    if (loc1.world != loc2.world) error("Given Pair of Locations showld be part of the same World.")
-    val minX = min(loc1.blockX, loc2.blockX)
-    val minY = min(loc1.blockY, loc2.blockY)
-    val minZ = min(loc1.blockZ, loc2.blockZ)
-    val maxX = max(loc1.blockX, loc2.blockX)
-    val maxY = max(loc1.blockY, loc2.blockY)
-    val maxZ = max(loc1.blockZ, loc2.blockZ)
-    val blocks = mutableListOf<Block>()
-    val world = first.world
-    for (x in minX..maxX) {
-        for (y in minY..maxY) {
-            for (z in minZ..maxZ) {
-                val block = world.getBlockAt(x, y, z)
-                blocks.add(block)
+val Pair<Location, Location>.blocksInsideArea: List<Block>
+    get() {
+        val loc1 = first!!
+        val loc2 = second!!
+        if (loc1.world != loc2.world) error("Given Pair of Locations showld be part of the same World.")
+        val minX = min(loc1.blockX, loc2.blockX)
+        val minY = min(loc1.blockY, loc2.blockY)
+        val minZ = min(loc1.blockZ, loc2.blockZ)
+        val maxX = max(loc1.blockX, loc2.blockX)
+        val maxY = max(loc1.blockY, loc2.blockY)
+        val maxZ = max(loc1.blockZ, loc2.blockZ)
+        val blocks = mutableListOf<Block>()
+        val world = first.world
+        for (x in minX..maxX) {
+            for (y in minY..maxY) {
+                for (z in minZ..maxZ) {
+                    val block = world.getBlockAt(x, y, z)
+                    blocks.add(block)
+                }
             }
         }
+        return blocks
     }
-    return blocks
-}
 
 /**
  * @return the given [Entity]'s chunk. (Entity.[Location.getChunk])
@@ -1199,7 +1234,7 @@ val ItemStack.nameBR: String
 val Material.nameBR: String
     get() {
         val name = this.name
-        val data = (this.data as? MaterialData)?.data?.toInt()?:0
+        val data = (this.data as? MaterialData)?.data?.toInt() ?: 0
         return name.ifEmpty {
             MinecraftItemName.valueOf(
                 when (this) {
