@@ -7,6 +7,7 @@ import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.actionBar
 import com.mikael.mkutilslegacy.spigot.api.runBlock
 import com.mikael.mkutilslegacy.spigot.api.soundTP
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
@@ -47,7 +48,7 @@ object RedisBungeeAPI {
      * @throws ClassCastException if used in Proxy server.
      */
     @JvmStatic
-    val spigotServerName: String get() = UtilsMain.instance.config.getString("RedisBungeeAPI.spigotServerName")
+    val spigotServerName: String get() = utilsMain.config.getString("RedisBungeeAPI.spigotServerName")
 
     /**
      * Internal.
@@ -409,7 +410,7 @@ object RedisBungeeAPI {
 
                             "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToPlayer" -> {
                                 val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
-                                UtilsMain.instance.syncTask {
+                                utilsMain.syncTask {
                                     player.runBlock {
                                         val target = Bukkit.getPlayer(data[1]) ?: return@runBlock
                                         player.teleport(target)
@@ -423,7 +424,7 @@ object RedisBungeeAPI {
                             "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToLocation" -> {
                                 val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
                                 val worldName = data[1]
-                                UtilsMain.instance.syncTask {
+                                utilsMain.syncTask {
                                     player.runBlock {
                                         val world =
                                             Bukkit.getWorlds().firstOrNull { it.name.equals(worldName, true) } ?: error(
@@ -441,7 +442,7 @@ object RedisBungeeAPI {
 
                             "mkUtils:RedisBungeeAPI:Event:SendChat" -> {
                                 val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
-                                UtilsMain.instance.syncTask {
+                                utilsMain.syncTask {
                                     player.runBlock {
                                         player.chat(data[1]) // data[1] = msgToChat
                                     }

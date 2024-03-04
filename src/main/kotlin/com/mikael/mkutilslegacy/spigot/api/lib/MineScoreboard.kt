@@ -4,6 +4,7 @@ import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineScoreboard.bukkitScores
 import com.mikael.mkutilslegacy.spigot.api.lib.MineScoreboard.removeScore
 import com.mikael.mkutilslegacy.spigot.api.lib.MineScoreboard.setScore
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.kotlin.cut
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -34,7 +35,7 @@ object MineScoreboard {
     private val lastScoreLines = mutableMapOf<Player, List<String>>()
 
     init {
-        UtilsMain.instance.syncTimer(20 * 3, 20 * 3) {
+        utilsMain.syncTimer(20 * 3, 20 * 3) {
             bukkitScores.keys.removeIf { !it.isOnline }
             lastScoreLines.keys.removeIf { !it.isOnline }
         }

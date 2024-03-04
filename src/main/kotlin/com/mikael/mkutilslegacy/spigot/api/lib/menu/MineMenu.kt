@@ -340,7 +340,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                 for (button in menuPage.buttons) {
                     if (button is MenuAnimatedButton) {
                         var lastId = 0
-                        button.runAnimationTask = UtilsMain.instance.syncTimer(0, button.changeFrameDelay) {
+                        button.runAnimationTask = utilsMain.syncTimer(0, button.changeFrameDelay) {
                             button.inventories.forEach { buttonInv ->
                                 if (buttonInv.viewers.isEmpty()) return@forEach // The inventory have no players seeing it
                                 if (lastId + 1 > button.frames.size) {
@@ -417,7 +417,7 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
                     }
                     if (button is MenuAnimatedButton) {
                         var lastId = 0
-                        button.runAnimationTask = UtilsMain.instance.syncTimer(0, button.changeFrameDelay) {
+                        button.runAnimationTask = utilsMain.syncTimer(0, button.changeFrameDelay) {
                             button.inventories.forEach { buttonInv ->
                                 if (buttonInv.viewers.isEmpty()) return@forEach // The inventory have no players seeing it
                                 if (lastId + 1 > button.frames.size) {
@@ -607,10 +607,10 @@ open class MineMenu(var title: String, var lineAmount: Int) : MineListener() {
             newButton.fixed = false
         }
         buttonsToRegister.add(newButton)
-        UtilsMain.instance.asyncDelay(1) {
+        utilsMain.asyncDelay(1) {
             try {
                 newButton.setup()
-                UtilsMain.instance.syncTask {
+                utilsMain.syncTask {
                     try {
                         newButton.inventories?.forEach { buttonInv ->
                             val currentAutoSlot = newButton.autoEffectiveSlot

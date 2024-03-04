@@ -6,6 +6,7 @@ import com.mikael.mkutilslegacy.spigot.api.event.PlayerStartFishingEvent
 import com.mikael.mkutilslegacy.spigot.api.event.PlayerStopFishingEvent
 import com.mikael.mkutilslegacy.spigot.api.lib.MineListener
 import com.mikael.mkutilslegacy.spigot.api.runBlock
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.kotlin.mineCallEvent
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -23,7 +24,7 @@ class GeneralListener : MineListener() {
     init {
         instance = this@GeneralListener
 
-        UtilsMain.instance.syncTimer(20 * 3, 20 * 3) { // Lists 'optimizer'
+        utilsMain.syncTimer(20 * 3, 20 * 3) { // Lists 'optimizer'
             invincibleEntities.removeIf { it.isDead }
             fishingPlayers.removeIf { !it.isOnline }
 
@@ -95,7 +96,7 @@ class GeneralListener : MineListener() {
                         }
                     }
                 }
-            }.runTaskTimer(UtilsMain.instance, 5, 5)
+            }.runTaskTimer(utilsMain, 5, 5)
         }
     }
 

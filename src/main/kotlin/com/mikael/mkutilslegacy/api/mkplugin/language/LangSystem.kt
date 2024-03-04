@@ -3,12 +3,13 @@ package com.mikael.mkutilslegacy.api.mkplugin.language
 import com.mikael.mkutilslegacy.api.isProxyServer
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 
 @Suppress("WARNINGS")
 object LangSystem {
 
     fun getText(translation: Translation): String {
-        val mkPlugin = if (isProxyServer) UtilsBungeeMain.instance else UtilsMain.instance
+        val mkPlugin = if (isProxyServer) UtilsBungeeMain.instance else utilsMain
         return when (mkPlugin.usingLanguage) {
             "en-us" -> {
                 translation.en_us[0]
@@ -23,7 +24,7 @@ object LangSystem {
     }
 
     fun getTextLines(translation: Translation): List<String> {
-        val mkPlugin = if (isProxyServer) UtilsBungeeMain.instance else UtilsMain.instance
+        val mkPlugin = if (isProxyServer) UtilsBungeeMain.instance else utilsMain
         return when (mkPlugin.usingLanguage) {
             "en-us" -> {
                 translation.en_us

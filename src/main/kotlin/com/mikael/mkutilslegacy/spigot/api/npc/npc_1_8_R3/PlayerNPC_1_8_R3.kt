@@ -6,6 +6,7 @@ import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPC
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPCAPI
 import com.mikael.mkutilslegacy.spigot.api.npc.enums.NPCPathWalkState
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import net.eduard.api.lib.kotlin.cut
@@ -133,7 +134,7 @@ class PlayerNPC_1_8_R3(
                 callback.invoke(state)
                 cancel()
             }
-        }.runTaskTimer(UtilsMain.instance, 1, 5)
+        }.runTaskTimer(utilsMain, 1, 5)
     }
 
     override fun spawn(location: Location, players: List<Player>) {
@@ -168,7 +169,7 @@ class PlayerNPC_1_8_R3(
         }
         */
         nmsWorld.addEntity(npc, CreatureSpawnEvent.SpawnReason.CUSTOM)
-        npc.bukkitEntity.setMetadata("NPC", FixedMetadataValue(UtilsMain.instance, true))
+        npc.bukkitEntity.setMetadata("NPC", FixedMetadataValue(utilsMain, true))
         // npc.listName = null
         for (player in players.filter { p -> !PlayerNPCAPI.isNPC(p) }) {
             holders.add(player)
@@ -249,7 +250,7 @@ class PlayerNPC_1_8_R3(
 
         // This will remove the NPC name from the tab list after one second.
         // Shows the NPC in the tab is needed so clients will load the NPC skin.
-        UtilsMain.instance.asyncDelay(20) {
+        utilsMain.asyncDelay(20) {
             playerConnection.sendPacket(
                 PacketPlayOutPlayerInfo(
                     PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER,

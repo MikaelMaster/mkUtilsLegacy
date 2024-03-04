@@ -84,8 +84,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Shortcut to get the [UtilsMain.instance].
- *
  * @return the [UtilsMain.instance].
  */
 val utilsMain get() = UtilsMain.instance
@@ -854,7 +852,7 @@ fun Player.moveToMounted(
                 targetLoc.toVector().subtract(currentLocation.toVector()).setY(0).normalize()
             navigator.velocity = horizontalDirection.multiply(2.0).setY(yOffset)
         }
-    }.runTaskTimer(UtilsMain.instance, 0, 1)
+    }.runTaskTimer(utilsMain, 0, 1)
 }
 
 /**

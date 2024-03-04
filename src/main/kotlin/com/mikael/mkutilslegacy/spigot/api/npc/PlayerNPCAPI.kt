@@ -169,8 +169,8 @@ object PlayerNPCAPI {
             }
         }
         val holo = MineHologram()
-        UtilsMain.instance.asyncTask {
-            UtilsMain.instance.syncTask { callback.invoke(NPCTextBalloonState.STARTED) }
+        utilsMain.asyncTask {
+            utilsMain.syncTask { callback.invoke(NPCTextBalloonState.STARTED) }
             for ((lineIndex, line) in textLines.withIndex()) {
                 loc.y += 0.3
                 val holoLines = holo.lines.toMutableList()
@@ -184,12 +184,12 @@ object PlayerNPCAPI {
                         holo.update(player, loc)
                     }
                     player.soundClick(2f, 2f)
-                    UtilsMain.instance.syncTask { callback.invoke(NPCTextBalloonState.FLUSH_CHARACTERS) }
+                    utilsMain.syncTask { callback.invoke(NPCTextBalloonState.FLUSH_CHARACTERS) }
                     Thread.sleep(50)
                 }
                 if (lineIndex == textLines.lastIndex) {
-                    UtilsMain.instance.syncTask { callback.invoke(NPCTextBalloonState.FINISHED) }
-                    UtilsMain.instance.syncDelay(whenDoneRemoveTicks) {
+                    utilsMain.syncTask { callback.invoke(NPCTextBalloonState.FINISHED) }
+                    utilsMain.syncDelay(whenDoneRemoveTicks) {
                         holo.despawn(player)
                         callback.invoke(NPCTextBalloonState.REMOVED)
                     }
@@ -205,7 +205,7 @@ object PlayerNPCAPI {
     // mkUtils onEnable
     internal fun onEnable() {
         onDisable()
-        lookAtNearbyTask = UtilsMain.instance.syncTimer(2, 2) {
+        lookAtNearbyTask = utilsMain.syncTimer(2, 2) {
             for (npc in npcs.values.filter { it.isSpawned() && it.shouldLookNearbyPlayers }) {
                 val npcPlayer = npc.getPlayer()
                 val nearbyPlayer =

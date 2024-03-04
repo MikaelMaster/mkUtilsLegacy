@@ -3,9 +3,10 @@ package com.mikael.mkutilslegacy.spigot.task
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.runBlock
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.manager.TimeManager
 
-internal class AutoUpdateMenusTask : TimeManager(UtilsMain.instance.config.getLong("MenuAPI.autoUpdateTicks")) {
+internal class AutoUpdateMenusTask : TimeManager(utilsMain.config.getLong("MenuAPI.autoUpdateTicks")) {
 
     override fun run() {
         /* Not used anymore

@@ -4,6 +4,7 @@ import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.runBlock
 import com.mikael.mkutilslegacy.spigot.api.soundNo
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.modules.Extra
 import net.eduard.api.lib.modules.Mine
 import org.bukkit.command.*
@@ -90,7 +91,7 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
     open fun registerCommand(plugin: MKPlugin) {
         this.plugin = plugin as JavaPlugin
         bukkitCommand = SimpleCommand(this)
-        UtilsMain.instance.scm!!.register(name, bukkitCommand)
+        utilsMain.scm!!.register(name, bukkitCommand)
         registeredMineCommands.add(this@MineCommand)
         this@MineCommand.registerListener(plugin)
     }
@@ -100,7 +101,7 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
      */
     open fun unregisterCommand() {
         this@MineCommand.unregisterListener()
-        bukkitCommand.unregister(UtilsMain.instance.scm)
+        bukkitCommand.unregister(utilsMain.scm)
         registeredMineCommands.remove(this@MineCommand)
     }
 
@@ -227,7 +228,7 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
         label: String?,
         args: Array<out String>?
     ): MutableList<String> {
-        UtilsMain.instance.log("AutoComplete.")
+        // utilsMain.log("AutoComplete.")
         val data = mutableListOf<String>()
 
         if (args == null || args.isEmpty()) {

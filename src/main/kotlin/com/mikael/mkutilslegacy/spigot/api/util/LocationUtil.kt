@@ -1,6 +1,7 @@
 package com.mikael.mkutilslegacy.spigot.api.util
 
 import com.mikael.mkutilslegacy.spigot.UtilsMain
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity
 import org.bukkit.util.Vector
@@ -73,7 +74,7 @@ object LocationUtil {
         if (exact) {
             entity.velocity = entity.location.direction.normalize().setY(0.01)
         }
-        UtilsMain.instance.syncDelay(1) {
+        utilsMain.syncDelay(1) {
             if (exact) {
                 entity.velocity = entity.location.direction.normalize().multiply(force).setY(0.01)
             } else {

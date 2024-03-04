@@ -1,6 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.api.util.hooks
 
-import com.mikael.mkutilslegacy.spigot.UtilsMain
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -33,17 +33,17 @@ object Vault {
     internal fun onEnable() {
         isHooked = Bukkit.getPluginManager().isPluginEnabled("Vault")
         if (!isHooked) {
-            UtilsMain.instance.log("§6[VaultAPI] §cVault not founded. VaultAPI will not be loaded.")
+            utilsMain.log("§6[VaultAPI] §cVault not founded. VaultAPI will not be loaded.")
             return
         }
-        UtilsMain.instance.log("§6[VaultAPI] §eVault founded. Loading VaultAPI...")
+        utilsMain.log("§6[VaultAPI] §eVault founded. Loading VaultAPI...")
         economy = Bukkit.getServicesManager().getRegistration(Economy::class.java).provider
     }
 
     // mkUtils onDisable
     internal fun onDisable() {
         if (!isHooked) return
-        UtilsMain.instance.log("§6[VaultAPI] §eUnloading VaultAPI...")
+        utilsMain.log("§6[VaultAPI] §eUnloading VaultAPI...")
         isHooked = false
     }
 
@@ -88,7 +88,7 @@ object Vault {
      */
     fun setPlayerBalance(playerName: String, amount: Double): Boolean {
         if (!isHooked) error("VaultAPI isn't hooked!")
-        if (amount < 0) error("Amount cannot be less than 0; Given amount: $amount")
+        if (amount < 0) error("Amount cannot be less than 0. Given amount: ${amount}.")
         economy.withdrawPlayer(playerName, getPlayerBalance(playerName))
         economy.depositPlayer(playerName, amount)
         return true
@@ -116,7 +116,7 @@ object Vault {
      */
     fun addPlayerBalance(playerName: String, amount: Double): Boolean {
         if (!isHooked) error("VaultAPI isn't hooked!")
-        if (amount < 0) error("Amount cannot be less than 0; Given amount: $amount")
+        if (amount < 0) error("Amount cannot be less than 0. Given amount: ${amount}.")
         economy.depositPlayer(playerName, amount)
         return true
     }
@@ -143,7 +143,7 @@ object Vault {
      */
     fun removePlayerBalance(playerName: String, amount: Double): Boolean {
         if (!isHooked) error("VaultAPI isn't hooked!")
-        if (amount < 0) error("Amount cannot be less than 0; Given amount: $amount")
+        if (amount < 0) error("Amount cannot be less than 0. Given amount: $${amount}.")
         economy.withdrawPlayer(playerName, amount)
         return true
     }
