@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.spigot.task
 
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPCAPI
 import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.event.PlayerTargetPlayerEvent

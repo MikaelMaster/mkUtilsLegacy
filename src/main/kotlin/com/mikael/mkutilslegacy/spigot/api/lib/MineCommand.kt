@@ -1,7 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.api.lib
 
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.runBlock
 import com.mikael.mkutilslegacy.spigot.api.soundNo
 import com.mikael.mkutilslegacy.spigot.api.utilsMain

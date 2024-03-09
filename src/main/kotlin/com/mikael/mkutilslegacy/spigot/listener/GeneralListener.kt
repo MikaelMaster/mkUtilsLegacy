@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.spigot.listener
 
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.entitiesMKPluginQuickCheckList
 import com.mikael.mkutilslegacy.spigot.api.event.PlayerStartFishingEvent
 import com.mikael.mkutilslegacy.spigot.api.event.PlayerStopFishingEvent

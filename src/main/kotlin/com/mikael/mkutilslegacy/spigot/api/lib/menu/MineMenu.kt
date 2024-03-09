@@ -2,7 +2,6 @@ package com.mikael.mkutilslegacy.spigot.api.lib.menu
 
 import com.mikael.mkutilslegacy.api.isMultOf
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.*
 import com.mikael.mkutilslegacy.spigot.api.event.menu.MineMenuOpenEvent
 import com.mikael.mkutilslegacy.spigot.api.lib.MineItem

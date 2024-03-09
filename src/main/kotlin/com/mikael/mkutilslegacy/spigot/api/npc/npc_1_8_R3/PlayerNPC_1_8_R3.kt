@@ -2,7 +2,6 @@
 
 package com.mikael.mkutilslegacy.spigot.api.npc.npc_1_8_R3
 
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPC
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPCAPI
 import com.mikael.mkutilslegacy.spigot.api.npc.enums.NPCPathWalkState

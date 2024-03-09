@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.spigot.task
 
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.runBlock
 import com.mikael.mkutilslegacy.spigot.api.utilsMain

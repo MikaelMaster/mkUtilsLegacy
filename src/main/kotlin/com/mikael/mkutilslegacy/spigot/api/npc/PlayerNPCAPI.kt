@@ -1,7 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.api.npc
 
 import com.mikael.mkutilslegacy.api.breakLines
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.hologram.MineHologram
 import com.mikael.mkutilslegacy.spigot.api.npc.enums.NPCTextBalloonState
 import com.mikael.mkutilslegacy.spigot.api.npc.listener.NPCSystemListener

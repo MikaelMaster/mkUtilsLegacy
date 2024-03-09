@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.spigot.api.lib
 
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.lib.MineScoreboard.bukkitScores
 import com.mikael.mkutilslegacy.spigot.api.lib.MineScoreboard.removeScore
 import com.mikael.mkutilslegacy.spigot.api.lib.MineScoreboard.setScore

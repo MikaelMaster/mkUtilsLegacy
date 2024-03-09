@@ -1,6 +1,5 @@
 package com.mikael.mkutilslegacy.spigot.api.util
 
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Entity

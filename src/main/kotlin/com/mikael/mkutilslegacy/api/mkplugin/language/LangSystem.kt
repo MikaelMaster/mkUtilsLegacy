@@ -2,7 +2,6 @@ package com.mikael.mkutilslegacy.api.mkplugin.language
 
 import com.mikael.mkutilslegacy.api.isProxyServer
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.utilsMain
 
 @Suppress("WARNINGS")
