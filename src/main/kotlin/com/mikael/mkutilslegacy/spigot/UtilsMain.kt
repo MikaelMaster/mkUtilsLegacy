@@ -231,7 +231,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         }
         log("§eConnecting to Redis server...")
         RedisAPI.onEnablePrepareRedisAPI()
-        if (!RedisAPI.isInitialized()) error("Cannot connect to Redis server")
+        if (!RedisAPI.isInitialized()) error("Cannot connect to Redis server.")
         RedisAPI.useToSyncBungeePlayers = RedisAPI.managerData.syncBungeeDataUsingRedis
         if (RedisBungeeAPI.isEnabled) {
             RedisBungeeAPI.bukkitServerOnEnable()
@@ -250,7 +250,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         }
         log("§eConnecting to MySQL database...")
         UtilsManager.dbManager.openConnection()
-        if (!UtilsManager.sqlManager.hasConnection()) error("Cannot connect to MySQL database")
+        if (!UtilsManager.sqlManager.hasConnection()) error("Cannot connect to MySQL database.")
         log("§aConnected to MySQL database!")
     }
 

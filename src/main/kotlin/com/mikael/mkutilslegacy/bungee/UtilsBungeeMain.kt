@@ -130,7 +130,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         }
         log("§eConnecting to Redis server...")
         RedisAPI.onEnablePrepareRedisAPI()
-        if (!RedisAPI.isInitialized()) error("Cannot connect to Redis server")
+        if (!RedisAPI.isInitialized()) error("Cannot connect to Redis server.")
         RedisAPI.useToSyncBungeePlayers = RedisAPI.managerData.syncBungeeDataUsingRedis
         if (RedisAPI.useToSyncBungeePlayers) {
             RedisBungeeAPI.proxyServerOnEnable()
@@ -145,7 +145,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         }
         log("§eConnecting to MySQL database...")
         UtilsManager.dbManager.openConnection()
-        if (!UtilsManager.sqlManager.hasConnection()) error("Cannot connect to MySQL database")
+        if (!UtilsManager.sqlManager.hasConnection()) error("Cannot connect to MySQL database.")
         log("§aConnected to MySQL database!")
     }
 

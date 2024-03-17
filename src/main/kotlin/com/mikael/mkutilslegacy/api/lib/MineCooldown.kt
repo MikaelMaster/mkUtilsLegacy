@@ -104,7 +104,7 @@ class MineCooldown(var duration: Long) {
     // Cooldown System - Start
     init {
         if (redisSync && !RedisAPI.isInitialized()) {
-            error("Cannot use redis to sync cooldown data; RedisAPI is not initialized.")
+            error("Cannot use redis to sync cooldown data because RedisAPI is not initialized.")
         }
     }
 

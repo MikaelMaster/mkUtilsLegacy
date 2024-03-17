@@ -209,8 +209,8 @@ object RedisBungeeAPI {
      */
     fun kickPlayer(playerName: String, kickMessage: String, bypassPerm: String = "nullperm"): Boolean {
         if (!isEnabled) error("RedisBungeeAPI is not enabled.")
-        if (kickMessage.contains(";")) error("kickMessage cannot contains ';' because of internal separator")
-        if (bypassPerm.contains(";")) error("bypassPerm cannot contains ';' because of internal separator")
+        if (kickMessage.contains(";")) error("kickMessage cannot contains ';' because of internal separator.")
+        if (bypassPerm.contains(";")) error("bypassPerm cannot contains ';' because of internal separator.")
         return RedisAPI.sendEvent(
             "mkUtils:BungeeAPI:Event:KickPlayer",
             "${playerName};${kickMessage};${bypassPerm}"
@@ -228,7 +228,11 @@ object RedisBungeeAPI {
      * @return True if the request has been sent with success. Otherwise, false.
      * @throws IllegalStateException if [isEnabled] is False.
      */
-    fun sendMessage(playersToSend: Set<String>, vararg message: BaseComponent, neededPermission: String = "nullperm"): Boolean {
+    fun sendMessage(
+        playersToSend: Set<String>,
+        vararg message: BaseComponent,
+        neededPermission: String = "nullperm"
+    ): Boolean {
         if (!isEnabled) error("RedisBungeeAPI is not enabled.")
         val json = JSONObject()
         json.put("playersToSend", JSONArray(playersToSend))
@@ -243,7 +247,11 @@ object RedisBungeeAPI {
     /**
      * @see sendMessage
      */
-    fun sendMessage(playersToSend: Set<String>, message: TextComponent, neededPermission: String = "nullperm"): Boolean {
+    fun sendMessage(
+        playersToSend: Set<String>,
+        message: TextComponent,
+        neededPermission: String = "nullperm"
+    ): Boolean {
         return sendMessage(playersToSend, *listOf(message).toTypedArray(), neededPermission = neededPermission)
     }
 
@@ -278,7 +286,7 @@ object RedisBungeeAPI {
      */
     fun sendActionBar(playerName: String, text: String): Boolean {
         if (!isEnabled) error("RedisBungeeAPI is not enabled.")
-        if (text.contains(";")) error("ActionBar text cannot contains ';' because of internal separator")
+        if (text.contains(";")) error("text cannot contains ';' because of internal separator.")
         return RedisAPI.sendEvent(
             "mkUtils:RedisBungeeAPI:Event:SendActionBarToPlayer",
             "${playerName};${text}"
@@ -367,10 +375,30 @@ object RedisBungeeAPI {
      */
     fun sendChat(playerName: String, msgToChat: String): Boolean {
         if (!isEnabled) error("RedisBungeeAPI is not enabled.")
-        if (msgToChat.contains(";")) error("ActionBar text cannot contains ';' because of internal separator")
+        if (msgToChat.contains(";")) error("msgToChat cannot contains ';' because of internal separator.")
         return RedisAPI.sendEvent(
             "mkUtils:RedisBungeeAPI:Event:SendChat",
             "${playerName};${msgToChat}"
+        )
+    }
+
+    /**
+     * Forces the given [playerName] to send a message in the chat (as the proxied player). ([ProxiedPlayer.chat])
+     *
+     * You can force the player to run proxy commands with this, the message just needs to start with '/'.
+     * Remember that the [msgToChat] cannot contains the character ';'.
+     *
+     * @param playerName the proxied player to play the sound.
+     * @param msgToChat the message to force player to send in chat.
+     * @return True if the request has been sent with success. Otherwise, false.
+     * @throws IllegalStateException if [isEnabled] is False.
+     */
+    fun sendProxyChat(proxiedPlayerName: String, msgToChat: String): Boolean {
+        if (!isEnabled) error("RedisBungeeAPI is not enabled.")
+        if (msgToChat.contains(";")) error("msgToChat cannot contains ';' because of internal separator.")
+        return RedisAPI.sendEvent(
+            "mkUtils:RedisBungeeAPI:Event:SendProxyChat",
+            "${proxiedPlayerName};${msgToChat}"
         )
     }
 
@@ -393,7 +421,7 @@ object RedisBungeeAPI {
                                 val volume = data[2].toFloat()
                                 val pitch = data[3].toFloat()
 
-                                players@for (playerName in players) {
+                                players@ for (playerName in players) {
                                     val player = Bukkit.getPlayer(playerName) ?: continue@players
                                     player.runBlock {
                                         player.playSound(player.location, soundToPlay, volume, pitch)
@@ -428,7 +456,7 @@ object RedisBungeeAPI {
                                     player.runBlock {
                                         val world =
                                             Bukkit.getWorlds().firstOrNull { it.name.equals(worldName, true) } ?: error(
-                                                "Given world $worldName is not loaded"
+                                                "Given world $worldName is not loaded."
                                             )
                                         val loc =
                                             Location(world, data[2].toDouble(), data[3].toDouble(), data[4].toDouble())
@@ -471,15 +499,18 @@ object RedisBungeeAPI {
                         val data = message.split(";")
                         when (channel) {
                             "mkUtils:BungeeAPI:Event:ConnectPlayer" -> {
-                                val player = ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
+                                val player =
+                                    ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
                                 player.runBlock {
-                                    val server = ProxyServer.getInstance().getServerInfo(data[1]) ?: return@runBlock // data[1] = serverName
+                                    val server = ProxyServer.getInstance().getServerInfo(data[1])
+                                        ?: return@runBlock // data[1] = serverName
                                     player.connect(server)
                                 }
                             }
 
                             "mkUtils:BungeeAPI:Event:KickPlayer" -> {
-                                val player = ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
+                                val player =
+                                    ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
                                 player.runBlock {
                                     val bypassPerm = data[2]
                                     if (bypassPerm != "nullperm" && player.hasPermission(bypassPerm)) return@runBlock
@@ -490,7 +521,9 @@ object RedisBungeeAPI {
                             "mkUtils:BungeeAPI:Event:SendMsgToPlayerList" -> {
                                 val json = JSONObject(message)
                                 val players = json.getJSONArray("playersToSend").toList() as List<String>
-                                val message = TextComponent(*ComponentSerializer.parse(json.getString("message")).toList().toTypedArray())
+                                val message = TextComponent(
+                                    *ComponentSerializer.parse(json.getString("message")).toList().toTypedArray()
+                                )
                                 val neededPermission = json.getString("neededPermission")
 
                                 players@ for (playerName in players) {
@@ -500,6 +533,14 @@ object RedisBungeeAPI {
                                             player.sendMessage(message)
                                         }
                                     }
+                                }
+                            }
+
+                            "mkUtils:RedisBungeeAPI:Event:SendProxyChat" -> {
+                                val player =
+                                    ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
+                                player.runBlock {
+                                    player.chat(data[1]) // data[1] = msgToChat
                                 }
                             }
 
@@ -521,6 +562,7 @@ object RedisBungeeAPI {
                 "mkUtils:BungeeAPI:Event:KickPlayer",
                 "mkUtils:BungeeAPI:Event:SendMsgToPlayer",
                 "mkUtils:BungeeAPI:Event:SendMsgToPlayerList",
+                "mkUtils:RedisBungeeAPI:Event:SendProxyChat",
                 "mkUtils:BungeeAPI:Event:ServerPowerAction"
             )
         }
