@@ -388,7 +388,7 @@ object RedisBungeeAPI {
      * You can force the player to run proxy commands with this, the message just needs to start with '/'.
      * Remember that the [msgToChat] cannot contains the character ';'.
      *
-     * @param playerName the proxied player to play the sound.
+     * @param playerName the proxied player to send chat message.
      * @param msgToChat the message to force player to send in chat.
      * @return True if the request has been sent with success. Otherwise, false.
      * @throws IllegalStateException if [isEnabled] is False.
@@ -399,6 +399,24 @@ object RedisBungeeAPI {
         return RedisAPI.sendEvent(
             "mkUtils:RedisBungeeAPI:Event:SendProxyChat",
             "${proxiedPlayerName};${msgToChat}"
+        )
+    }
+
+    /**
+     * Forces the given [playerName] to dispatch a command (as the proxied player).
+     *
+     * @param playerName the proxied player to dispatch the command.
+     * @param proxyCmd the command to dispatch as the given proxied player.
+     * @return True if the request has been sent with success. Otherwise, false.
+     * @throws IllegalStateException if [isEnabled] is False.
+     */
+    fun dispatchProxyCmd(proxiedPlayerName: String, proxyCmd: String): Boolean {
+        if (!isEnabled) error("RedisBungeeAPI is not enabled.")
+        val finalCmd = proxyCmd.removePrefix("/")
+        if (finalCmd.contains(";")) error("proxyCmd cannot contains ';' because of internal separator.")
+        return RedisAPI.sendEvent(
+            "mkUtils:RedisBungeeAPI:Event:DispatchProxyCmd",
+            "${proxiedPlayerName};${finalCmd}"
         )
     }
 
@@ -541,6 +559,17 @@ object RedisBungeeAPI {
                                     ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
                                 player.runBlock {
                                     player.chat(data[1]) // data[1] = msgToChat
+                                }
+                            }
+
+                            "mkUtils:RedisBungeeAPI:Event:DispatchProxyCmd" -> {
+                                val player =
+                                    ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
+                                player.runBlock {
+                                    ProxyServer.getInstance().pluginManager.dispatchCommand(
+                                        player,
+                                        data[1]
+                                    ) // data[1] = proxyCmd
                                 }
                             }
 
