@@ -1,8 +1,8 @@
 package com.mikael.mkutilslegacy.api.redis
 
 import com.mikael.mkutilslegacy.api.toTextComponent
-import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.bungee.api.runBlock
+import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.actionBar
 import com.mikael.mkutilslegacy.spigot.api.runBlock
@@ -38,7 +38,6 @@ object RedisBungeeAPI {
     val isEnabled: Boolean get() = RedisAPI.isInitialized() && RedisAPI.useToSyncBungeePlayers
 
     // SPIGOT ONLY - Start
-
     /**
      * Returns this current spigot server name in mkUtils [RedisBungeeAPI] system.
      *
@@ -64,7 +63,6 @@ object RedisBungeeAPI {
             "${spigotServerName};${if (online) "on" else "off"}"
         )
     }
-
     // SPIGOT ONLY - End
 
     /**
@@ -438,7 +436,6 @@ object RedisBungeeAPI {
                                 val soundToPlay = Sound.valueOf(data[1].uppercase()) // data[1] = soundName
                                 val volume = data[2].toFloat()
                                 val pitch = data[3].toFloat()
-
                                 players@ for (playerName in players) {
                                     val player = Bukkit.getPlayer(playerName) ?: continue@players
                                     player.runBlock {
@@ -473,11 +470,15 @@ object RedisBungeeAPI {
                                 utilsMain.syncTask {
                                     player.runBlock {
                                         val world =
-                                            Bukkit.getWorlds().firstOrNull { it.name.equals(worldName, true) } ?: error(
-                                                "Given world $worldName is not loaded."
-                                            )
+                                            Bukkit.getWorlds().firstOrNull { it.name.equals(worldName, true) }
+                                                ?: error("Given world $worldName is not loaded.")
                                         val loc =
-                                            Location(world, data[2].toDouble(), data[3].toDouble(), data[4].toDouble())
+                                            Location(
+                                                world,
+                                                data[2].toDouble(),
+                                                data[3].toDouble(),
+                                                data[4].toDouble()
+                                            ) // data[2] = x, data[3] = y, data[4] = z
                                         player.teleport(loc)
                                         if (data[5].toBoolean()) { // data[5] = playTeleportSound
                                             player.soundTP()
@@ -543,7 +544,6 @@ object RedisBungeeAPI {
                                     *ComponentSerializer.parse(json.getString("message")).toList().toTypedArray()
                                 )
                                 val neededPermission = json.getString("neededPermission")
-
                                 players@ for (playerName in players) {
                                     val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
                                     player.runBlock {
@@ -574,12 +574,12 @@ object RedisBungeeAPI {
                             }
 
                             "mkUtils:BungeeAPI:Event:ServerPowerAction" -> {
-                                if (!UtilsBungeeMain.instance.config.getBoolean("RedisBungeeAPI.logSpigotServersPowerActions")) return
+                                if (!utilsBungeeMain.config.getBoolean("RedisBungeeAPI.logSpigotServersPowerActions")) return
                                 val server = data[0]
-                                val newState = data[1]
-                                val logMsg = if (newState == "on") "§aSpigot server '$server' is now online." else
+                                val logMsg = if (data[1] == "on") // data[1] = action
+                                    "§aSpigot server '$server' is now online." else
                                     "§cSpigot server '$server' is now offline."
-                                UtilsBungeeMain.instance.log(
+                                utilsBungeeMain.log(
                                     "",
                                     "§6[RedisBungeeAPI] $logMsg",
                                     ""
