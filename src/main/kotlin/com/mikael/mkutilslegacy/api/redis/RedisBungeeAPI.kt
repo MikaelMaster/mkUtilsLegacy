@@ -592,6 +592,7 @@ object RedisBungeeAPI {
                 "mkUtils:BungeeAPI:Event:SendMsgToPlayer",
                 "mkUtils:BungeeAPI:Event:SendMsgToPlayerList",
                 "mkUtils:RedisBungeeAPI:Event:SendProxyChat",
+                "mkUtils:RedisBungeeAPI:Event:DispatchProxyCmd",
                 "mkUtils:BungeeAPI:Event:ServerPowerAction"
             )
         }
