@@ -629,7 +629,7 @@ object RedisBungeeAPI {
                                 players@ for (playerName in players) {
                                     val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
                                     player.runBlock {
-                                        proxyTitle.send(player)
+                                        player.sendTitle(proxyTitle)
                                     }
                                 }
                             }
@@ -654,7 +654,8 @@ object RedisBungeeAPI {
                 "mkUtils:BungeeAPI:Event:SendMsgToPlayerList",
                 "mkUtils:RedisBungeeAPI:Event:SendProxyChat",
                 "mkUtils:RedisBungeeAPI:Event:DispatchProxyCmd",
-                "mkUtils:BungeeAPI:Event:ServerPowerAction"
+                "mkUtils:BungeeAPI:Event:SendTitleToPlayerList",
+                "mkUtils:BungeeAPI:Event:ServerPowerAction",
             )
         }
     }
