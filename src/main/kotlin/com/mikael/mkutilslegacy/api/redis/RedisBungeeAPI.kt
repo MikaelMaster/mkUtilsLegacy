@@ -9,6 +9,7 @@ import com.mikael.mkutilslegacy.spigot.api.runBlock
 import com.mikael.mkutilslegacy.spigot.api.soundTP
 import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.Title
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.chat.ComponentSerializer
@@ -292,6 +293,45 @@ object RedisBungeeAPI {
     }
 
     /**
+     * @see sendTitle
+     */
+    fun sendTitle(
+        playerName: String,
+        title: String,
+        subtitle: String,
+        fadeIn: Int = 10,
+        stay: Int = 20 * 3,
+        fadeOut: Int = 10
+    ): Boolean {
+        return sendTitle(setOf(playerName), title, subtitle, fadeIn, stay, fadeOut)
+    }
+
+    /**
+     * Sends a title to the given [playersName].
+     * The proxy server will be used to send the [title] and the [subtitle].
+     *
+     * @param title the title to send.
+     * @param subtitle the subtitle to send.
+     * @param fadeIn the fade in time. Default: 10.
+     * @param stay the stay time. Default: 20 * 3.
+     * @param fadeOut the fade out time. Default: 10.
+     */
+    fun sendTitle(
+        playersName: Set<String>,
+        title: String,
+        subtitle: String,
+        fadeIn: Int = 10,
+        stay: Int = 20 * 3,
+        fadeOut: Int = 10
+    ): Boolean {
+        if (!isEnabled) error("RedisBungeeAPI is not enabled.")
+        return RedisAPI.sendEvent(
+            "mkUtils:BungeeAPI:Event:SendTitleToPlayerList",
+            "${playersName.joinToString(",")};${title};${subtitle};${fadeIn};${stay};${fadeOut}"
+        )
+    }
+
+    /**
      * @see playSound
      */
     fun playSound(playerName: String, bukkitSound: String, volume: Float = 2f, pitch: Float = 1f): Boolean {
@@ -570,6 +610,27 @@ object RedisBungeeAPI {
                                         player,
                                         data[1]
                                     ) // data[1] = proxyCmd
+                                }
+                            }
+
+                            "mkUtils:BungeeAPI:Event:SendTitleToPlayerList" -> {
+                                val players = data[0].split(",").filter { it.isNotEmpty() } // data[0] = playersName
+                                val title = data[1]
+                                val subtitle = data[2]
+                                val fadeIn = data[3].toInt()
+                                val stay = data[4].toInt()
+                                val fadeOut = data[5].toInt()
+                                val proxyTitle = ProxyServer.getInstance().createTitle()
+                                    .title(title.toTextComponent())
+                                    .subTitle(subtitle.toTextComponent())
+                                    .fadeIn(fadeIn)
+                                    .stay(stay)
+                                    .fadeOut(fadeOut)
+                                players@ for (playerName in players) {
+                                    val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
+                                    player.runBlock {
+                                        proxyTitle.send(player)
+                                    }
                                 }
                             }
 
