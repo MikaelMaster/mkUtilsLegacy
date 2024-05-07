@@ -15,6 +15,7 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.json.JSONObject
 import java.io.*
+import java.net.HttpURLConnection
 import java.net.URL
 import java.text.NumberFormat
 import java.util.*
@@ -218,6 +219,7 @@ fun Number.formatValue(): String {
 
 private val values = intArrayOf(1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1)
 private val numerals = arrayOf("M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I")
+
 /**
  * @return a [String] with the given [Int] as a Roman number.
  * @author Mikael
@@ -310,11 +312,16 @@ private val jsonParser = JsonParser()
  * @throws JsonIOException
  * @throws JsonSyntaxException
  * @author Mikael
- * @see URL.stream
  * @see jsonParser
  */
-fun URL.getJson(): JsonObject {
-    return jsonParser.parse(this.stream()).asJsonObject
+fun URL.getJson(connectTimeout: Int = 3000, readTimeout: Int = 3000): JsonObject {
+    val connection = this.openConnection()
+    connection.connectTimeout = connectTimeout
+    connection.readTimeout = readTimeout
+    val stream = connection.getInputStream()
+    val jsonString = stream.bufferedReader().use { it.readText() }
+    stream.close()
+    return jsonParser.parse(jsonString).asJsonObject
 }
 
 /**
