@@ -547,7 +547,7 @@ object RedisBungeeAPI {
         internal fun onDisableStopRedisSub() {
             try {
                 redisPubSubThread?.interrupt()
-                redisPubSubJedisClient?.close()
+                // redisPubSubJedisClient?.close() // This may cause an exception because the thread is still running
             } catch (ex: Exception) {
                 ex.printStackTrace()
             } finally {
@@ -683,7 +683,7 @@ object RedisBungeeAPI {
         internal fun onDisableStopRedisSub() {
             try {
                 redisPubSubThread?.interrupt()
-                redisPubSubJedisClient?.close()
+                // redisPubSubJedisClient?.close() // This may cause an exception because the thread is still running
             } catch (ex: Exception) {
                 ex.printStackTrace()
             } finally {
