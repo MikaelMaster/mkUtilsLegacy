@@ -6,6 +6,8 @@ import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.toTextComponent
 import net.md_5.bungee.api.ProxyServer
 import org.bukkit.Bukkit
+import org.json.JSONObject
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -71,11 +73,11 @@ class MineCooldown(var duration: Long) {
      * The ID of this [MineCooldown] under redis.
      * If you want that different cooldowns in different servers sync between, just set them with the same ID.
      *
-     * By default, the id is represented as [MineCooldown].toString(), using MineCooldown as this.
+     * By default, the id is represented as [UUID.randomUUID].toString().
      *
      * @see redisSync
      */
-    var redisSyncId = this.toString()
+    var redisSyncId = UUID.randomUUID().toString()
 
     /**
      * The cooldowns by permission.
@@ -142,7 +144,7 @@ class MineCooldown(var duration: Long) {
 
     fun stopCooldown(playerName: String) {
         if (redisSync) {
-            RedisAPI.mapDelete("mkUtils:MineCooldown:Cooldown:${redisSyncId}", playerName)
+            RedisAPI.mapDelete("mkUtils_MineCooldown_Cooldown_${redisSyncId}", playerName)
         } else {
             cooldowns.remove(playerName)
         }
@@ -165,11 +167,13 @@ class MineCooldown(var duration: Long) {
             stopCooldown(playerName)
         }
         if (redisSync) {
-            RedisAPI.insertMap(
-                "mkUtils:MineCooldown:Cooldown:${redisSyncId}",
-                mapOf(
-                    playerName to "${System.currentTimeMillis()};${customDuration}"
-                )
+            RedisAPI.setMapValue(
+                "mkUtils_MineCooldown_Cooldown_${redisSyncId}",
+                playerName,
+                JSONObject()
+                    .put("time", System.currentTimeMillis())
+                    .put("duration", customDuration)
+                    .toString()
             )
         } else {
             cooldowns[playerName] = mapOf(System.currentTimeMillis() to customDuration)
@@ -201,9 +205,9 @@ class MineCooldown(var duration: Long) {
 
     fun getResult(playerName: String): Long {
         val timeManager = if (redisSync) {
-            val redisData =
-                RedisAPI.getMapValue("mkUtils:MineCooldown:Cooldown:${redisSyncId}", playerName)?.split(";") ?: return 0
-            mapOf(redisData[0].toLong() to redisData[1].toLong())
+            val redisData = RedisAPI.getMapValue("mkUtils_MineCooldown_Cooldown_${redisSyncId}", playerName) ?: return 0
+            val json = JSONObject(redisData)
+            mapOf(json.getLong("time") to json.getLong("duration"))
         } else {
             cooldowns[playerName] ?: return 0
         }

@@ -17,10 +17,14 @@ class RedisBungeeAPIListener : MineListener() {
     fun onPlayerJoin(e: PlayerJoinEvent) {
         val player = e.player
         player.runBlock {
-            val serverData = RedisAPI.getMapValue("mkUtils:BungeeAPI:Servers", currentServer) ?: return@runBlock
-            val players = serverData.split(";").filter { it.isNotBlank() }.toMutableList()
-            players.add(player.name)
-            RedisAPI.insertMap("mkUtils:BungeeAPI:Servers", mapOf(currentServer to players.joinToString(";")))
+            RedisAPI.jedisPool.resource.use { resource ->
+                val pipeline = resource.pipelined()
+                pipeline.sadd(
+                    "${RedisBungeeAPI.RedisBungeeAPIKey.SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${currentServer}",
+                    player.name.lowercase()
+                )
+                pipeline.sync()
+            }
         }
     }
 
@@ -28,10 +32,14 @@ class RedisBungeeAPIListener : MineListener() {
     fun onPlayerQuit(e: PlayerQuitEvent) {
         val player = e.player
         player.runBlock {
-            val serverData = RedisAPI.getMapValue("mkUtils:BungeeAPI:Servers", currentServer) ?: return@runBlock
-            val players = serverData.split(";").filter { it.isNotBlank() }.toMutableList()
-            players.remove(player.name)
-            RedisAPI.insertMap("mkUtils:BungeeAPI:Servers", mapOf(currentServer to players.joinToString(";")))
+            RedisAPI.jedisPool.resource.use { resource ->
+                val pipeline = resource.pipelined()
+                pipeline.srem(
+                    "${RedisBungeeAPI.RedisBungeeAPIKey.SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${currentServer}",
+                    player.name.lowercase()
+                )
+                pipeline.sync()
+            }
         }
     }
 

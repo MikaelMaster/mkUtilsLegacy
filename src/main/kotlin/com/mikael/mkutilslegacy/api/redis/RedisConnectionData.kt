@@ -9,10 +9,16 @@ class RedisConnectionData(
 
     var isEnabled: Boolean = false,
 
+    var debug: Boolean = false,
+
+    // RedisBungeeAPI - Start
     /**
      * @see RedisBungeeAPI
      */
     var useRedisBungeeAPI: Boolean = false,
+
+    var debugRedisBungeeAPI: Boolean = false,
+    // RedisBungeeAPI - End
 
     var usePass: Boolean = false,
 

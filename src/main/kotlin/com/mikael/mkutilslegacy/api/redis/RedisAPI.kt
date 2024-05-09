@@ -1,12 +1,11 @@
 package com.mikael.mkutilslegacy.api.redis
 
-import com.mikael.mkutilslegacy.api.redis.RedisAPI.getExtraClient
-import com.mikael.mkutilslegacy.api.redis.RedisAPI.getString
-import com.mikael.mkutilslegacy.api.redis.RedisAPI.isInitialized
+import com.mikael.mkutilslegacy.api.isProxyServer
 import com.mikael.mkutilslegacy.api.redis.RedisAPI.jedisPool
-import com.mikael.mkutilslegacy.api.redis.RedisAPI.managerData
-import com.mikael.mkutilslegacy.api.runTryCatch
+import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
+import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
+import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
@@ -14,11 +13,10 @@ import redis.clients.jedis.JedisPool
 /**
  * mkUtils [RedisAPI]
  *
- * Remember that to use this API you should mark 'RedisAPI.isEnabled' to True in [UtilsMain.config] file.
+ * This API is used to connect to a Redis server and perform operations like *set*, *get*, *del*, and more easily.
  *
- * To create a Redis Sub you should create a [Thread] and use [getExtraClient].
- * The [RedisConnectionData] required to connect an extra client is the [managerData].
- * Once you have an extra client inside the created [Thread], just register a Redis Sub using it.
+ * Remember that to use this API you should mark *RedisAPI.isEnabled* to *true*
+ * in [UtilsMain.config] (or [UtilsBungeeMain.config] if you are using BungeeCord) file.
  *
  * @author Mikael
  * @see RedisConnectionData
@@ -46,6 +44,7 @@ object RedisAPI {
     val isInitialized: Boolean get() = this::jedisPoolConfig.isInitialized && this::jedisPool.isInitialized
     // Properties - End
 
+    // Internal methods - Start
     internal fun onEnableLoadRedisAPI(): Boolean {
         val config = GenericObjectPoolConfig<Jedis>()
         config.maxTotal = managerData.jedisPoolMaxClients
@@ -68,172 +67,122 @@ object RedisAPI {
         jedisPool.destroy()
     }
 
+    private fun debug(msg: String) {
+        if (!isInitialized || !managerData.debug) return
+        if (isProxyServer) {
+            utilsBungeeMain.log("§e[RedisAPI] §6[DEBUG] §f$msg")
+        } else {
+            utilsMain.log("§e[RedisAPI] §6[DEBUG] §f$msg")
+        }
+    }
+    // Internal methods - End
+
     /**
-     * Verify if a data exists in the redis server.
-     *
-     * To verify if multiple keys exists at the same time, use [existsAll].
-     *
-     * @param key the key to verify if the value exists.
-     * @return True if the data exists. Otherwise, false.
-     * @throws IllegalStateException if [isInitialized] is false.
+     * @see Jedis.set
      */
-    fun exists(key: String): Boolean {
+    fun set(key: String, value: Any): Boolean {
         if (!isInitialized) error("RedisAPI is not initialized.")
+        val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
-            val response = pipelined.exists(key)
+            val res = pipelined.set(key, value.toString())
             pipelined.sync()
-            return response.get()
+            debug("set() to '$key' took ${System.currentTimeMillis() - start}ms.")
+            return res.get() == "OK"
         }
     }
 
     /**
-     * Verify if multiple keys exits in redis server.
-     *
-     * To verify if a single key exists use [exists].
-     *
-     * @param keys the keys to verify if them exists.
-     * @return True if all given [keys] exists. Otherwise, false.
-     * @throws IllegalStateException if [isInitialized] is false.
+     * @see Jedis.hset
      */
-    fun existsAll(vararg keys: String): Boolean {
+    fun setMap(key: String, value: Map<String, String>): Long {
         if (!isInitialized) error("RedisAPI is not initialized.")
+        val start = System.currentTimeMillis()
+        jedisPool.resource.use { resource ->
+            val pipelined = resource.pipelined()
+            val res = pipelined.hset(key, value)
+            pipelined.sync()
+            debug("setMap() to '$key' took ${System.currentTimeMillis() - start}ms.")
+            return res.get()
+        }
+    }
+
+    /**
+     * @see Jedis.hsetnx
+     */
+    fun setMapValue(key: String, mapKey: String, mapValue: String): Long {
+        return setMap(key, mapOf(mapKey to mapValue))
+    }
+
+    /**
+     * @see exists
+     */
+    data class ExistsResponse(val verifiedKeys: Long, val existentKeys: Long) {
+        /**
+         * @return True if the verified keys are equals to the existent keys. Otherwise, false.
+         */
+        val asBoolean get() = verifiedKeys == existentKeys
+    }
+
+    /**
+     * @return an [ExistsResponse] with the verified keys and the existent keys.
+     * @see Jedis.exists
+     */
+    fun exists(vararg keys: String): ExistsResponse {
+        if (!isInitialized) error("RedisAPI is not initialized.")
+        val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
             val response = pipelined.exists(*keys)
             pipelined.sync()
-            return response.get() == keys.size.toLong()
+            val verifiedKeys = keys.size.toLong()
+            val existentKeys = response.get()
+            debug("exists() took ${System.currentTimeMillis() - start}ms. Verified: $verifiedKeys | Existent: ${existentKeys}.")
+            return ExistsResponse(verifiedKeys, existentKeys)
         }
     }
 
     /**
-     * Inserts a data into redis server using the given [key] and [value].
-     *
-     * @param key the key to push the value.
-     * @param value the value to be pushed into redis server. The value will always be converted to string.
-     * @return True if the insert was completed. Otherwise, false.
-     * @throws IllegalStateException if [isInitialized] is false.
-     * @see Jedis.set
-     */
-    fun insert(key: String, value: Any): Boolean {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return runTryCatch {
-            jedisPool.resource.use { resource ->
-                val pipelined = resource.pipelined()
-                pipelined.set(key, value.toString())
-                pipelined.sync()
-            }
-        }
-    }
-
-    /**
-     * Inserts a map using the given [key] into redis server.
-     *
-     * @param key the key to push the value.
-     * @param value the [Map] to be pushed into redis server.
-     * @return True if the insert was completed. Otherwise, false.
-     * @throws IllegalStateException if [isInitialized] is false.
-     * @see Jedis.hset
-     */
-    fun insertMap(key: String, value: Map<String, String>): Boolean {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return runTryCatch {
-            jedisPool.resource.use { resource ->
-                val pipelined = resource.pipelined()
-                pipelined.hset(key, value)
-                pipelined.sync()
-            }
-        }
-    }
-
-    /**
-     * Inserts a map using the given [key] into redis server.
-     *
-     * @param key the key to push the value.
-     * @param mapKey the map key to be set.
-     * @param mapValue the map value to be set.
-     * @return True if the insert was completed. Otherwise, false.
-     * @throws IllegalStateException if [isInitialized] is false.
-     * @see Jedis.hset
-     */
-    fun insertMapValue(key: String, mapKey: String, mapValue: String): Boolean {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return runTryCatch {
-            jedisPool.resource.use { resource ->
-                val pipelined = resource.pipelined()
-                pipelined.hsetnx(key, mapKey, mapValue)
-                pipelined.sync()
-            }
-        }
-    }
-
-    /**
-     * Inserts a String List into the redis server using the given [key] and [stringList].
-     *
-     * @param key the key to push the value.
-     * @param stringList the String List to be pushed into redis server.
-     * @param useExistingData if is to use the existing redis list data. If you want to send this list with just the given `stringList`, mark this as false.
-     * @return True if the insert was completed. Otherwise, false.
-     * @throws IllegalStateException if [isInitialized] is false.
-     */
-    fun insertStringList(
-        key: String,
-        stringList: MutableList<String>,
-        useExistingData: Boolean = true
-    ): Boolean {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return runTryCatch {
-            if (useExistingData) {
-                val possibleData = getStringList(key)
-                if (possibleData != null) {
-                    for (string in possibleData) {
-                        stringList.add(string)
-                    }
-                }
-            }
-            val stringBuilder = StringBuilder()
-            for ((index, string) in stringList.withIndex()) {
-                stringBuilder.append(string)
-                if (index != stringList.lastIndex) stringBuilder.append(";")
-            }
-            insert(key, stringBuilder.toString())
-        }
-    }
-
-    /**
-     * Hmm ?
-     */
-    fun removeFromStringList(
-        key: String,
-        stringListToRemove: MutableList<String>
-    ): Boolean {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return runTryCatch {
-            val data = getStringList(key)?.toMutableList() ?: return@runTryCatch // There's nothing to remove
-            if (data.isEmpty()) return@runTryCatch
-            data.removeAll(stringListToRemove)
-            insertStringList(key, data, false)
-        }
-    }
-
-    /**
-     * Get all data in redis liked with given [keys].
-     *
-     * This method is MUCH faster than using a For with [getString].
-     *
-     * @param keys the keys to get linked data from redis server.
-     * @return all data for the given [keys]. If one of the given [keys] does not exits, 'nil' will be
-     * returned as the value of that specific key.
      * @see Jedis.mget
      */
     fun getAllData(vararg keys: String): List<String> {
         if (!isInitialized) error("RedisAPI is not initialized.")
+        val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
-            val response = pipelined.mget(*keys)
+            val res = pipelined.mget(*keys)
             pipelined.sync()
-            return response.get()
+            debug("getAllData() took ${System.currentTimeMillis() - start}ms.")
+            return res.get()
         }
+    }
+
+    /**
+     * @see Jedis.get
+     */
+    fun getString(key: String): String? {
+        if (!isInitialized) error("RedisAPI is not initialized.")
+        val start = System.currentTimeMillis()
+        jedisPool.resource.use { resource ->
+            val pipelined = resource.pipelined()
+            val res = pipelined.get(key)
+            pipelined.sync()
+            val value = res.get()
+            debug("getString() from '$key' took ${System.currentTimeMillis() - start}ms.")
+            return if (value != "nil") value else null
+        }
+    }
+
+    fun getInt(key: String): Int? {
+        return getString(key)?.toInt()
+    }
+
+    fun getDouble(key: String): Double? {
+        return getString(key)?.toDouble()
+    }
+
+    fun getLong(key: String): Long? {
+        return getString(key)?.toLong()
     }
 
     /**
@@ -241,11 +190,13 @@ object RedisAPI {
      */
     fun getMap(key: String): Map<String, String> {
         if (!isInitialized) error("RedisAPI is not initialized.")
+        val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
-            val response = pipelined.hgetAll(key)
+            val res = pipelined.hgetAll(key)
             pipelined.sync()
-            return response.get()
+            debug("getMap() from '$key' took ${System.currentTimeMillis() - start}ms.")
+            return res.get()
         }
     }
 
@@ -254,204 +205,65 @@ object RedisAPI {
      */
     fun getMapValue(key: String, mapKey: String): String? {
         if (!isInitialized) error("RedisAPI is not initialized.")
+        val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
-            val response = pipelined.hget(key, mapKey)
+            val res = pipelined.hget(key, mapKey)
             pipelined.sync()
-            val value = response.get()
+            val value = res.get()
+            debug("getMapValue() from '$key' took ${System.currentTimeMillis() - start}ms.")
             return if (value != "nil") value else null
+        }
+    }
+
+
+    /**
+     * @see Jedis.del
+     */
+    fun delete(vararg keys: String): Long {
+        if (!isInitialized) error("RedisAPI is not initialized.")
+        val start = System.currentTimeMillis()
+        jedisPool.resource.use { resource ->
+            val pipelined = resource.pipelined()
+            val res = pipelined.del(*keys)
+            pipelined.sync()
+            val deletedCount = res.get()
+            debug("delete() took ${System.currentTimeMillis() - start}ms. Deleted: $deletedCount.")
+            return deletedCount
         }
     }
 
     /**
      * @see Jedis.hdel
      */
-    fun mapDeleteAll(key: String): Boolean {
+    fun mapDelete(key: String, vararg mapKeys: String): Long {
         if (!isInitialized) error("RedisAPI is not initialized.")
-        return runTryCatch {
-            jedisPool.resource.use { resource ->
-                val pipelined = resource.pipelined()
-                pipelined.hdel(key)
-                pipelined.sync()
-            }
-        }
-    }
-
-    /**
-     * @see Jedis.hdel
-     */
-    fun mapDelete(key: String, mapKey: String): Boolean {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return runTryCatch {
-            jedisPool.resource.use { resource ->
-                val pipelined = resource.pipelined()
-                pipelined.hdel(key, mapKey)
-                pipelined.sync()
-            }
-        }
-    }
-
-    /**
-     * Returns a String from redis server using the given [key].
-     *
-     * @param key the key to search on redis server for a data.
-     * @return A String from the redis server. Null if the data does not exist.
-     * @throws IllegalStateException if [isInitialized] is false.
-     * @throws NullPointerException if the returned data is null.
-     */
-    fun getString(key: String): String? {
-        if (!isInitialized) error("RedisAPI is not initialized.")
+        val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
-            val response = pipelined.get(key)
+            val res = pipelined.hdel(key, *mapKeys)
             pipelined.sync()
-            val value = response.get()
-            return if (value != "nil") value else null
+            val deletedCount = res.get()
+            debug("mapDelete() from '$key' took ${System.currentTimeMillis() - start}ms. Deleted: $deletedCount.")
+            return deletedCount
         }
     }
 
     /**
-     * Returns a String from redis server using the given [key].
-     * If the returned data from redis is null, the given [defaultValue] will be set for the given [key],
-     * and the [defaultValue] will be returned.
-     *
-     * @param key the key to search on redis server for a data.
-     * @param defaultValue the value to associate with the [key] if there's no data for this [key] in redis server.
-     * @return A String from the redis server, or the [defaultValue] if there's no data for the given [key].
-     * @throws IllegalStateException if [isInitialized] is false.
-     * @throws NullPointerException if the returned data is null.
+     * @see Jedis.publish
      */
-    fun getOrPut(key: String, defaultValue: Any): String {
+    fun sendEvent(channel: String, message: String): Long {
         if (!isInitialized) error("RedisAPI is not initialized.")
+        val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
-            val response = pipelined.get(key)
+            val res = pipelined.publish(channel, message)
             pipelined.sync()
-            val value = response.get()
-            if (value == "nil") {
-                pipelined.set(key, "$defaultValue")
-                pipelined.sync()
-            }
-            return value ?: "$defaultValue"
+            val receivedCount = res.get()
+            debug("sendEvent() to '$channel' took ${System.currentTimeMillis() - start}ms. Received: ${receivedCount}.")
+            return receivedCount
         }
     }
-
-    /**
-     * Returns a String List from redis server using the given [key].
-     *
-     * @param key the key to search on redis server for a data.
-     * @return A String List from the redis server. Empty list of the data dos not exist.
-     * @throws IllegalStateException if [isInitialized] is false.
-     */
-    fun getStringList(key: String): List<String>? {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return getString(key)?.split(";")?.filter { it.isNotBlank() }
-    }
-
-    /**
-     * Returns an Int from redis server using the given [key].
-     *
-     * @param key the key to search on redis server for a data.
-     * @return An Int? from the redis server. Null if the data does not exist.
-     * @throws IllegalStateException if [isInitialized] is false.
-     * @throws NumberFormatException if the returned data is null or is not an Int.
-     */
-    fun getInt(key: String): Int? {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return getString(key)?.toInt()
-    }
-
-    /**
-     * Returns a Double from redis server using the given [key].
-     *
-     * @param key the key to search on redis server for a data.
-     * @return A Double? from the redis server. Null if the data does not exist.
-     * @throws IllegalStateException if [isInitialized] is false.
-     * @throws NumberFormatException if the returned data is null or is not an Int.
-     */
-    fun getDouble(key: String): Double? {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return getString(key)?.toDouble()
-    }
-
-    /**
-     * Returns a Long from redis server using the given [key].
-     *
-     * @param key the key to search on redis server for a data.
-     * @return A Long? from the redis server. Null if the data does not exist.
-     * @throws IllegalStateException if [isInitialized] is false.
-     * @throws NumberFormatException if the returned data is null or is not an Int.
-     */
-    fun getLong(key: String): Long? {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return getString(key)?.toLong()
-    }
-
-    /**
-     * This will return a value for the given [key] transformed into the given [C] ([Any]).
-     *
-     * @param key the key to search on redis server for a data.
-     * @return A Data as [C] from the redis server.
-     * @throws IllegalStateException if [isInitialized] is false.
-     * @throws ClassCastException if the returned value cannot be transformed into the given [C] ([Any]).
-     */
-    inline fun <reified C : Any> getDataAs(key: String): C {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        val data = getString(key)
-        if (data !is C) error("Returned data '${data}' cannot be cast as the given custom class.")
-        return data
-    }
-
-    /**
-     * Deletes a data from redis server.
-     *
-     * @param key the key to delete from redis.
-     * @return True if the value was successfully deleted. Otherwise, false.
-     */
-    fun delete(key: String): Boolean {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return runTryCatch {
-            jedisPool.resource.use { resource ->
-                val pipelined = resource.pipelined()
-                pipelined.del(key)
-                pipelined.sync()
-            }
-        }
-    }
-
-    /**
-     * Sends a ping to redis server.
-     *
-     * @return True if the ping is answered. Otherwise, false.
-     * @throws IllegalStateException if [isInitialized] is false.
-     */
-    fun testPing(): Boolean {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return runTryCatch {
-            jedisPool.resource.use { resource ->
-                resource.ping()
-            }
-        }
-    }
-
-    /**
-     * Sends an 'event' to redis server.
-     *
-     * @param channel the channel name to send the event.
-     * @param message the message that will be sent with the event.
-     * @return True if the event sent was completed. Otherwise, false.
-     * @throws IllegalStateException if [isInitialized] is false.
-     */
-    fun sendEvent(channel: String, message: String): Boolean {
-        if (!isInitialized) error("RedisAPI is not initialized.")
-        return runTryCatch {
-            jedisPool.resource.use { resource ->
-                resource.publish(channel, message)
-            }
-        }
-    }
-
-    // Extra Client Section
 
     /**
      * Creates a new [Jedis] and connect it using the given [RedisConnectionData].
@@ -465,12 +277,14 @@ object RedisAPI {
      * @throws IllegalStateException if the [RedisConnectionData.isEnabled] of the given [connectionData] is false.
      */
     fun getExtraClient(connectionData: RedisConnectionData): Jedis {
-        if (!connectionData.isEnabled) error("Given RedisConnectionData isEnabled should not be False.")
+        if (!connectionData.isEnabled) error("Given RedisConnectionData isEnabled should not be false.")
+        val start = System.currentTimeMillis()
         val jedis = Jedis("http://${connectionData.host}:${connectionData.port}/")
         if (connectionData.usePass) {
             jedis.auth(connectionData.pass)
         }
         jedis.connect()
+        debug("getExtraClient() took ${System.currentTimeMillis() - start}ms. UsePass: ${connectionData.usePass}.")
         return jedis
     }
 }
