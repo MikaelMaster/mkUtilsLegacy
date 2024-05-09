@@ -12,7 +12,7 @@ class RedisConnectionData(
     /**
      * @see RedisBungeeAPI
      */
-    var syncBungeeDataUsingRedis: Boolean = false,
+    var useRedisBungeeAPI: Boolean = false,
 
     var usePass: Boolean = false,
 

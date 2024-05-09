@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 
 class RedisBungeeAPIListener : MineListener() {
 
-    private val currentServer = RedisBungeeAPI.spigotServerName
+    private val currentServer = RedisBungeeAPI.Spigot.spigotServerName
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerJoin(e: PlayerJoinEvent) {

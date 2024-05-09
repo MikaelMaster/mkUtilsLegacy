@@ -28,14 +28,25 @@ import redis.clients.jedis.JedisPool
 @Suppress("WARNINGS")
 object RedisAPI {
 
-    var useToSyncBungeePlayers: Boolean = false
+    // Properties - Start
     lateinit var managerData: RedisConnectionData
 
     lateinit var jedisPoolConfig: GenericObjectPoolConfig<Jedis>
     lateinit var jedisPool: JedisPool
 
-    // mkUtils onEnable
-    internal fun onEnablePrepareRedisAPI(): Boolean {
+    // RedisBungeeAPI - Start
+    private var _useRedisBungeeAPI = false
+    var useRedisBungeeAPI: Boolean
+        get() = _useRedisBungeeAPI
+        internal set(value) {
+            _useRedisBungeeAPI = value
+        }
+    // RedisBungeeAPI - End
+
+    val isInitialized: Boolean get() = this::jedisPoolConfig.isInitialized && this::jedisPool.isInitialized
+    // Properties - End
+
+    internal fun onEnableLoadRedisAPI(): Boolean {
         val config = GenericObjectPoolConfig<Jedis>()
         config.maxTotal = managerData.jedisPoolMaxClients
         config.maxIdle = managerData.jedisPoolMaxIdle
@@ -52,13 +63,9 @@ object RedisAPI {
         return true
     }
 
-    /**
-     * Checks if the [RedisAPI] has been started and probably is working correctly.
-     *
-     * @return True if the [jedisPoolConfig] and [jedisPool] has been set. Otherwise, false.
-     */
-    fun isInitialized(): Boolean {
-        return this::jedisPoolConfig.isInitialized && this::jedisPool.isInitialized
+    internal fun onDisableUnloadRedisAPI() {
+        if (!isInitialized) return
+        jedisPool.destroy()
     }
 
     /**
@@ -71,7 +78,7 @@ object RedisAPI {
      * @throws IllegalStateException if [isInitialized] is false.
      */
     fun exists(key: String): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
             val response = pipelined.exists(key)
@@ -90,7 +97,7 @@ object RedisAPI {
      * @throws IllegalStateException if [isInitialized] is false.
      */
     fun existsAll(vararg keys: String): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
             val response = pipelined.exists(*keys)
@@ -109,7 +116,7 @@ object RedisAPI {
      * @see Jedis.set
      */
     fun insert(key: String, value: Any): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return runTryCatch {
             jedisPool.resource.use { resource ->
                 val pipelined = resource.pipelined()
@@ -129,7 +136,7 @@ object RedisAPI {
      * @see Jedis.hset
      */
     fun insertMap(key: String, value: Map<String, String>): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return runTryCatch {
             jedisPool.resource.use { resource ->
                 val pipelined = resource.pipelined()
@@ -150,7 +157,7 @@ object RedisAPI {
      * @see Jedis.hset
      */
     fun insertMapValue(key: String, mapKey: String, mapValue: String): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return runTryCatch {
             jedisPool.resource.use { resource ->
                 val pipelined = resource.pipelined()
@@ -174,7 +181,7 @@ object RedisAPI {
         stringList: MutableList<String>,
         useExistingData: Boolean = true
     ): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return runTryCatch {
             if (useExistingData) {
                 val possibleData = getStringList(key)
@@ -200,7 +207,7 @@ object RedisAPI {
         key: String,
         stringListToRemove: MutableList<String>
     ): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return runTryCatch {
             val data = getStringList(key)?.toMutableList() ?: return@runTryCatch // There's nothing to remove
             if (data.isEmpty()) return@runTryCatch
@@ -220,7 +227,7 @@ object RedisAPI {
      * @see Jedis.mget
      */
     fun getAllData(vararg keys: String): List<String> {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
             val response = pipelined.mget(*keys)
@@ -233,7 +240,7 @@ object RedisAPI {
      * @see Jedis.hgetAll
      */
     fun getMap(key: String): Map<String, String> {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
             val response = pipelined.hgetAll(key)
@@ -246,7 +253,7 @@ object RedisAPI {
      * @see Jedis.hget
      */
     fun getMapValue(key: String, mapKey: String): String? {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
             val response = pipelined.hget(key, mapKey)
@@ -260,7 +267,7 @@ object RedisAPI {
      * @see Jedis.hdel
      */
     fun mapDeleteAll(key: String): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return runTryCatch {
             jedisPool.resource.use { resource ->
                 val pipelined = resource.pipelined()
@@ -274,7 +281,7 @@ object RedisAPI {
      * @see Jedis.hdel
      */
     fun mapDelete(key: String, mapKey: String): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return runTryCatch {
             jedisPool.resource.use { resource ->
                 val pipelined = resource.pipelined()
@@ -293,7 +300,7 @@ object RedisAPI {
      * @throws NullPointerException if the returned data is null.
      */
     fun getString(key: String): String? {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
             val response = pipelined.get(key)
@@ -315,12 +322,21 @@ object RedisAPI {
      * @throws NullPointerException if the returned data is null.
      */
     fun getOrPut(key: String, defaultValue: Any): String {
-        var data = getString(key)
-        if (data == null) {
-            insert(key, defaultValue)
-            data = defaultValue.toString()
+        if (!isInitialized) error("RedisAPI is not initialized.")
+        jedisPool.resource.use { resource ->
+            val pipelined = resource.pipelined()
+            try {
+                val response = pipelined.get(key)
+                pipelined.sync()
+                val value = response.get()
+                if (value == "nil") {
+                    pipelined.set(key, "$defaultValue")
+                }
+                return value ?: "$defaultValue"
+            } finally {
+                pipelined.close()
+            }
         }
-        return data
     }
 
     /**
@@ -331,7 +347,7 @@ object RedisAPI {
      * @throws IllegalStateException if [isInitialized] is false.
      */
     fun getStringList(key: String): List<String>? {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return getString(key)?.split(";")?.filter { it.isNotBlank() }
     }
 
@@ -344,7 +360,7 @@ object RedisAPI {
      * @throws NumberFormatException if the returned data is null or is not an Int.
      */
     fun getInt(key: String): Int? {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return getString(key)?.toInt()
     }
 
@@ -357,7 +373,7 @@ object RedisAPI {
      * @throws NumberFormatException if the returned data is null or is not an Int.
      */
     fun getDouble(key: String): Double? {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return getString(key)?.toDouble()
     }
 
@@ -370,7 +386,7 @@ object RedisAPI {
      * @throws NumberFormatException if the returned data is null or is not an Int.
      */
     fun getLong(key: String): Long? {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return getString(key)?.toLong()
     }
 
@@ -383,7 +399,7 @@ object RedisAPI {
      * @throws ClassCastException if the returned value cannot be transformed into the given [C] ([Any]).
      */
     inline fun <reified C : Any> getDataAs(key: String): C {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         val data = getString(key)
         if (data !is C) error("Returned data '${data}' cannot be cast as the given custom class.")
         return data
@@ -396,7 +412,7 @@ object RedisAPI {
      * @return True if the value was successfully deleted. Otherwise, false.
      */
     fun delete(key: String): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return runTryCatch {
             jedisPool.resource.use { resource ->
                 val pipelined = resource.pipelined()
@@ -413,7 +429,7 @@ object RedisAPI {
      * @throws IllegalStateException if [isInitialized] is false.
      */
     fun testPing(): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return runTryCatch {
             jedisPool.resource.use { resource ->
                 resource.ping()
@@ -430,7 +446,7 @@ object RedisAPI {
      * @throws IllegalStateException if [isInitialized] is false.
      */
     fun sendEvent(channel: String, message: String): Boolean {
-        if (!isInitialized()) error("RedisAPI is not initialized.")
+        if (!isInitialized) error("RedisAPI is not initialized.")
         return runTryCatch {
             jedisPool.resource.use { resource ->
                 resource.publish(channel, message)

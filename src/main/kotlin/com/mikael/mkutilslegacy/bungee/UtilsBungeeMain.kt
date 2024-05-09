@@ -113,7 +113,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         log(LangSystem.getText(Translation.UNLOADING_SYSTEMS))
 
         BungeeAPI.controller.unregister() // EduardAPI
-        RedisBungeeAPI.proxyServerPubSubThread?.interrupt()
+        RedisBungeeAPI.Bungee.onDisableStopRedisSub()
         RedisAPI.jedisPool.destroy()
         mySqlQueueUpdater?.cancel()
         UtilsManager.dbManager.closeConnection()
@@ -129,11 +129,11 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
             return
         }
         log("§eConnecting to Redis server...")
-        RedisAPI.onEnablePrepareRedisAPI()
-        if (!RedisAPI.isInitialized()) error("Cannot connect to Redis server.")
-        RedisAPI.useToSyncBungeePlayers = RedisAPI.managerData.syncBungeeDataUsingRedis
-        if (RedisAPI.useToSyncBungeePlayers) {
-            RedisBungeeAPI.proxyServerOnEnable()
+        RedisAPI.onEnableLoadRedisAPI()
+        if (!RedisAPI.isInitialized) error("Cannot connect to Redis server.")
+        RedisAPI.useRedisBungeeAPI = RedisAPI.managerData.useRedisBungeeAPI
+        if (RedisAPI.useRedisBungeeAPI) {
+            RedisBungeeAPI.Bungee.onEnableStartRedisPubSub()
         }
         log("§aConnected to Redis server!")
     }
@@ -158,19 +158,17 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         config.add(
             "Database",
             DBManager(),
-            "Config of MySQL database.",
-            "All the plugins that use the mkUtilsProxy will use this MySQL database."
+            "Config of MySQL database."
         )
         config.add(
             "Redis",
             RedisConnectionData(),
-            "Config of Redis server.",
-            "All the plugins that use the mkUtilsProxy will use this Redis server."
+            "Config of Redis server."
         )
         config.add(
             "RedisBungeeAPI.logSpigotServersPowerActions",
             false,
-            "It'll send a message on Proxy server's console when a spigot server turn on/off."
+            "Log the power actions of Spigot servers received from RedisBungeeAPI into the Proxy console."
         )
         config.add(
             "Region.Language",
@@ -182,6 +180,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
             "Region.RegionFormatter",
             "US",
             "The Region Format to be used in Money formats.",
+            "Don't change it if you don't have sure what you're doing!"
         )
         config.saveConfig()
     }

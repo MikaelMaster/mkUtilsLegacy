@@ -186,7 +186,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
         if (RedisBungeeAPI.isEnabled) {
             log(LangSystem.getText(Translation.UNLOADING_REDISBUNGEEAPI_DISABLING))
-            RedisBungeeAPI.updateSpigotServerState(false)
+            RedisBungeeAPI.Spigot.updateSpigotServerState(false)
         }
 
         log(LangSystem.getText(Translation.UNLOADING_APIS))
@@ -196,10 +196,8 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
         log(LangSystem.getText(Translation.UNLOADING_SYSTEMS))
         BungeeAPI.controller.unregister() // EduardAPI
-        RedisBungeeAPI.bukkitServerPubSubThread?.interrupt()
-        if (RedisAPI.isInitialized()) {
-            RedisAPI.jedisPool.destroy()
-        }
+        RedisBungeeAPI.Spigot.onDisableStopRedisSub()
+        RedisAPI.onDisableUnloadRedisAPI()
         mySqlQueueUpdater?.cancel()
         UtilsManager.dbManager.closeConnection()
 
@@ -230,13 +228,13 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
             return
         }
         log("§eConnecting to Redis server...")
-        RedisAPI.onEnablePrepareRedisAPI()
-        if (!RedisAPI.isInitialized()) error("Cannot connect to Redis server.")
-        RedisAPI.useToSyncBungeePlayers = RedisAPI.managerData.syncBungeeDataUsingRedis
+        RedisAPI.onEnableLoadRedisAPI()
+        if (!RedisAPI.isInitialized) error("Cannot connect to Redis server.")
+        RedisAPI.useRedisBungeeAPI = RedisAPI.managerData.useRedisBungeeAPI
         if (RedisBungeeAPI.isEnabled) {
-            RedisBungeeAPI.bukkitServerOnEnable()
+            RedisBungeeAPI.Spigot.onEnableStartRedisPubSub()
             syncDelay(1) {
-                RedisBungeeAPI.updateSpigotServerState(true)
+                RedisBungeeAPI.Spigot.updateSpigotServerState(true)
             } // This will be executed after server is done loading
         }
         log("§aConnected to Redis server!")
@@ -321,19 +319,18 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         config.add(
             "Database",
             DBManager(),
-            "Config of MySQL database.",
-            "All plugins that use mkUtils DB will use this MySQL database."
+            "Config of MySQL database."
         )
         config.add(
             "Redis",
             RedisConnectionData(),
-            "Config of Redis server.",
-            "All plugins that use mkUtils RedisAPI will use this Redis server."
+            "Config of Redis server."
         )
         config.add(
             "RedisBungeeAPI.spigotServerName",
             "lobby-1",
-            "The name of this spigot server defined on Proxy config file."
+            "The name of this spigot server. Should be the same as in the Proxy config file.",
+            "This is used to identify the server in RedisBungeeAPI."
         )
         config.add(
             "Region.Language",
@@ -361,7 +358,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         config.add(
             "CustomKick.isEnabled",
             true,
-            "If true, mkUtils will kick all online players with a custom message."
+            "If true, mkUtils will kick all online players with a custom message when the server is shutting down.",
         )
         config.add(
             "CustomKick.customKickMessage",

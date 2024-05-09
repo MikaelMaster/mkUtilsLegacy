@@ -1,15 +1,14 @@
 package com.mikael.mkutilslegacy.api.redis
 
+import com.mikael.mkutilslegacy.api.isProxyServer
 import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.api.runBlock
 import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
-import com.mikael.mkutilslegacy.spigot.UtilsMain
 import com.mikael.mkutilslegacy.spigot.api.actionBar
 import com.mikael.mkutilslegacy.spigot.api.runBlock
 import com.mikael.mkutilslegacy.spigot.api.soundTP
 import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.md_5.bungee.api.ProxyServer
-import net.md_5.bungee.api.Title
 import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.chat.ComponentSerializer
@@ -19,13 +18,16 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.json.JSONArray
 import org.json.JSONObject
+import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPubSub
 import kotlin.concurrent.thread
 
 /**
  * mkUtils [RedisBungeeAPI]
  *
- * It's very usefully over BungeeCord default messaging 'service'.
+ * This is a class that provides a set of functions to sync data between Spigot and BungeeCord servers using Redis.
+ * It's important to note that this class is a part of the [RedisAPI] and it's only available
+ * if the [RedisAPI] is enabled and the [RedisAPI.useRedisBungeeAPI] is *true*.
  *
  * @author Mikael
  * @see RedisAPI
@@ -33,38 +35,12 @@ import kotlin.concurrent.thread
 @Suppress("WARNINGS")
 object RedisBungeeAPI {
 
+    // Properties - Start
     /**
      * @return True if the [RedisBungeeAPI] is enabled. Otherwise, false.
      */
-    val isEnabled: Boolean get() = RedisAPI.isInitialized() && RedisAPI.useToSyncBungeePlayers
-
-    // SPIGOT ONLY - Start
-    /**
-     * Returns this current spigot server name in mkUtils [RedisBungeeAPI] system.
-     *
-     * Should NOT be used in Proxy server side.
-     *
-     * @return The name of this server set in [UtilsMain.config] file.
-     * @throws ClassCastException if used in Proxy server.
-     */
-    @JvmStatic
-    val spigotServerName: String get() = utilsMain.config.getString("RedisBungeeAPI.spigotServerName")
-
-    /**
-     * Internal.
-     */
-    internal fun updateSpigotServerState(online: Boolean) {
-        if (online) {
-            RedisAPI.insertMap("mkUtils:BungeeAPI:Servers", mutableMapOf(spigotServerName to ""))
-        } else {
-            RedisAPI.mapDelete("mkUtils:BungeeAPI:Servers", spigotServerName)
-        }
-        RedisAPI.sendEvent(
-            "mkUtils:BungeeAPI:Event:ServerPowerAction",
-            "${spigotServerName};${if (online) "on" else "off"}"
-        )
-    }
-    // SPIGOT ONLY - End
+    val isEnabled: Boolean get() = RedisAPI.isInitialized && RedisAPI.useRedisBungeeAPI
+    // Properties - End
 
     /**
      * Please note that *servers will be returned as they're in the mkUtils Spigot Server Config File*.
@@ -458,207 +434,264 @@ object RedisBungeeAPI {
         )
     }
 
-    // REDIS SUBS SECTION BELOW
+    /**
+     * Methods inside [RedisBungeeAPI.Spigot] can only be used in Spigot servers.
+     * If any method/val here is called in a BungeeCord server, it'll throw an [IllegalStateException].
+     */
+    object Spigot {
+        @JvmStatic
+        val spigotServerName: String get() {
+            if (isProxyServer) error("This method can only be used in Spigot servers.")
+            return utilsMain.config.getString("RedisBungeeAPI.spigotServerName")
+        }
 
-    // SPIGOT SUB - Start
-    var bukkitServerPubSubThread: Thread? = null
+        internal fun updateSpigotServerState(online: Boolean) {
+            if (online) {
+                RedisAPI.insertMap("mkUtils:BungeeAPI:Servers", mutableMapOf(spigotServerName to ""))
+            } else {
+                RedisAPI.mapDelete("mkUtils:BungeeAPI:Servers", spigotServerName)
+            }
+            RedisAPI.sendEvent(
+                "mkUtils:BungeeAPI:Event:ServerPowerAction",
+                "${spigotServerName};${if (online) "on" else "off"}"
+            )
+        }
 
-    // mkUtils onEnable
-    fun bukkitServerOnEnable() {
-        bukkitServerPubSubThread = thread {
-            RedisAPI.getExtraClient(RedisAPI.managerData).subscribe(
-                object : JedisPubSub() {
-                    override fun onMessage(channel: String, message: String) {
-                        val data = message.split(";")
-                        when (channel) {
-                            "mkUtils:RedisBungeeAPI:Event:PlaySoundToPlayer" -> {
-                                val players = data[0].split(",").filter { it.isNotEmpty() } // data[0] = playersName
-                                val soundToPlay = Sound.valueOf(data[1].uppercase()) // data[1] = soundName
-                                val volume = data[2].toFloat()
-                                val pitch = data[3].toFloat()
-                                players@ for (playerName in players) {
-                                    val player = Bukkit.getPlayer(playerName) ?: continue@players
-                                    player.runBlock {
-                                        player.playSound(player.location, soundToPlay, volume, pitch)
+        // Spigot RedisPubSub - Start
+        private var redisPubSubThread: Thread? = null
+        private var redisPubSubJedisClient: Jedis? = null
+
+        internal fun onEnableStartRedisPubSub() {
+            redisPubSubJedisClient = RedisAPI.getExtraClient(RedisAPI.managerData)
+            redisPubSubThread = thread {
+                redisPubSubJedisClient!!.subscribe(
+                    object : JedisPubSub() {
+                        override fun onMessage(channel: String, message: String) {
+                            val data = message.split(";")
+                            when (channel) {
+                                "mkUtils:RedisBungeeAPI:Event:PlaySoundToPlayer" -> {
+                                    val players = data[0].split(",").filter { it.isNotEmpty() } // data[0] = playersName
+                                    val soundToPlay = Sound.valueOf(data[1].uppercase()) // data[1] = soundName
+                                    val volume = data[2].toFloat()
+                                    val pitch = data[3].toFloat()
+                                    players@ for (playerName in players) {
+                                        val player = Bukkit.getPlayer(playerName) ?: continue@players
+                                        player.runBlock {
+                                            player.playSound(player.location, soundToPlay, volume, pitch)
+                                        }
                                     }
                                 }
-                            }
 
-                            "mkUtils:RedisBungeeAPI:Event:SendActionBarToPlayer" -> {
-                                val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
-                                player.runBlock {
-                                    player.actionBar(data[1]) // data[1] = message
-                                }
-                            }
-
-                            "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToPlayer" -> {
-                                val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
-                                utilsMain.syncTask {
+                                "mkUtils:RedisBungeeAPI:Event:SendActionBarToPlayer" -> {
+                                    val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
                                     player.runBlock {
-                                        val target = Bukkit.getPlayer(data[1]) ?: return@runBlock
-                                        player.teleport(target)
-                                        if (data[2].toBoolean()) { // data[2] = playTeleportSound
-                                            player.soundTP()
+                                        player.actionBar(data[1]) // data[1] = message
+                                    }
+                                }
+
+                                "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToPlayer" -> {
+                                    val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
+                                    utilsMain.syncTask {
+                                        player.runBlock {
+                                            val target = Bukkit.getPlayer(data[1]) ?: return@runBlock
+                                            player.teleport(target)
+                                            if (data[2].toBoolean()) { // data[2] = playTeleportSound
+                                                player.soundTP()
+                                            }
+                                        }
+                                    }
+                                }
+
+                                "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToLocation" -> {
+                                    val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
+                                    val worldName = data[1]
+                                    utilsMain.syncTask {
+                                        player.runBlock {
+                                            val world =
+                                                Bukkit.getWorlds().firstOrNull { it.name.equals(worldName, true) }
+                                                    ?: error("Given world $worldName is not loaded.")
+                                            val loc =
+                                                Location(
+                                                    world,
+                                                    data[2].toDouble(),
+                                                    data[3].toDouble(),
+                                                    data[4].toDouble()
+                                                ) // data[2] = x, data[3] = y, data[4] = z
+                                            player.teleport(loc)
+                                            if (data[5].toBoolean()) { // data[5] = playTeleportSound
+                                                player.soundTP()
+                                            }
+                                        }
+                                    }
+                                }
+
+                                "mkUtils:RedisBungeeAPI:Event:SendChat" -> {
+                                    val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
+                                    utilsMain.syncTask {
+                                        player.runBlock {
+                                            player.chat(data[1]) // data[1] = msgToChat
                                         }
                                     }
                                 }
                             }
+                        }
+                    }, "mkUtils:RedisBungeeAPI:Event:PlaySoundToPlayer",
+                    "mkUtils:RedisBungeeAPI:Event:SendActionBarToPlayer",
+                    "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToPlayer",
+                    "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToLocation",
+                    "mkUtils:RedisBungeeAPI:Event:SendChat"
+                )
+            }
+        }
 
-                            "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToLocation" -> {
-                                val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
-                                val worldName = data[1]
-                                utilsMain.syncTask {
+        internal fun onDisableStopRedisSub() {
+            try {
+                redisPubSubThread?.interrupt()
+                redisPubSubJedisClient?.close()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            } finally {
+                redisPubSubThread = null
+                redisPubSubJedisClient = null
+            }
+        }
+        // Spigot RedisPubSub - End
+    }
+
+
+    /**
+     * Methods inside [RedisBungeeAPI.Bungee] can only be used in BungeeCord servers.
+     * If any method/val here is called in a Spigot server, it'll throw an [IllegalStateException].
+     */
+    public object Bungee {
+        // Bungee RedisPubSub - Start
+        private var redisPubSubThread: Thread? = null
+        private var redisPubSubJedisClient: Jedis? = null
+
+        internal fun onEnableStartRedisPubSub() {
+            redisPubSubJedisClient = RedisAPI.getExtraClient(RedisAPI.managerData)
+            redisPubSubThread = thread {
+                redisPubSubJedisClient!!.subscribe(
+                    object : JedisPubSub() {
+                        override fun onMessage(channel: String, message: String) {
+                            val data = message.split(";")
+                            when (channel) {
+                                "mkUtils:BungeeAPI:Event:ConnectPlayer" -> {
+                                    val player =
+                                        ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
                                     player.runBlock {
-                                        val world =
-                                            Bukkit.getWorlds().firstOrNull { it.name.equals(worldName, true) }
-                                                ?: error("Given world $worldName is not loaded.")
-                                        val loc =
-                                            Location(
-                                                world,
-                                                data[2].toDouble(),
-                                                data[3].toDouble(),
-                                                data[4].toDouble()
-                                            ) // data[2] = x, data[3] = y, data[4] = z
-                                        player.teleport(loc)
-                                        if (data[5].toBoolean()) { // data[5] = playTeleportSound
-                                            player.soundTP()
+                                        val server = ProxyServer.getInstance().getServerInfo(data[1])
+                                            ?: return@runBlock // data[1] = serverName
+                                        player.connect(server)
+                                    }
+                                }
+
+                                "mkUtils:BungeeAPI:Event:KickPlayer" -> {
+                                    val player =
+                                        ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
+                                    player.runBlock {
+                                        val bypassPerm = data[2]
+                                        if (bypassPerm != "nullperm" && player.hasPermission(bypassPerm)) return@runBlock
+                                        player.disconnect(data[1].toTextComponent()) // data[1] = kickMsg
+                                    }
+                                }
+
+                                "mkUtils:BungeeAPI:Event:SendMsgToPlayerList" -> {
+                                    val json = JSONObject(message)
+                                    val players = json.getJSONArray("playersToSend").toList() as List<String>
+                                    val message = TextComponent(
+                                        *ComponentSerializer.parse(json.getString("message")).toList().toTypedArray()
+                                    )
+                                    val neededPermission = json.getString("neededPermission")
+                                    players@ for (playerName in players) {
+                                        val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
+                                        player.runBlock {
+                                            if (neededPermission == "nullperm" || player.hasPermission(neededPermission)) {
+                                                player.sendMessage(message)
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            "mkUtils:RedisBungeeAPI:Event:SendChat" -> {
-                                val player = Bukkit.getPlayer(data[0]) ?: return // data[0] = playerName
-                                utilsMain.syncTask {
+                                "mkUtils:RedisBungeeAPI:Event:SendProxyChat" -> {
+                                    val player =
+                                        ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
                                     player.runBlock {
                                         player.chat(data[1]) // data[1] = msgToChat
                                     }
                                 }
-                            }
-                        }
-                    }
-                }, "mkUtils:RedisBungeeAPI:Event:PlaySoundToPlayer",
-                "mkUtils:RedisBungeeAPI:Event:SendActionBarToPlayer",
-                "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToPlayer",
-                "mkUtils:RedisBungeeAPI:Event:TeleportPlayerToLocation",
-                "mkUtils:RedisBungeeAPI:Event:SendChat"
-            )
-        }
-    }
-    // SPIGOT SUB - End
 
-    // PROXY SUB - Start
-    var proxyServerPubSubThread: Thread? = null
-
-    fun proxyServerOnEnable() {
-        proxyServerPubSubThread = thread {
-            RedisAPI.getExtraClient(RedisAPI.managerData).subscribe(
-                object : JedisPubSub() {
-                    override fun onMessage(channel: String, message: String) {
-                        val data = message.split(";")
-                        when (channel) {
-                            "mkUtils:BungeeAPI:Event:ConnectPlayer" -> {
-                                val player =
-                                    ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
-                                player.runBlock {
-                                    val server = ProxyServer.getInstance().getServerInfo(data[1])
-                                        ?: return@runBlock // data[1] = serverName
-                                    player.connect(server)
-                                }
-                            }
-
-                            "mkUtils:BungeeAPI:Event:KickPlayer" -> {
-                                val player =
-                                    ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
-                                player.runBlock {
-                                    val bypassPerm = data[2]
-                                    if (bypassPerm != "nullperm" && player.hasPermission(bypassPerm)) return@runBlock
-                                    player.disconnect(data[1].toTextComponent()) // data[1] = kickMsg
-                                }
-                            }
-
-                            "mkUtils:BungeeAPI:Event:SendMsgToPlayerList" -> {
-                                val json = JSONObject(message)
-                                val players = json.getJSONArray("playersToSend").toList() as List<String>
-                                val message = TextComponent(
-                                    *ComponentSerializer.parse(json.getString("message")).toList().toTypedArray()
-                                )
-                                val neededPermission = json.getString("neededPermission")
-                                players@ for (playerName in players) {
-                                    val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
+                                "mkUtils:RedisBungeeAPI:Event:DispatchProxyCmd" -> {
+                                    val player =
+                                        ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
                                     player.runBlock {
-                                        if (neededPermission == "nullperm" || player.hasPermission(neededPermission)) {
-                                            player.sendMessage(message)
+                                        ProxyServer.getInstance().pluginManager.dispatchCommand(
+                                            player,
+                                            data[1]
+                                        ) // data[1] = proxyCmd
+                                    }
+                                }
+
+                                "mkUtils:BungeeAPI:Event:SendTitleToPlayerList" -> {
+                                    val players = data[0].split(",").filter { it.isNotEmpty() } // data[0] = playersName
+                                    val title = data[1]
+                                    val subtitle = data[2]
+                                    val fadeIn = data[3].toInt()
+                                    val stay = data[4].toInt()
+                                    val fadeOut = data[5].toInt()
+                                    val proxyTitle = ProxyServer.getInstance().createTitle()
+                                        .title(title.toTextComponent())
+                                        .subTitle(subtitle.toTextComponent())
+                                        .fadeIn(fadeIn)
+                                        .stay(stay)
+                                        .fadeOut(fadeOut)
+                                    players@ for (playerName in players) {
+                                        val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
+                                        player.runBlock {
+                                            player.sendTitle(proxyTitle)
                                         }
                                     }
                                 }
-                            }
 
-                            "mkUtils:RedisBungeeAPI:Event:SendProxyChat" -> {
-                                val player =
-                                    ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
-                                player.runBlock {
-                                    player.chat(data[1]) // data[1] = msgToChat
+                                "mkUtils:BungeeAPI:Event:ServerPowerAction" -> {
+                                    if (!utilsBungeeMain.config.getBoolean("RedisBungeeAPI.logSpigotServersPowerActions")) return
+                                    val server = data[0]
+                                    val logMsg = if (data[1] == "on") // data[1] = action
+                                        "§aSpigot server '$server' is now online." else
+                                        "§cSpigot server '$server' is now offline."
+                                    utilsBungeeMain.log(
+                                        "",
+                                        "§6[RedisBungeeAPI] $logMsg",
+                                        ""
+                                    )
                                 }
-                            }
-
-                            "mkUtils:RedisBungeeAPI:Event:DispatchProxyCmd" -> {
-                                val player =
-                                    ProxyServer.getInstance().getPlayer(data[0]) ?: return // data[0] = playerName
-                                player.runBlock {
-                                    ProxyServer.getInstance().pluginManager.dispatchCommand(
-                                        player,
-                                        data[1]
-                                    ) // data[1] = proxyCmd
-                                }
-                            }
-
-                            "mkUtils:BungeeAPI:Event:SendTitleToPlayerList" -> {
-                                val players = data[0].split(",").filter { it.isNotEmpty() } // data[0] = playersName
-                                val title = data[1]
-                                val subtitle = data[2]
-                                val fadeIn = data[3].toInt()
-                                val stay = data[4].toInt()
-                                val fadeOut = data[5].toInt()
-                                val proxyTitle = ProxyServer.getInstance().createTitle()
-                                    .title(title.toTextComponent())
-                                    .subTitle(subtitle.toTextComponent())
-                                    .fadeIn(fadeIn)
-                                    .stay(stay)
-                                    .fadeOut(fadeOut)
-                                players@ for (playerName in players) {
-                                    val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
-                                    player.runBlock {
-                                        player.sendTitle(proxyTitle)
-                                    }
-                                }
-                            }
-
-                            "mkUtils:BungeeAPI:Event:ServerPowerAction" -> {
-                                if (!utilsBungeeMain.config.getBoolean("RedisBungeeAPI.logSpigotServersPowerActions")) return
-                                val server = data[0]
-                                val logMsg = if (data[1] == "on") // data[1] = action
-                                    "§aSpigot server '$server' is now online." else
-                                    "§cSpigot server '$server' is now offline."
-                                utilsBungeeMain.log(
-                                    "",
-                                    "§6[RedisBungeeAPI] $logMsg",
-                                    ""
-                                )
                             }
                         }
-                    }
-                }, "mkUtils:BungeeAPI:Event:ConnectPlayer",
-                "mkUtils:BungeeAPI:Event:KickPlayer",
-                "mkUtils:BungeeAPI:Event:SendMsgToPlayer",
-                "mkUtils:BungeeAPI:Event:SendMsgToPlayerList",
-                "mkUtils:RedisBungeeAPI:Event:SendProxyChat",
-                "mkUtils:RedisBungeeAPI:Event:DispatchProxyCmd",
-                "mkUtils:BungeeAPI:Event:SendTitleToPlayerList",
-                "mkUtils:BungeeAPI:Event:ServerPowerAction",
-            )
+                    },
+                    "mkUtils:BungeeAPI:Event:ConnectPlayer",
+                    "mkUtils:BungeeAPI:Event:KickPlayer",
+                    "mkUtils:BungeeAPI:Event:SendMsgToPlayer",
+                    "mkUtils:BungeeAPI:Event:SendMsgToPlayerList",
+                    "mkUtils:RedisBungeeAPI:Event:SendProxyChat",
+                    "mkUtils:RedisBungeeAPI:Event:DispatchProxyCmd",
+                    "mkUtils:BungeeAPI:Event:SendTitleToPlayerList",
+                    "mkUtils:BungeeAPI:Event:ServerPowerAction",
+                )
+            }
         }
+
+        internal fun onDisableStopRedisSub() {
+            try {
+                redisPubSubThread?.interrupt()
+                redisPubSubJedisClient?.close()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            } finally {
+                redisPubSubThread = null
+                redisPubSubJedisClient = null
+            }
+        }
+        // Bungee RedisPubSub - End
     }
-    // PROXY SUB - End
 
 }

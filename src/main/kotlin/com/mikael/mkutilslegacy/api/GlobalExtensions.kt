@@ -15,7 +15,6 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.json.JSONObject
 import java.io.*
-import java.net.HttpURLConnection
 import java.net.URL
 import java.text.NumberFormat
 import java.util.*
