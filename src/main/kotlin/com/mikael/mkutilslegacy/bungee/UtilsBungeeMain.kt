@@ -132,7 +132,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         RedisAPI.onEnableLoadRedisAPI()
         if (!RedisAPI.isInitialized) error("Cannot connect to Redis server.")
         RedisAPI.useRedisBungeeAPI = RedisAPI.managerData.useRedisBungeeAPI
-        if (RedisAPI.useRedisBungeeAPI) {
+        if (RedisBungeeAPI.isEnabled) {
             RedisBungeeAPI.Bungee.onEnableStartRedisPubSub()
         }
         log("§aConnected to Redis server!")
