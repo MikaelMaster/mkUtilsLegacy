@@ -325,17 +325,14 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         jedisPool.resource.use { resource ->
             val pipelined = resource.pipelined()
-            try {
-                val response = pipelined.get(key)
+            val response = pipelined.get(key)
+            pipelined.sync()
+            val value = response.get()
+            if (value == "nil") {
+                pipelined.set(key, "$defaultValue")
                 pipelined.sync()
-                val value = response.get()
-                if (value == "nil") {
-                    pipelined.set(key, "$defaultValue")
-                }
-                return value ?: "$defaultValue"
-            } finally {
-                pipelined.close()
             }
+            return value ?: "$defaultValue"
         }
     }
 
