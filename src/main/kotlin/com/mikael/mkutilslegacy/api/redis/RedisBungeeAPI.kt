@@ -389,11 +389,13 @@ object RedisBungeeAPI {
 
         internal fun updateSpigotServerState(online: Boolean) {
             RedisAPI.jedisPool.resource.use { resource ->
+                val pipeline = resource.pipelined()
                 if (online) {
-                    resource.sadd(ONLINE_SPIGOT_SERVERS.key, spigotServerName)
+                    pipeline.sadd(ONLINE_SPIGOT_SERVERS.key, spigotServerName)
                 } else {
-                    resource.srem(ONLINE_SPIGOT_SERVERS.key, spigotServerName)
+                    pipeline.srem(ONLINE_SPIGOT_SERVERS.key, spigotServerName)
                 }
+                pipeline.sync()
             }
             RedisAPI.sendEvent(
                 LOG_SPIGOT_SERVER_POWER_ACTION.ch,
