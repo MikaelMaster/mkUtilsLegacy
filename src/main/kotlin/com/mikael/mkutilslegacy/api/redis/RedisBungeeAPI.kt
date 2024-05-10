@@ -153,13 +153,21 @@ object RedisBungeeAPI {
             val pipeline = resource.pipelined()
             val resPlayers = pipeline.hkeys(ONLINE_PLAYERS_SERVERS.key)
             pipeline.sync()
-            debug("getOnlinePlayers()/getOnlinePlayersCount() took ${System.currentTimeMillis() - start}ms.")
+            debug("getOnlinePlayers() took ${System.currentTimeMillis() - start}ms.")
             return resPlayers.get()
         }
     }
 
     fun getOnlinePlayersCount(): Int {
-        return getOnlinePlayers().size
+        if (!isEnabled) error("RedisBungeeAPI is not enabled.")
+        val start = System.currentTimeMillis()
+        RedisAPI.jedisPool.resource.use { resource ->
+            val pipeline = resource.pipelined()
+            val resPlayers = pipeline.hlen(ONLINE_PLAYERS_SERVERS.key)
+            pipeline.sync()
+            debug("getOnlinePlayersCount() took ${System.currentTimeMillis() - start}ms.")
+            return resPlayers.get().toInt()
+        }
     }
 
     data class OnlinePlayersAndSpigotServersResult(val onlinePlayers: Set<String>, val onlineSpigotServers: Set<String>)
@@ -537,11 +545,10 @@ object RedisBungeeAPI {
                                     val player =
                                         ProxyServer.getInstance().getPlayer(json.getString("playerName")) ?: return
                                     player.runBlock {
-                                        val kickMessage = json.getString("kickMessage")
                                         val bypassPerm = json.getString("bypassPerm")
-                                        if (bypassPerm == "nullperm" || player.hasPermission(bypassPerm)) {
-                                            player.disconnect(kickMessage.toTextComponent())
-                                        }
+                                        if (bypassPerm == "nullperm" || player.hasPermission(bypassPerm)) return@runBlock
+                                        val kickMessage = json.getString("kickMessage")
+                                        player.disconnect(kickMessage.toTextComponent())
                                     }
                                 }
 
@@ -593,13 +600,13 @@ object RedisBungeeAPI {
                                     }
                                 }
 
-                                "mkUtils:BungeeAPI:Event:ServerPowerAction" -> {
+                                LOG_SPIGOT_SERVER_POWER_ACTION.ch -> {
                                     if (!utilsBungeeMain.config.getBoolean("RedisBungeeAPI.logSpigotServersPowerActions")) return
                                     val server = json.getString("server")
                                     val online = json.getBoolean("online")
                                     utilsBungeeMain.log(
-                                        if (online) "§aSpigot server '$server' updated its status to online."
-                                        else "§cSpigot server '$server' updated its status to offline."
+                                        if (online) "§e[RedisBungeeAPI] §aSpigot server '$server' updated its status to online."
+                                        else "§e[RedisBungeeAPI] §cSpigot server '$server' updated its status to offline."
                                     )
                                 }
                             }

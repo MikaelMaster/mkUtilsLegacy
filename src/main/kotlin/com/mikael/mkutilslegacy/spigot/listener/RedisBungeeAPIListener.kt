@@ -17,11 +17,16 @@ class RedisBungeeAPIListener : MineListener() {
     fun onPlayerJoin(e: PlayerJoinEvent) {
         val player = e.player
         player.runBlock {
+            val playerNameLower = player.name.lowercase()
             RedisAPI.jedisPool.resource.use { resource ->
                 val pipeline = resource.pipelined()
+                pipeline.hset(
+                    RedisBungeeAPI.RedisBungeeAPIKey.ONLINE_PLAYERS_SERVERS.key,
+                    playerNameLower, RedisBungeeAPI.Spigot.spigotServerName
+                )
                 pipeline.sadd(
                     "${RedisBungeeAPI.RedisBungeeAPIKey.SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${currentServer}",
-                    player.name.lowercase()
+                    playerNameLower
                 )
                 pipeline.sync()
             }
