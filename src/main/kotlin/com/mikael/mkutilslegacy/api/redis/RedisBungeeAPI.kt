@@ -398,6 +398,7 @@ object RedisBungeeAPI {
         internal fun updateSpigotServerState(online: Boolean) {
             RedisAPI.jedisPool.resource.use { resource ->
                 val pipeline = resource.pipelined()
+                pipeline.del("${SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${spigotServerName}")
                 if (online) {
                     pipeline.sadd(ONLINE_SPIGOT_SERVERS.key, spigotServerName)
                 } else {
