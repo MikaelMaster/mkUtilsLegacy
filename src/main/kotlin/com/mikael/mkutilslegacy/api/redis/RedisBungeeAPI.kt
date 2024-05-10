@@ -547,7 +547,7 @@ object RedisBungeeAPI {
                                         ProxyServer.getInstance().getPlayer(json.getString("playerName")) ?: return
                                     player.runBlock {
                                         val bypassPerm = json.getString("bypassPerm")
-                                        if (bypassPerm == "nullperm" || player.hasPermission(bypassPerm)) return@runBlock
+                                        if (bypassPerm != "nullperm" && player.hasPermission(bypassPerm)) return@runBlock
                                         val kickMessage = json.getString("kickMessage")
                                         player.disconnect(kickMessage.toTextComponent())
                                     }
@@ -559,11 +559,8 @@ object RedisBungeeAPI {
                                     val neededPermission = json.getString("neededPermission")
                                     players@ for (playerName in players) {
                                         val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
-                                        player.runBlock {
-                                            if (neededPermission == "nullperm" || player.hasPermission(neededPermission)) {
-                                                player.sendMessage(*message)
-                                            }
-                                        }
+                                        if (neededPermission != "nullperm" && player.hasPermission(neededPermission)) continue@players
+                                        player.sendMessage(*message)
                                     }
                                 }
 
