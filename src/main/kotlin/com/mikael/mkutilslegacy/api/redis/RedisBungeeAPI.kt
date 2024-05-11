@@ -559,7 +559,7 @@ object RedisBungeeAPI {
                                     val neededPermission = json.getString("neededPermission")
                                     players@ for (playerName in players) {
                                         val player = ProxyServer.getInstance().getPlayer(playerName) ?: continue@players
-                                        if (neededPermission != "nullperm" && player.hasPermission(neededPermission)) continue@players
+                                        if (neededPermission != "nullperm" && !player.hasPermission(neededPermission)) continue@players
                                         player.sendMessage(*message)
                                     }
                                 }
