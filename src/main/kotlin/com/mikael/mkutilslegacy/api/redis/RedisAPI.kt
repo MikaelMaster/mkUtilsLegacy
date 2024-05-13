@@ -59,12 +59,13 @@ object RedisAPI {
             managerData.jedisPoolMaxTimeout,
             managerData.pass
         )
+        jedisPool.preparePool()
         return true
     }
 
     internal fun onDisableUnloadRedisAPI() {
         if (!isInitialized) return
-        jedisPool.destroy()
+        // jedisPool.destroy() // Não é necessário e não pode.
     }
 
     private fun debug(msg: String) {
@@ -84,11 +85,9 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
-            val pipelined = resource.pipelined()
-            val res = pipelined.set(key, value.toString())
-            pipelined.sync()
+            val res = resource.set(key, value.toString())
             debug("set() to '$key' took ${System.currentTimeMillis() - start}ms.")
-            return res.get() == "OK"
+            return res == "OK"
         }
     }
 
@@ -99,11 +98,9 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
-            val pipelined = resource.pipelined()
-            val res = pipelined.hset(key, value)
-            pipelined.sync()
+            val res = resource.hset(key, value)
             debug("setMap() to '$key' took ${System.currentTimeMillis() - start}ms.")
-            return res.get()
+            return res
         }
     }
 
@@ -132,11 +129,8 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
-            val pipelined = resource.pipelined()
-            val response = pipelined.exists(*keys)
-            pipelined.sync()
             val verifiedKeys = keys.size.toLong()
-            val existentKeys = response.get()
+            val existentKeys = resource.exists(*keys)
             debug("exists() took ${System.currentTimeMillis() - start}ms. Verified: $verifiedKeys | Existent: ${existentKeys}.")
             return ExistsResponse(verifiedKeys, existentKeys)
         }
@@ -149,11 +143,9 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
-            val pipelined = resource.pipelined()
-            val res = pipelined.mget(*keys)
-            pipelined.sync()
+            val res = resource.mget(*keys)
             debug("getAllData() took ${System.currentTimeMillis() - start}ms.")
-            return res.get()
+            return res
         }
     }
 
@@ -164,12 +156,9 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
-            val pipelined = resource.pipelined()
-            val res = pipelined.get(key)
-            pipelined.sync()
-            val value = res.get()
+            val res = resource.get(key)
             debug("getString() from '$key' took ${System.currentTimeMillis() - start}ms.")
-            return if (value != "nil") value else null
+            return if (res != "nil") res else null
         }
     }
 
@@ -192,11 +181,9 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
-            val pipelined = resource.pipelined()
-            val res = pipelined.hgetAll(key)
-            pipelined.sync()
+            val res = resource.hgetAll(key)
             debug("getMap() from '$key' took ${System.currentTimeMillis() - start}ms.")
-            return res.get()
+            return res
         }
     }
 
@@ -207,12 +194,9 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
-            val pipelined = resource.pipelined()
-            val res = pipelined.hget(key, mapKey)
-            pipelined.sync()
-            val value = res.get()
+            val res = resource.hget(key, mapKey)
             debug("getMapValue() from '$key' took ${System.currentTimeMillis() - start}ms.")
-            return if (value != "nil") value else null
+            return if (res != "nil") res else null
         }
     }
 
@@ -224,12 +208,9 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
-            val pipelined = resource.pipelined()
-            val res = pipelined.del(*keys)
-            pipelined.sync()
-            val deletedCount = res.get()
-            debug("delete() took ${System.currentTimeMillis() - start}ms. Deleted: $deletedCount.")
-            return deletedCount
+            val res = resource.del(*keys)
+            debug("delete() took ${System.currentTimeMillis() - start}ms. Deleted: $res.")
+            return res
         }
     }
 
@@ -240,12 +221,9 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
-            val pipelined = resource.pipelined()
-            val res = pipelined.hdel(key, *mapKeys)
-            pipelined.sync()
-            val deletedCount = res.get()
-            debug("mapDelete() from '$key' took ${System.currentTimeMillis() - start}ms. Deleted: $deletedCount.")
-            return deletedCount
+            val res = resource.hdel(key, *mapKeys)
+            debug("mapDelete() from '$key' took ${System.currentTimeMillis() - start}ms. Deleted: $res.")
+            return res
         }
     }
 
@@ -256,12 +234,9 @@ object RedisAPI {
         if (!isInitialized) error("RedisAPI is not initialized.")
         val start = System.currentTimeMillis()
         jedisPool.resource.use { resource ->
-            val pipelined = resource.pipelined()
-            val res = pipelined.publish(channel, message)
-            pipelined.sync()
-            val receivedCount = res.get()
-            debug("sendEvent() to '$channel' took ${System.currentTimeMillis() - start}ms. Received: ${receivedCount}.")
-            return receivedCount
+            val res = resource.publish(channel, message)
+            debug("sendEvent() to '$channel' took ${System.currentTimeMillis() - start}ms. Received by: ${res} pub-subs.")
+            return res
         }
     }
 

@@ -28,11 +28,11 @@ class RedisConnectionData(
 
     var host: String = "localhost",
 
-    var jedisPoolMaxClients: Int = 50,
+    var jedisPoolMaxClients: Int = 100,
 
-    var jedisPoolMaxIdle: Int = 50,
+    var jedisPoolMaxIdle: Int = 80,
 
-    var jedisPoolMinIdle: Int = 8,
+    var jedisPoolMinIdle: Int = 50,
 
     var jedisPoolTestWhileIdle: Boolean = true,
 

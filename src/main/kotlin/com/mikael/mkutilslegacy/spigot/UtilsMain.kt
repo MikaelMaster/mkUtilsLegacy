@@ -235,7 +235,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
             RedisBungeeAPI.Spigot.onEnableStartRedisPubSub()
             syncDelay(1) {
                 RedisBungeeAPI.Spigot.updateSpigotServerState(true)
-            } // This will be executed after server is done loading
+            } // This will be executed after the server is done loading
         }
         log("§aConnected to Redis server!")
     }

@@ -2,7 +2,8 @@ package com.mikael.mkutilslegacy.api.redis
 
 import com.mikael.mkutilslegacy.api.isProxyServer
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI.RedisBungeeAPIChannel.*
-import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI.RedisBungeeAPIKey.*
+import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI.RedisBungeeAPIKey.ONLINE_SPIGOT_SERVERS
+import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI.RedisBungeeAPIKey.SPIGOT_SERVERS_ONLINE_PLAYERS
 import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.api.runBlock
 import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
@@ -56,7 +57,6 @@ object RedisBungeeAPI {
 
     enum class RedisBungeeAPIKey(val key: String) {
         ONLINE_SPIGOT_SERVERS("mkUtils_RedisBungeeAPI_OnlineSpigotServers"),
-        ONLINE_PLAYERS_SERVERS("mkUtils_RedisBungeeAPI_OnlinePlayersServers"),
         SPIGOT_SERVERS_ONLINE_PLAYERS("mkUtils_RedisBungeeAPI_OnlineSpigotServers_Players"),
     }
 
@@ -64,11 +64,9 @@ object RedisBungeeAPI {
         if (!isEnabled) error("RedisBungeeAPI is not enabled.")
         val start = System.currentTimeMillis()
         RedisAPI.jedisPool.resource.use { resource ->
-            val pipeline = resource.pipelined()
-            val resOnlineSpigotServers = pipeline.smembers(ONLINE_SPIGOT_SERVERS.key)
-            pipeline.sync()
+            val resOnlineSpigotServers = resource.smembers(ONLINE_SPIGOT_SERVERS.key)
             debug("getOnlineSpigotServers() took ${System.currentTimeMillis() - start}ms.")
-            return resOnlineSpigotServers.get()
+            return resOnlineSpigotServers
         }
     }
 
@@ -98,11 +96,36 @@ object RedisBungeeAPI {
         val start = System.currentTimeMillis()
         RedisAPI.jedisPool.resource.use { resource ->
             val pipeline = resource.pipelined()
-            val resOnlinePlayerServer = pipeline.hget(ONLINE_PLAYERS_SERVERS.key, playerName.lowercase())
+            val resOnlineServers = pipeline.smembers(ONLINE_SPIGOT_SERVERS.key)
             pipeline.sync()
-            val playerServer = resOnlinePlayerServer.get()
+            val onlineServers = resOnlineServers.get()
+            for (server in onlineServers) {
+                val resPlayerServer =
+                    pipeline.sismember("${SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${server}", playerName.lowercase())
+            }
+            val playerServer = (pipeline.syncAndReturnAll() as List<Boolean>)
+                .mapIndexed { index, isMember -> if (isMember) onlineServers.elementAt(index) else null }
+                .firstOrNull { it != null }
             debug("getPlayerServer(playerName: String) took ${System.currentTimeMillis() - start}ms.")
-            return if (playerServer != "nil") playerServer else null
+            return playerServer
+        }
+    }
+
+    fun isPlayerOnline(playerName: String): Boolean {
+        if (!isEnabled) error("RedisBungeeAPI is not enabled.")
+        val start = System.currentTimeMillis()
+        RedisAPI.jedisPool.resource.use { resource ->
+            val pipeline = resource.pipelined()
+            val resOnlineServers = pipeline.smembers(ONLINE_SPIGOT_SERVERS.key)
+            pipeline.sync()
+            val onlineServers = resOnlineServers.get()
+            for (server in onlineServers) {
+                val resPlayerServer =
+                    pipeline.sismember("${SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${server}", playerName.lowercase())
+            }
+            val isOnline = (pipeline.syncAndReturnAll() as List<Boolean>).any { it }
+            debug("isPlayerOnline(playerName: String) took ${System.currentTimeMillis() - start}ms.")
+            return isOnline
         }
     }
 
@@ -139,10 +162,21 @@ object RedisBungeeAPI {
         val start = System.currentTimeMillis()
         RedisAPI.jedisPool.resource.use { resource ->
             val pipeline = resource.pipelined()
-            val resOnlinePlayersServers = pipeline.hgetAll(ONLINE_PLAYERS_SERVERS.key)
+            val resOnlineSpigotServers = pipeline.smembers(ONLINE_SPIGOT_SERVERS.key)
             pipeline.sync()
+            val servers = resOnlineSpigotServers.get()
+            val toReturn = mutableMapOf<String, String>()
+            for (server in servers) {
+                pipeline.smembers("${SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${server}")
+            }
+            val serversPlayers = pipeline.syncAndReturnAll() as List<Set<String>>
+            for ((index, server) in servers.withIndex()) {
+                serversPlayers[index].forEach { playerName ->
+                    toReturn[playerName] = server
+                }
+            }
             debug("getOnlinePlayersServers() took ${System.currentTimeMillis() - start}ms.")
-            return resOnlinePlayersServers.get()
+            return toReturn
         }
     }
 
@@ -151,10 +185,19 @@ object RedisBungeeAPI {
         val start = System.currentTimeMillis()
         RedisAPI.jedisPool.resource.use { resource ->
             val pipeline = resource.pipelined()
-            val resPlayers = pipeline.hkeys(ONLINE_PLAYERS_SERVERS.key)
+            val resOnlineSpigotServers = pipeline.smembers(ONLINE_SPIGOT_SERVERS.key)
             pipeline.sync()
+            val servers = resOnlineSpigotServers.get()
+            val toReturn = mutableSetOf<String>()
+            for (server in servers) {
+                pipeline.smembers("${SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${server}")
+            }
+            val serversPlayers = pipeline.syncAndReturnAll() as List<Set<String>>
+            for (serverPlayers in serversPlayers) {
+                toReturn.addAll(serverPlayers)
+            }
             debug("getOnlinePlayers() took ${System.currentTimeMillis() - start}ms.")
-            return resPlayers.get()
+            return toReturn
         }
     }
 
@@ -163,10 +206,19 @@ object RedisBungeeAPI {
         val start = System.currentTimeMillis()
         RedisAPI.jedisPool.resource.use { resource ->
             val pipeline = resource.pipelined()
-            val resPlayers = pipeline.hlen(ONLINE_PLAYERS_SERVERS.key)
+            val resOnlineSpigotServers = pipeline.smembers(ONLINE_SPIGOT_SERVERS.key)
             pipeline.sync()
+            val servers = resOnlineSpigotServers.get()
+            var count = 0
+            for (server in servers) {
+                pipeline.scard("${SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${server}")
+            }
+            val serversPlayersCount = pipeline.syncAndReturnAll() as List<Long>
+            for (serverPlayersCount in serversPlayersCount) {
+                count += serverPlayersCount.toInt()
+            }
             debug("getOnlinePlayersCount() took ${System.currentTimeMillis() - start}ms.")
-            return resPlayers.get().toInt()
+            return count
         }
     }
 
@@ -177,11 +229,21 @@ object RedisBungeeAPI {
         val start = System.currentTimeMillis()
         RedisAPI.jedisPool.resource.use { resource ->
             val pipeline = resource.pipelined()
-            val resPlayers = pipeline.hkeys(ONLINE_PLAYERS_SERVERS.key)
-            val resServers = pipeline.smembers(ONLINE_SPIGOT_SERVERS.key)
+            val resOnlineSpigotServers = pipeline.smembers(ONLINE_SPIGOT_SERVERS.key)
             pipeline.sync()
+            val servers = resOnlineSpigotServers.get()
+            val toReturnPlayers = mutableSetOf<String>()
+            val toReturnServers = mutableSetOf<String>()
+            for (server in servers) {
+                pipeline.smembers("${SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${server}")
+            }
+            val serversPlayers = pipeline.syncAndReturnAll() as List<Set<String>>
+            for ((index, server) in servers.withIndex()) {
+                toReturnServers.add(server)
+                toReturnPlayers.addAll(serversPlayers[index])
+            }
             debug("getOnlinePlayersAndSpigotServers() took ${System.currentTimeMillis() - start}ms.")
-            return OnlinePlayersAndSpigotServersResult(resPlayers.get(), resServers.get())
+            return OnlinePlayersAndSpigotServersResult(toReturnPlayers, toReturnServers)
         }
     }
 

@@ -17,33 +17,24 @@ class RedisBungeeAPIListener : MineListener() {
     fun onPlayerJoin(e: PlayerJoinEvent) {
         val player = e.player
         player.runBlock {
-            val playerNameLower = player.name.lowercase()
             RedisAPI.jedisPool.resource.use { resource ->
-                val pipeline = resource.pipelined()
-                pipeline.hset(
-                    RedisBungeeAPI.RedisBungeeAPIKey.ONLINE_PLAYERS_SERVERS.key,
-                    playerNameLower, RedisBungeeAPI.Spigot.spigotServerName
-                )
-                pipeline.sadd(
+                resource.sadd(
                     "${RedisBungeeAPI.RedisBungeeAPIKey.SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${currentServer}",
-                    playerNameLower
+                    player.name.lowercase()
                 )
-                pipeline.sync()
             }
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerQuit(e: PlayerQuitEvent) {
         val player = e.player
         player.runBlock {
             RedisAPI.jedisPool.resource.use { resource ->
-                val pipeline = resource.pipelined()
-                pipeline.srem(
+                resource.srem(
                     "${RedisBungeeAPI.RedisBungeeAPIKey.SPIGOT_SERVERS_ONLINE_PLAYERS.key}_${currentServer}",
                     player.name.lowercase()
                 )
-                pipeline.sync()
             }
         }
     }

@@ -11,7 +11,6 @@ import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
 import com.mikael.mkutilslegacy.api.toTextComponent
 import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
 import com.mikael.mkutilslegacy.bungee.command.BungeeVersionCommand
-import com.mikael.mkutilslegacy.bungee.listener.RedisBungeeAPIListener
 import net.eduard.api.lib.bungee.BungeeAPI
 import net.eduard.api.lib.command.Command
 import net.eduard.api.lib.config.Config
@@ -87,9 +86,6 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         // Commands
         BungeeVersionCommand().registerCommand(this)
 
-        // Listeners
-        RedisBungeeAPIListener().registerListener(this)
-
         val loadTime = System.currentTimeMillis() - loadStart
         log(LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$loadTime"))
         MKPluginSystem.registerMKPlugin(this@UtilsBungeeMain)
@@ -118,7 +114,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
 
         BungeeAPI.controller.unregister() // EduardAPI
         RedisBungeeAPI.Bungee.onDisableStopRedisSub()
-        RedisAPI.jedisPool.destroy()
+        RedisAPI.onDisableUnloadRedisAPI()
         mySqlQueueUpdater?.cancel()
         UtilsManager.dbManager.closeConnection()
 
