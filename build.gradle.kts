@@ -1,8 +1,12 @@
+import java.util.Random
+
 plugins {
     java
     kotlin("jvm") version "1.9.23"
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.0.0"
+    // id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
+    // id("net.minecrell.plugin-yml.bungee") version "0.6.0"
 }
 
 group = "com.mikael"
