@@ -1,7 +1,6 @@
 package com.mikael.mkutilslegacy.spigot.task
 
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPCAPI
-import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.eduard.api.lib.event.PlayerTargetPlayerEvent
 import net.eduard.api.lib.kotlin.mineCallEvent
 import net.eduard.api.lib.manager.TimeManager
@@ -22,11 +21,9 @@ internal class PlayerTargetAtPlayerTask : TimeManager(20L) {
                         .filterIsInstance<Player>()
                 ) ?: continue
                 if (target.hasMetadata("NPC") || PlayerNPCAPI.isNPC(target)) continue
-                utilsMain.syncTask {
-                    PlayerTargetPlayerEvent(
-                        target, player
-                    ).mineCallEvent()
-                }
+                PlayerTargetPlayerEvent(
+                    target, player
+                ).mineCallEvent()
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }

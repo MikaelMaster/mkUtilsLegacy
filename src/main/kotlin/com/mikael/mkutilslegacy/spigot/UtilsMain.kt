@@ -296,7 +296,9 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         if (config.getBoolean("MenuAPI.autoUpdateMenus")) {
             AutoUpdateMenusTask().syncTimer()
         }
-        PlayerTargetAtPlayerTask().asyncTimer()
+        // Uses syncTimer to avoid concurrency issues
+        // (at org.bukkit.craftbukkit.v1_8_R3.util.UnsafeList$Itr.next(UnsafeList.java:248))
+        PlayerTargetAtPlayerTask().syncTimer()
     }
 
     private fun resetScoreboards() { // EduardAPI
