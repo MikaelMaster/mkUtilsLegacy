@@ -6,7 +6,7 @@ package com.mikael.mkutilslegacy.api.mkplugin
 @Suppress("WARNINGS")
 object MKPluginSystem {
 
-    internal val loadedMKPlugins = mutableSetOf<MKPlugin>()
+    private val loadedMKPlugins = mutableSetOf<MKPlugin>()
 
     init {
         loadedMKPlugins.clear()
@@ -16,8 +16,8 @@ object MKPluginSystem {
      * @return all loaded [MKPlugin]s.
      * @see loadedMKPlugins
      */
-    fun getLoadedMKPlugins(): List<MKPlugin> {
-        return loadedMKPlugins.toList()
+    fun getLoadedMKPlugins(): Set<MKPlugin> {
+        return loadedMKPlugins.toSet() // Returns a copy of the set.
     }
 
     /**

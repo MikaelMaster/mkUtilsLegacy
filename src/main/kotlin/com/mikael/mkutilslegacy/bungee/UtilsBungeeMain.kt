@@ -94,7 +94,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
 
             // Show MK Plugins
             log("§aLoaded MK Plugins:")
-            for (mkPlugin in MKPluginSystem.loadedMKPlugins) {
+            for (mkPlugin in MKPluginSystem.getLoadedMKPlugins()) {
                 val mkProxyPl = mkPlugin.plugin as Plugin
                 log(" §7▪ §e${mkProxyPl.description.name} v${mkProxyPl.description.version}")
             }
@@ -192,8 +192,8 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         Command.MESSAGE_PERMISSION = "§cYou don't have permission to use this command." // EduardAPI
     }
 
-    override var usingLanguage: String = "en-us" // Default always is 'en-us' (US English)
-    override var regionFormatter: Locale = Locale.US // Default always is 'Locale.US' (US English)
+    override var usingLanguage: String = "en-us"
+    override var regionFormatter: Locale = Locale.US
 
     override fun log(vararg msg: String) {
         msg.forEach {

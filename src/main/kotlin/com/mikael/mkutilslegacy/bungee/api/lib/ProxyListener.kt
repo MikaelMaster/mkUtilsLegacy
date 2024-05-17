@@ -10,8 +10,10 @@ import net.md_5.bungee.api.plugin.Plugin
  *
  * This class represents a [Listener].
  *
- * To create a new MineListener, extends it in a Class. As the example below:
- * - class TestListener : ProxyListener() { *class code* }
+ * To create a new ProxyListener, extends it in a Class. As the example below:
+ * ```
+ * class TestListener : ProxyListener() {}
+ * ```
  *
  * @author Mikael
  * @see Listener
@@ -20,19 +22,16 @@ import net.md_5.bungee.api.plugin.Plugin
 open class ProxyListener : Listener {
 
     // Properties - Start
+    private var _ownerPlugin: MKPlugin? = null
 
     /**
      * The [MKPlugin] holder (owner) of this [ProxyListener].
      */
-    private var ownerPlugin: MKPlugin? = null
-
-    /**
-     * @return the [MKPlugin]? holding (owner) of this [ProxyListener]. Can be null
-     * if this listener is not registered yet.
-     */
-    fun getOwnerPlugin(): MKPlugin? {
-        return ownerPlugin
-    }
+    var ownerPlugin: MKPlugin?
+        get() = _ownerPlugin
+        private set(value) {
+            _ownerPlugin = value
+        }
 
     /**
      * Note: If [ownerPlugin] is NOT null, means that this [ProxyListener] is registered.
@@ -41,7 +40,6 @@ open class ProxyListener : Listener {
      * @return True if the [ownerPlugin] is not null. Otherwise, false.
      */
     val isRegistered get() = ownerPlugin != null
-
     // Properties - End
 
     /**

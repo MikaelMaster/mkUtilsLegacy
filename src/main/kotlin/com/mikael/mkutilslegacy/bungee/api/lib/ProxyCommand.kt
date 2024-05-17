@@ -12,11 +12,18 @@ import org.bukkit.entity.Player
 /**
  * [ProxyCommand] util class
  *
- * This class represents a [Command] and extends a [TabExecutor].
+ * This class represents a [Command] and a [TabExecutor].
  *
- * To create a new ProxyCommand, extends it in a Class. As the example below:
- * - class TestCommand : ProxyCommand(command: [String]) { *class code* } -> This command will have no aliases.
- * - class TestCommand : ProxyCommand(command: [String], vararg aliases: [String]) { *class code* } -> This command will have the given aliases.
+ * To create a new ProxyCommand, extend it in a Class.
+ * As the example below:
+ * ```
+ * // This command will have no aliases.
+ * class TestCommand : ProxyCommand(command: [String]) {}
+ * ```
+ * ```
+ * // This command will have the given aliases.
+ * class TestCommand : ProxyCommand(command: [String], vararg aliases: [String]) {}
+ * ```
  *
  * @param command the command name, as the example above.
  * @param aliases the command aliases, as the example above.
@@ -24,7 +31,6 @@ import org.bukkit.entity.Player
  * @author Mikael
  * @see Command
  */
-@Suppress("WARNINGS")
 open class ProxyCommand(command: String, vararg aliases: String) : TabExecutor {
     companion object {
         private val registeredProxyCommands = mutableListOf<ProxyCommand>()
@@ -46,12 +52,12 @@ open class ProxyCommand(command: String, vararg aliases: String) : TabExecutor {
 
     /**
      * The command permission message.
-     * Message sent when a player don't have permission to use it.
+     * Message sent when a player doesn't have permission to use it.
      */
     var permissionMessage: String = "§cYou don't have permission to use this command."
 
     /**
-     * The command usage. Message sent when a player use the command incorrectly.
+     * The command usage. Message sent when a player uses the command incorrectly.
      *
      * @see sendUsage
      */
@@ -59,7 +65,7 @@ open class ProxyCommand(command: String, vararg aliases: String) : TabExecutor {
 
     /**
      * The command 'name'.
-     * Example: If the command is '/help' the plugin name will be 'help'.
+     * Example: If the command is '/help', the plugin name will be 'help'.
      */
     val name = command
 
@@ -94,7 +100,6 @@ open class ProxyCommand(command: String, vararg aliases: String) : TabExecutor {
      */
     open fun unregisterCommand() {
         plugin.proxy.pluginManager.unregisterCommand(proxyCommand)
-
         registeredProxyCommands.remove(this@ProxyCommand)
     }
 

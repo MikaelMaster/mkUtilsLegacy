@@ -149,7 +149,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
 
             //  MK Plugins - Start
             log("§aLoaded MK Plugins:")
-            for (mkPlugin in MKPluginSystem.loadedMKPlugins) {
+            for (mkPlugin in MKPluginSystem.getLoadedMKPlugins()) {
                 log(" §7▪ §e${mkPlugin}")
             }
 

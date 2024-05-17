@@ -16,11 +16,18 @@ import org.bukkit.plugin.java.JavaPlugin
 /**
  * [MineCommand] util class
  *
- * This class represents a [CommandExecutor].
+ * This class extends a [CommandExecutor] and a [TabExecutor].
  *
- * To create a new MineCommand, extends it in a Class. As the example below:
- * - class TestCommand : MineCommand(command: [String]) { *class code* } -> This command will have no aliases.
- * - class TestCommand : MineCommand(command: [String], vararg aliases: [String]) { *class code* } -> This command will have the given aliases.
+ * To create a new MineCommand, extend it in a Class.
+ * As the example below:
+ * ```
+ * // This command will have no aliases.
+ * class TestCommand : MineCommand(command: [String]) {}
+ * ```
+ * ```
+ * // This command will have the given aliases.
+ * class TestCommand : MineCommand(command: [String], vararg aliases: [String]) {}
+ * ```
  *
  * @param command the command name, as the example above.
  * @param aliases the command aliases, as the example above.
@@ -51,12 +58,12 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
 
     /**
      * The command permission message.
-     * Message sent when a player don't have permission to use it.
+     * Message sent when a player doesn't have permission to use it.
      */
     var permissionMessage: String = "§cYou don't have permission to use this command."
 
     /**
-     * The command usage. Mesage sent when a player use the command incorrectly.
+     * The command usage. Message sent when a player uses the command incorrectly.
      *
      * @see sendUsage
      */
@@ -143,7 +150,7 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
      * The code here will be executed when the [CommandSender] is a [Player].
      */
     open fun playerCommand(player: Player, args: List<String>) {
-        player.sendMessage("§cOps! Something went wrong. :c")
+        player.sendMessage("§cThis command is not implemented for players.")
     }
 
     /**

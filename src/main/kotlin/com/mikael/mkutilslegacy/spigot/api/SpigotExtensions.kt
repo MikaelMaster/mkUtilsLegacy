@@ -347,7 +347,7 @@ val Entity.getMKPluginOwner: MKPlugin?
         val nbt = MineNBT.Entity(this)
         if (nbt.hasKey("MKPluginOwner")) {
             val pluginName = nbt.getString("MKPluginOwner")
-            return MKPluginSystem.loadedMKPlugins.firstOrNull { it.systemName == pluginName }
+            return MKPluginSystem.getLoadedMKPlugins().firstOrNull { it.systemName == pluginName }
         }
         return null
     }

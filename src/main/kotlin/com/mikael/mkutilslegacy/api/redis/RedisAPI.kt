@@ -105,7 +105,7 @@ object RedisAPI {
     }
 
     /**
-     * @see Jedis.hsetnx
+     * @see Jedis.hset
      */
     fun setMapValue(key: String, mapKey: String, mapValue: String): Long {
         return setMap(key, mapOf(mapKey to mapValue))

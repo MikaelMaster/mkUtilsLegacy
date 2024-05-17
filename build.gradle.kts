@@ -1,8 +1,6 @@
-import java.util.Random
-
 plugins {
     java
-    kotlin("jvm") version "1.9.23"
+    kotlin("jvm") version "1.9.24"
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.0.0"
     // id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
