@@ -98,7 +98,7 @@ bukkit {
 }
 
 bungee {
-    name = "mkUtilsLegacy"
+    name = "mkUtilsProxy"
     description = "mkUtils is a lib for plugins development. By Mikael with help of Eduard and Koddy."
     author = "Mikael"
 
