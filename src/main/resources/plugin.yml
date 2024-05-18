@@ -1,8 +1,0 @@
-name: mkUtilsLegacy
-description: mkUtilsLegacy is a lib for plugins development. By Mikael with help of Eduard and Koddy.
-version: 5.1.1
-softdepend: [ Vault ]
-load: POSTWORLD
-authors: [ Mikael, Eduard, Koddy ]
-website: "https://github.com/MikaelMaster/mkUtilsLegacy"
-main: com.mikael.mkutilslegacy.spigot.UtilsMain
