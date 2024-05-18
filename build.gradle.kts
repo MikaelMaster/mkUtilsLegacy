@@ -103,7 +103,7 @@ bungee {
     author = "Mikael"
 
     version = pluginVersion
-    main = "com.mikael.mkutilslegacy.spigot.UtilsMain"
+    main = "com.mikael.mkutilslegacy.bungee.UtilsBungeeMain"
 }
 
 tasks {
