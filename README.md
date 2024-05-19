@@ -49,8 +49,8 @@ This plugin/library is developed by:
 - Mikael (aka MikaelMaster, TheSrMK, SrMK)
 - Vinícius (aka Koddy, KoddyDev)
 
-This project utilizes various utility methods and the DB/SQL Manager from EduardAPI, developed by Eduard (aka EduardMaster).
+This project utilizes various utility methods and the DB/SQL Manager from MineToolkit, developed by Eduard (aka EduardMaster).
 
-For more information about EduardAPI, visit [EduardAPI on GitHub](https://github.com/EduardMaster/EduardAPI).
+For more information about EduardAPI, visit [MineToolKit on GitHub](https://github.com/EduardMaster/MineToolkit).
 
 *Last updated by Mikael on May 2024.*
