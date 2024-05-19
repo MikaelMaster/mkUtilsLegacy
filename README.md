@@ -39,7 +39,7 @@ mkUtilsLegacy offers a variety of APIs and utility systems, including:
 
 ## Usage
 
-To use mkUtilsLegacy for development, download `mkUtilsLegacy-version.jar` and `EduardAPI-1.0-all.jar` and add them as dependencies in your project. 
+To use mkUtilsLegacy for development, download `mkUtilsLegacy-version.jar` and `EduardAPI-1.0-all.jar` (MineToolkit) and add them as dependencies in your project. 
 
 Since this is not just a library but also a plugin, you need to run the plugin shadow jar (`mkUtilsLegacy-version-all.jar`) on your server along with other plugins that depend on it.
 
@@ -51,6 +51,6 @@ This plugin/library is developed by:
 
 This project utilizes various utility methods and the DB/SQL Manager from MineToolkit, developed by Eduard (aka EduardMaster).
 
-For more information about EduardAPI, visit [MineToolKit on GitHub](https://github.com/EduardMaster/MineToolkit).
+For more information about MineToolkit, visit [MineToolkit on GitHub](https://github.com/EduardMaster/MineToolkit).
 
 *Last updated by Mikael on May 2024.*
