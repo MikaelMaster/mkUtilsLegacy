@@ -1,34 +1,56 @@
-# mkUtilsLegacy - by Mikael, Vinícius and Eduard
-An utils plugin/lib for Minecraft Kotlin developers (For legacy Minecraft versions - Paper 1.8.8-R0.1).
+# mkUtilsLegacy - by Mikael, Vinícius, and Eduard
 
-*Some useful APIs and Utils Systems mkUtilsLegacy have:*
+An utility plugin/library for Minecraft Kotlin developers, targeting legacy Minecraft versions (Paper 1.8.8-R0.1).
 
-- MKPlugin (All)
-- GlobalExtensions (All)
-- MineCooldown (All)
-- RedisAPI (All)
-- RedisBungeeAPI (All)
-- StorageAPI (All)
-- BungeeExtensions *This contains a lot of complementing methods such as *ProxiedPlayer.title()*, *ProxiedPlayer.sendMessages(vararg String)*, *ProxiedPlayer.clearChat()* and a lot more* (Proxy-side)
-- ProxyCommand *Supporting an easy creation of subcommands* (Proxy-side)
-- ProxyListener (Proxy-side)
-- SpigotExtensions *This contains a lot of complementing methods such as *Entity.enableAI()*, *Chest.open()*, *Block.setDamage()* and a lot more* (Spigot-side)
-- MineCommand *Supporting an easy creation of subcommands* (Spigot-side)
-- MineListener (Spigot-side)
-- MineItem (Spigot-side)
-- MineMenu *One of more exciting API mkUtils have: Create menus with animated buttons, auto-pages, per-player, auto updates and more* (Spigot-side)
-- MineHologram (Spigot-side)
-- MineBook (Spigot-side)
-- MineScoreboard (Spigot-side)
-- PlayerNPCAPI *A simple API to create Human NPCs using NMS* (Spigot-side)
-- Vault *hook foi Vault Plugin* (Spigot-side)
-- LocationUtil (Spigot-side)
-- MineNBT (Spigot-side)
-- A lot of custom events complementing the BukkitAPI are also available! (Spigot-side, Extra)
+## Features
 
-To use it to develop, you should download *mkUtilsLegacy-version.jar* and *EduardAPI-1.0-all.jar* and use them as depends in your project.
-This is not only a lib, so you'll need to run the plugin shadow jar (mkUtilsLegacy-version-all.jar) in your server with the others plugins that depends on it.
+mkUtilsLegacy offers a variety of APIs and utility systems, including:
 
-This plugin/lib is developed by Mikael (vulgo MikaelMaster, TheSrMK, SrMK) and Vinícius (vulgo Koddy, KoddyDev). This project uses EduardAPI's (https://github.com/EduardMaster/EduardAPI) some utils methods and DB/SQL Manager, credits do Eduard (vulgo EduardMaster).
+- **MKPlugin** (All)
+- **GlobalExtensions** (All)
+- **MineCooldown** (All)
+- **RedisAPI** (All)
+- **RedisBungeeAPI** (All)
+- **StorageAPI** (All)
+- **BungeeExtensions** (Proxy-side)  
+  Contains many useful methods such as `ProxiedPlayer.title()`, `ProxiedPlayer.sendMessages(vararg String)`, `ProxiedPlayer.clearChat()`, and more.
+- **ProxyCommand** (Proxy-side)  
+  Facilitates the easy creation of subcommands.
+- **ProxyListener** (Proxy-side)
+- **SpigotExtensions** (Spigot-side)  
+  Contains many useful methods such as `Entity.enableAI()`, `Chest.open()`, `Block.setDamage()`, and more.
+- **MineCommand** (Spigot-side)  
+  Facilitates the easy creation of subcommands.
+- **MineListener** (Spigot-side)
+- **MineItem** (Spigot-side)
+- **MineMenu** (Spigot-side)  
+  One of the more exciting APIs offered by mkUtils. Allows for the creation of menus with animated buttons, auto-pages, per-player settings, auto updates, and more.
+- **MineHologram** (Spigot-side)
+- **MineBook** (Spigot-side)
+- **MineScoreboard** (Spigot-side)
+- **PlayerNPCAPI** (Spigot-side)  
+  A simple API to create human NPCs using NMS.
+- **Vault** (Spigot-side)  
+  Integration with the Vault plugin.
+- **LocationUtil** (Spigot-side)
+- **MineNBT** (Spigot-side)
+- **Custom Events** (Spigot-side, Extra)  
+  Many custom events that complement the Bukkit API.
 
-- by Mikael, last update on 2023/10.
+## Usage
+
+To use mkUtilsLegacy for development, download `mkUtilsLegacy-version.jar` and `EduardAPI-1.0-all.jar` (MineToolkit) and add them as dependencies in your project. 
+
+Since this is not just a library but also a plugin, you need to run the plugin shadow jar (`mkUtilsLegacy-version-all.jar`) on your server along with other plugins that depend on it.
+
+## Authors and Acknowledgements
+
+This plugin/library is developed by:
+- Mikael (aka MikaelMaster, TheSrMK, SrMK)
+- Vinícius (aka Koddy, KoddyDev)
+
+This project utilizes various utility methods and the DB/SQL Manager from MineToolkit, developed by Eduard (aka EduardMaster).
+
+For more information about MineToolkit, visit [MineToolkit on GitHub](https://github.com/EduardMaster/MineToolkit).
+
+*Last updated by Mikael on May 2024.*
