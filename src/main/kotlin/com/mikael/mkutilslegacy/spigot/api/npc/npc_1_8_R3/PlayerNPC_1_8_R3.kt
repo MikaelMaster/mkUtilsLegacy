@@ -235,14 +235,14 @@ class PlayerNPC_1_8_R3(
         packetPlayerSpawn?.let { playerConnection.sendPacket(it) }
         packetPlayerHeadRotation?.let { playerConnection.sendPacket(it) }
 
-        val name = Extra.cutText("${Int.MAX_VALUE}NPC", 16) // Sets NPC tab's show priority to 'last'
+        val name = Extra.cutText("${0}NPC", 16) // Sets NPC tab's show priority to '0' (last)
         val team = Mine.getTeam(player.scoreboard ?: Mine.getMainScoreboard(), name)
         try {
             team.nameTagVisibility = NameTagVisibility.NEVER
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
-        // team.prefix = Extra.cutText(tag.tabPrefix, 16)!!
+        team.prefix = "§8"
         if (!team.hasEntry(npc.name)) {
             team.addEntry(npc.name)
         }
