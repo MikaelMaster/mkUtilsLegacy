@@ -235,7 +235,7 @@ class PlayerNPC_1_8_R3(
         packetPlayerSpawn?.let { playerConnection.sendPacket(it) }
         packetPlayerHeadRotation?.let { playerConnection.sendPacket(it) }
 
-        val name = Extra.cutText("${0}NPC", 16) // Sets NPC tab's show priority to '0' (last)
+        val name = Extra.cutText("zNPC", 16) // Sets NPC tab's show priority to 'z' (last)
         val team = Mine.getTeam(player.scoreboard ?: Mine.getMainScoreboard(), name)
         try {
             team.nameTagVisibility = NameTagVisibility.NEVER
