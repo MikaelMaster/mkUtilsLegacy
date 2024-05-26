@@ -89,7 +89,7 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
         /**
          * Transforms a [Base64] String to a [MineItem]?.
          *
-         * @param base64 The base64, is obvious.
+         * @param base64 The base64 is clear.
          * @author KoddyDev
          * @return a new [MineItem]?.
          */
@@ -106,7 +106,6 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
                 null
             }
         }
-
     }
 
     /**

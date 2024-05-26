@@ -75,10 +75,15 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.util.Vector
+import org.bukkit.util.io.BukkitObjectInputStream
+import org.bukkit.util.io.BukkitObjectOutputStream
 import org.json.JSONObject
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder
 import java.awt.Image
 import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -1199,6 +1204,38 @@ fun getNonPlayerProfile(skinURL: String): GameProfile {
         )
     )
     return newSkinProfile
+}
+
+fun fromBase64toItems(base64: String): List<ItemStack>? {
+    return try {
+        val inputStream = ByteArrayInputStream(Base64Coder.decodeLines(base64))
+        val dataInput = BukkitObjectInputStream(inputStream)
+        val stacks = mutableListOf<ItemStack>()
+        for (slot in 0 until dataInput.readInt()) {
+            stacks.add(dataInput.readObject() as ItemStack)
+        }
+        dataInput.close()
+        return stacks
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+        null
+    }
+}
+
+fun fromItemsToBase64(items: List<ItemStack>): String? {
+    return try {
+        val outputStream = ByteArrayOutputStream()
+        val dataOutput = BukkitObjectOutputStream(outputStream)
+        dataOutput.writeInt(items.size)
+        for (stack in items) {
+            dataOutput.writeObject(stack)
+        }
+        dataOutput.close()
+        return Base64Coder.encodeLines(outputStream.toByteArray())
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+        null
+    }
 }
 
 @Suppress("DEPRECATION")
