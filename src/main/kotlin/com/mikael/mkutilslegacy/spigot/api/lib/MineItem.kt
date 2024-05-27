@@ -359,11 +359,11 @@ open class MineItem(item: ItemStack) : ItemStack(item), Serializable {
     }
 
     /**
-     * @return this super class [ItemStack].
+     * @return An [ItemStack] created using this [MineItem] as the *stack*.
      * @see MineItem.clone
      */
     fun toItemStack(): ItemStack {
-        return this.clone()
+        return ItemStack(this)
     }
 
     /**
