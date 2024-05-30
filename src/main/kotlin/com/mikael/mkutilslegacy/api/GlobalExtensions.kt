@@ -429,7 +429,12 @@ fun Double.getProbability(): Boolean {
 }
 
 /**
- * @return A value for the [key] or null if the key does not exists on the given [JSONObject].
+ * This function is used to safely retrieve a value from a JSONObject.
+ * It checks if the JSONObject has the provided key and if it does, it returns the value associated with that key.
+ * If the key does not exist in the JSONObject, it returns null.
+ *
+ * @param key The key to look for in the JSONObject.
+ * @return The value associated with the key if it exists, null otherwise.
  */
 fun JSONObject.getOrNull(key: String): Any? {
     if (!this.has(key)) return null

@@ -1,7 +1,6 @@
 package com.mikael.mkutilslegacy.api.redis
 
 import com.mikael.mkutilslegacy.api.isProxyServer
-import com.mikael.mkutilslegacy.api.redis.RedisAPI.jedisPool
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain
@@ -27,13 +26,22 @@ import redis.clients.jedis.JedisPool
 object RedisAPI {
 
     // Properties - Start
+
+    // Connection data for the Redis server
     lateinit var managerData: RedisConnectionData
 
+    // Configuration for the Jedis pool
     lateinit var jedisPoolConfig: GenericObjectPoolConfig<Jedis>
+
+    // Pool of Jedis instances
     lateinit var jedisPool: JedisPool
 
     // RedisBungeeAPI - Start
+
+    // Private variable to store the state of RedisBungeeAPI usage
     private var _useRedisBungeeAPI = false
+
+    // Public property to get and set the state of RedisBungeeAPI usage
     var useRedisBungeeAPI: Boolean
         get() = _useRedisBungeeAPI
         internal set(value) {
@@ -41,10 +49,13 @@ object RedisAPI {
         }
     // RedisBungeeAPI - End
 
+    // Check if the Jedis pool and its configuration are initialized
     val isInitialized: Boolean get() = this::jedisPoolConfig.isInitialized && this::jedisPool.isInitialized
     // Properties - End
 
     // Internal methods - Start
+
+    // Method to initialize and load the Redis API
     internal fun onEnableLoadRedisAPI(): Boolean {
         val config = GenericObjectPoolConfig<Jedis>()
         config.maxTotal = managerData.jedisPoolMaxClients
@@ -63,11 +74,13 @@ object RedisAPI {
         return true
     }
 
+    // Method to unload the Redis API
     internal fun onDisableUnloadRedisAPI() {
         if (!isInitialized) return
         // jedisPool.destroy() // Não é necessário e não pode.
     }
 
+    // Method to log debug messages
     private fun debug(msg: String) {
         if (!isInitialized || !managerData.debug) return
         if (isProxyServer) {
@@ -79,6 +92,7 @@ object RedisAPI {
     // Internal methods - End
 
     /**
+     * Method to set a value in Redis
      * @see Jedis.set
      */
     fun set(key: String, value: Any): Boolean {
@@ -92,6 +106,7 @@ object RedisAPI {
     }
 
     /**
+     * Method to set a map in Redis
      * @see Jedis.hset
      */
     fun setMap(key: String, value: Map<String, String>): Long {
@@ -105,6 +120,7 @@ object RedisAPI {
     }
 
     /**
+     * Method to set a value in a map in Redis
      * @see Jedis.hset
      */
     fun setMapValue(key: String, mapKey: String, mapValue: String): Long {
@@ -112,6 +128,7 @@ object RedisAPI {
     }
 
     /**
+     * Data class to hold the response of the exists method
      * @see exists
      */
     data class ExistsResponse(val verifiedKeys: Long, val existentKeys: Long) {
@@ -122,6 +139,7 @@ object RedisAPI {
     }
 
     /**
+     * Method to check if keys exist in Redis
      * @return an [ExistsResponse] with the verified keys and the existent keys.
      * @see Jedis.exists
      */
@@ -137,6 +155,7 @@ object RedisAPI {
     }
 
     /**
+     * Method to get all data for given keys from Redis
      * @see Jedis.mget
      */
     fun getAllData(vararg keys: String): List<String> {
@@ -150,6 +169,7 @@ object RedisAPI {
     }
 
     /**
+     * Method to get a string value from Redis
      * @see Jedis.get
      */
     fun getString(key: String): String? {
@@ -162,19 +182,23 @@ object RedisAPI {
         }
     }
 
+    // Method to get an integer value from Redis
     fun getInt(key: String): Int? {
         return getString(key)?.toInt()
     }
 
+    // Method to get a double value from Redis
     fun getDouble(key: String): Double? {
         return getString(key)?.toDouble()
     }
 
+    // Method to get a long value from Redis
     fun getLong(key: String): Long? {
         return getString(key)?.toLong()
     }
 
     /**
+     * Method to get a map from Redis
      * @see Jedis.hgetAll
      */
     fun getMap(key: String): Map<String, String> {
@@ -188,6 +212,7 @@ object RedisAPI {
     }
 
     /**
+     * Method to get a value from a map in Redis
      * @see Jedis.hget
      */
     fun getMapValue(key: String, mapKey: String): String? {
@@ -200,8 +225,8 @@ object RedisAPI {
         }
     }
 
-
     /**
+     * Method to delete keys from Redis
      * @see Jedis.del
      */
     fun delete(vararg keys: String): Long {
@@ -215,6 +240,7 @@ object RedisAPI {
     }
 
     /**
+     * Method to delete keys from a map in Redis
      * @see Jedis.hdel
      */
     fun mapDelete(key: String, vararg mapKeys: String): Long {
@@ -228,6 +254,7 @@ object RedisAPI {
     }
 
     /**
+     * Method to publish a message to a channel in Redis
      * @see Jedis.publish
      */
     fun sendEvent(channel: String, message: String): Long {
@@ -240,17 +267,7 @@ object RedisAPI {
         }
     }
 
-    /**
-     * Creates a new [Jedis] and connect it using the given [RedisConnectionData].
-     * This is usefully to create pub-subs.
-     *
-     * This method does NOT get a [Jedis] from the [jedisPool], this will create a new [Jedis] instance,
-     * and then connect it using the given [connectionData] properties.
-     *
-     * @param connectionData A [RedisConnectionData] to create a new [Jedis].
-     * @return A new connected [Jedis].
-     * @throws IllegalStateException if the [RedisConnectionData.isEnabled] of the given [connectionData] is false.
-     */
+    // Method to get an extra client for a given connection data
     fun getExtraClient(connectionData: RedisConnectionData): Jedis {
         if (!connectionData.isEnabled) error("Given RedisConnectionData isEnabled should not be false.")
         val start = System.currentTimeMillis()
