@@ -153,6 +153,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
                 log(" §7▪ §e${mkPlugin}")
             }
 
+            /*
             log("§eCleaning up loaded MK Plugins spawned entities...")
             for (world in Bukkit.getWorlds()) {
                 for (entity in world.entities) {
@@ -164,6 +165,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
                     }
                 }
             }
+             */
             // MK Plugins - End
 
             // MySQL queue updater timer
