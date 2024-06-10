@@ -239,17 +239,10 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
 
         if (args == null || args.isEmpty()) {
             data.addAll(subCommands.map { it.name })
-
-            data.addAll(
-                Mine.getPlayers().map { it.name }
-            )
+            data.addAll(Mine.getPlayers().map { it.name })
         } else {
-            data.addAll(subCommands.map { it.name }.filter { it.lowercase().startsWith(args.last().lowercase()) })
-
-            data.addAll(
-                Mine.getPlayers().map { it.name }
-                    .filter { it.lowercase().startsWith(args[0]) }
-            )
+            data.addAll(subCommands.map { it.name }.filter { it.startsWith(args.last(), ignoreCase = true) })
+            data.addAll(Mine.getPlayers().map { it.name }.filter { it.startsWith(args.last(), ignoreCase = true) })
         }
 
         return data

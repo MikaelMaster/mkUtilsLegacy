@@ -37,4 +37,5 @@ class RedisConnectionData(
     var jedisPoolTestWhileIdle: Boolean = true,
 
     var jedisPoolMaxTimeout: Int = 3000
+
 )
