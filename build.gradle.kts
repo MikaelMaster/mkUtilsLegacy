@@ -8,7 +8,7 @@ import java.util.*
 
 plugins {
     java
-    kotlin("jvm") version "1.9.24"
+    kotlin("jvm") version "2.0.0"
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
@@ -34,7 +34,7 @@ repositories {
 val userFolderPath: String = System.getProperty("user.home")
 
 dependencies {
-    // Spigot/Paper API, Waterfall API and Vault API for mkUtils hook Vault
+    // Spigot/Paper API, Waterfall API and Vault API for mkUtils Vault hook
     compileOnly("org.github.paperspigot:paperspigot-api:1.8.8-R0.1-SNAPSHOT")
     compileOnly(files("libs/spigot-1.8.8.jar"))
     compileOnly("io.github.waterfallmc:waterfall-api:1.19-R0.1-SNAPSHOT")
@@ -42,25 +42,25 @@ dependencies {
 
     // Kotlin stdlib and EduardAPI
     implementation(kotlin("stdlib"))
-    implementation(files("${userFolderPath}\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar"))
+    api(files("${userFolderPath}\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar"))
 
     // Jedis for mkUtils RedisAPI
-    implementation("redis.clients:jedis:5.1.3")
+    api("redis.clients:jedis:5.1.3")
 
     // Exposed (all modules) for mkUtils DB
     val exposedVersion: String by project // defined in gradle.properties
-    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    api("org.jetbrains.exposed:exposed-core:$exposedVersion")
     // implementation("org.jetbrains.exposed:exposed-crypt:$exposedVersion") // Not compatible with Java 8
-    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-json:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-money:$exposedVersion")
+    api("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    api("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    api("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
+    api("org.jetbrains.exposed:exposed-json:$exposedVersion")
+    api("org.jetbrains.exposed:exposed-money:$exposedVersion")
     // implementation("org.jetbrains.exposed:exposed-spring-boot-starter:$exposedVersion") // Not compatible with Java 8
 
     // JDBC Drivers (MySQL and MariaDB) for Exposed (SQL)
-    implementation("com.mysql:mysql-connector-j:8.4.0")
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.4.0")
+    api("com.mysql:mysql-connector-j:8.4.0")
+    api("org.mariadb.jdbc:mariadb-java-client:3.4.0")
 }
 
 fun generateVersion(): String {
