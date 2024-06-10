@@ -1,7 +1,9 @@
 package com.mikael.mkutilslegacy.spigot
 
 import com.mikael.mkutilslegacy.api.UtilsManager
-import com.mikael.mkutilslegacy.api.formatValue
+import com.mikael.mkutilslegacy.api.db.DBInfo
+import com.mikael.mkutilslegacy.api.db.DatabaseAPI
+import com.mikael.mkutilslegacy.api.db.DatabaseAPI.usingDBEngine
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.mkplugin.MKPluginSystem
 import com.mikael.mkutilslegacy.api.mkplugin.language.LangSystem
@@ -9,9 +11,6 @@ import com.mikael.mkutilslegacy.api.mkplugin.language.Translation
 import com.mikael.mkutilslegacy.api.redis.RedisAPI
 import com.mikael.mkutilslegacy.api.redis.RedisBungeeAPI
 import com.mikael.mkutilslegacy.api.redis.RedisConnectionData
-import com.mikael.mkutilslegacy.spigot.api.chunk
-import com.mikael.mkutilslegacy.spigot.api.entitiesMKPluginQuickCheckList
-import com.mikael.mkutilslegacy.spigot.api.hasMKPluginOwner
 import com.mikael.mkutilslegacy.spigot.api.lib.hologram.listener.MineHologramListener
 import com.mikael.mkutilslegacy.spigot.api.lib.menu.MenuSystem
 import com.mikael.mkutilslegacy.spigot.api.npc.PlayerNPCAPI
@@ -32,7 +31,6 @@ import net.eduard.api.lib.config.Config
 import net.eduard.api.lib.database.BukkitTypes
 import net.eduard.api.lib.database.DBManager
 import net.eduard.api.lib.database.HybridTypes
-import net.eduard.api.lib.database.SQLManager
 import net.eduard.api.lib.hybrid.BukkitServer
 import net.eduard.api.lib.hybrid.Hybrid
 import net.eduard.api.lib.kotlin.store
@@ -48,7 +46,6 @@ import org.bukkit.command.SimpleCommandMap
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.SimplePluginManager
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.scheduler.BukkitTask
 import java.io.File
 import java.lang.reflect.Field
 import java.text.SimpleDateFormat
@@ -57,12 +54,12 @@ import java.util.*
 /**
  * mkUtilsLegacy plugin main Spigot class.
  *
- * Special thanks to Eduard-- (*https://github.com/EduardMaster*).
- * This project uses some EduardAPI codes and methods.
+ * Special thanks to [Eduard](https://github.com/EduardMaster).
+ * This project uses some [EduardAPI/MineToolkit](https://github.com/EduardMaster/MineToolkit) extras and methods.
  *
  * @author Mikael
  * @author KoddyDev
- * @author Eduard (EduardAPI)
+ * @author Eduard (EduardAPI/MineToolkit)
  *
  * @see MKPlugin
  * @see utilsMain
@@ -73,8 +70,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
     }
 
     internal var scm: SimpleCommandMap? = null
-    internal var spm: SimplePluginManager? = null
-    private var mySqlQueueUpdater: BukkitTask? = null
+    private var spm: SimplePluginManager? = null
     lateinit var config: Config
 
     init {
@@ -93,7 +89,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         store<RedisConnectionData>()
 
         Extra.FORMAT_DATE = SimpleDateFormat("dd/MM/yyyy") // EduardAPI
-        Extra.FORMAT_DATETIME = SimpleDateFormat("dd/MM/yyyy HH:mm:ss") // EduardAPI
+        Extra.FORMAT_DATETIME = SimpleDateFormat("dd/MM/yyyy HH:mm") // EduardAPI
 
         log(LangSystem.getText(Translation.LOADING_DIRECTORIES))
         config = Config(this@UtilsMain, "config.yml")
@@ -106,7 +102,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         regionFormatter = Locale.forLanguageTag(config.getString("Region.RegionFormatter").lowercase()) // LangSystem
 
         log(LangSystem.getText(Translation.LOADING_EXTRAS))
-        preparePlaceholders(); prepareTasks()
+        prepareTasks()
 
         log(LangSystem.getText(Translation.LOADING_APIS))
         MenuSystem.onEnable()
@@ -119,8 +115,8 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         BungeeAPI.bukkit.register(this) // EduardAPI
 
         log(LangSystem.getText(Translation.LOADING_SYSTEMS))
-        prepareMySQL()
-        prepareRedis()
+        prepareDatabaseAPI()
+        prepareRedisAPI()
         prepareCommandMap()
 
         // Commands
@@ -142,38 +138,14 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         syncDelay(20) {
             log("§ePreparing MineReflect...")
             try {
-                MineReflect.getVersion() // Prints the server (reflect) version
+                MineReflect.getVersion() // Prints the server (NMS) version
             } catch (ex: Exception) {
                 Mine.console("§b[MineReflect] §cThe current version is not supported. Some custom features will not work, mkUtils will run with default Paper ones.")
             }
 
-            //  MK Plugins - Start
             log("§aLoaded MK Plugins:")
             for (mkPlugin in MKPluginSystem.getLoadedMKPlugins()) {
                 log(" §7▪ §e${mkPlugin}")
-            }
-
-            /*
-            log("§eCleaning up loaded MK Plugins spawned entities...")
-            for (world in Bukkit.getWorlds()) {
-                for (entity in world.entities) {
-                    if (!entity.chunk.isLoaded) {
-                        entity.chunk.load(true)
-                    }
-                    if (entity.hasMKPluginOwner && !entitiesMKPluginQuickCheckList.containsKey(entity)) {
-                        entity.remove()
-                    }
-                }
-            }
-             */
-            // MK Plugins - End
-
-            // MySQL queue updater timer
-            if (UtilsManager.sqlManager.hasConnection()) {
-                mySqlQueueUpdater = asyncTimer(1, 20) {
-                    if (!UtilsManager.sqlManager.hasConnection()) return@asyncTimer
-                    UtilsManager.sqlManager.runChanges()
-                }
             }
         }
     }
@@ -199,9 +171,8 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         log(LangSystem.getText(Translation.UNLOADING_SYSTEMS))
         BungeeAPI.controller.unregister() // EduardAPI
         RedisBungeeAPI.Spigot.onDisableStopRedisSub()
-        RedisAPI.onDisableUnloadRedisAPI()
-        mySqlQueueUpdater?.cancel()
-        UtilsManager.dbManager.closeConnection()
+        RedisAPI.unloadRedisAPI()
+        DatabaseAPI.unloadDatabaseAPI()
 
         log(LangSystem.getText(Translation.UNLOADING_COMPLETE))
         MKPluginSystem.unregisterMKPlugin(this@UtilsMain)
@@ -223,14 +194,14 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         }
     }
 
-    private fun prepareRedis() {
+    private fun prepareRedisAPI() {
         RedisAPI.managerData = config["Redis", RedisConnectionData::class.java]
         if (!RedisAPI.managerData.isEnabled) {
             log("§cRedis is not active on the config file. Some plugins and MK systems may not work correctly.")
             return
         }
         log("§eConnecting to Redis server...")
-        RedisAPI.onEnableLoadRedisAPI()
+        RedisAPI.loadRedisAPI()
         if (!RedisAPI.isInitialized) error("Cannot connect to Redis server.")
         RedisAPI.useRedisBungeeAPI = RedisAPI.managerData.useRedisBungeeAPI
         if (RedisBungeeAPI.isEnabled) {
@@ -242,16 +213,16 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         log("§aConnected to Redis server!")
     }
 
-    private fun prepareMySQL() {
-        UtilsManager.sqlManager = SQLManager(config["Database", DBManager::class.java])
-        if (!UtilsManager.sqlManager.dbManager.isEnabled) {
-            log("§cThe MySQL is not active on the config file. Some plugins and MK systems may not work correctly.")
+    private fun prepareDatabaseAPI() {
+        DatabaseAPI.usingDBInfo = config["Database", DBInfo::class.java]
+        if (!DatabaseAPI.usingDBInfo.isEnabled) {
+            log("§cDatabase (SQL) is not active on the config file. Some plugins and MK systems may not work correctly.")
             return
         }
-        log("§eConnecting to MySQL database...")
-        UtilsManager.dbManager.openConnection()
-        if (!UtilsManager.sqlManager.hasConnection()) error("Cannot connect to MySQL database.")
-        log("§aConnected to MySQL database!")
+        log("§eConnecting to ${usingDBEngine.display} DB...")
+        if (DatabaseAPI.loadDatabaseAPI()) {
+            log("§aConnected to ${usingDBEngine.display} DB!")
+        }
     }
 
     private fun prepareStorageAPI() {
@@ -263,16 +234,6 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         // StorageAPI.registerStorable(MineItemStorable::class.java, MineItemStorable())
 
         StorageAPI.startGson() // EduardAPI
-    }
-
-    private fun preparePlaceholders() { // mkUtils default placeholders
-        Mine.addReplacer("mkutils_redisbungeeapi_players") {
-            try {
-                Bukkit.getOnlinePlayers().size.formatValue()
-            } catch (ex: Exception) {
-                -1
-            }
-        }
     }
 
     private fun prepareBasics() {
@@ -298,7 +259,7 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         if (config.getBoolean("MenuAPI.autoUpdateMenus")) {
             AutoUpdateMenusTask().syncTimer()
         }
-        // Uses syncTimer to avoid concurrency issues
+        // Uses syncTimer to avoid concurrency issues:
         // (at org.bukkit.craftbukkit.v1_8_R3.util.UnsafeList$Itr.next(UnsafeList.java:248))
         PlayerTargetAtPlayerTask().syncTimer()
     }
@@ -322,8 +283,8 @@ class UtilsMain : JavaPlugin(), MKPlugin, BukkitTimeHandler {
         // config.setHeader("mkUtils v${description.version} config file.") // It's bugged
         config.add(
             "Database",
-            DBManager(),
-            "Config of MySQL database."
+            DBInfo(),
+            "Config of SQL database."
         )
         config.add(
             "Redis",

@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin
  *
  * @author Mikael
  */
+@Suppress("WARNINGS")
 object UtilsManager {
 
     /**
@@ -23,6 +24,7 @@ object UtilsManager {
      * This value is only started when the plugin starts [JavaPlugin.onEnable].
      * Before the plugin onEnable this value will be 'null'.
      */
+    @Deprecated("EduardAPI DB System in not used in mkUtils. Exposed is used instead.")
     lateinit var sqlManager: SQLManager
 
     /**
@@ -31,6 +33,7 @@ object UtilsManager {
      * IMPORTANT:
      * This will only be successfully called if the [sqlManager] is already set.
      */
+    @Deprecated("EduardAPI DB System in not used in mkUtils. Exposed is used instead.")
     val dbManager get() = sqlManager.dbManager
 
 }

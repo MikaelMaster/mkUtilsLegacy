@@ -1,6 +1,9 @@
 package com.mikael.mkutilslegacy.bungee
 
 import com.mikael.mkutilslegacy.api.UtilsManager
+import com.mikael.mkutilslegacy.api.db.DBInfo
+import com.mikael.mkutilslegacy.api.db.DatabaseAPI
+import com.mikael.mkutilslegacy.api.db.DatabaseAPI.usingDBEngine
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.mkplugin.MKPluginSystem
 import com.mikael.mkutilslegacy.api.mkplugin.language.LangSystem
@@ -16,7 +19,6 @@ import net.eduard.api.lib.command.Command
 import net.eduard.api.lib.config.Config
 import net.eduard.api.lib.database.DBManager
 import net.eduard.api.lib.database.HybridTypes
-import net.eduard.api.lib.database.SQLManager
 import net.eduard.api.lib.hybrid.BungeeServer
 import net.eduard.api.lib.hybrid.Hybrid
 import net.eduard.api.lib.kotlin.store
@@ -24,20 +26,19 @@ import net.eduard.api.lib.modules.Copyable
 import net.eduard.api.lib.storage.StorageAPI
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.plugin.Plugin
-import net.md_5.bungee.api.scheduler.ScheduledTask
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
- * mkUtils (non-legacy for bungee) plugin main Bungee class.
+ * mkUtils (non-legacy for bungee/proxy) plugin main Bungee/Proxy class.
  *
- * Special thanks to Eduard-- (*https://github.com/EduardMaster*).
- * This project uses some EduardAPI codes and methods.
+ * Special thanks to [Eduard](https://github.com/EduardMaster).
+ * This project uses some [EduardAPI/MineToolkit](https://github.com/EduardMaster/MineToolkit) extras and methods.
  *
  * @author Mikael
  * @author KoddyDev
- * @author Eduard (EduardAPI)
+ * @author Eduard (EduardAPI/MineToolkit)
  *
  * @see MKPlugin
  * @see utilsBungeeMain
@@ -47,7 +48,6 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         lateinit var instance: UtilsBungeeMain
     }
 
-    private var mySqlQueueUpdater: ScheduledTask? = null
     lateinit var config: Config
 
     init {
@@ -81,7 +81,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         BungeeAPI.bungee.register(this) // EduardAPI
 
         log(LangSystem.getText(Translation.LOADING_SYSTEMS))
-        prepareMySQL(); prepareRedis()
+        prepareDatabaseAPI(); prepareRedisAPI()
 
         // Commands
         BungeeVersionCommand().registerCommand(this)
@@ -90,21 +90,12 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         log(LangSystem.getText(Translation.LOADING_COMPLETE).replace("%time_taken%", "$loadTime"))
         MKPluginSystem.registerMKPlugin(this@UtilsBungeeMain)
 
+        // Log loaded MK Plugins after proxy server is 'done loading'
         ProxyServer.getInstance().scheduler.schedule(this, delay@{
-
-            // Show MK Plugins
             log("§aLoaded MK Plugins:")
             for (mkPlugin in MKPluginSystem.getLoadedMKPlugins()) {
                 val mkProxyPl = mkPlugin.plugin as Plugin
                 log(" §7▪ §e${mkProxyPl.description.name} v${mkProxyPl.description.version}")
-            }
-
-            // MySQL queue updater timer
-            if (UtilsManager.sqlManager.hasConnection()) {
-                mySqlQueueUpdater = ProxyServer.getInstance().scheduler.schedule(this, queueUpdater@{
-                    if (!UtilsManager.sqlManager.hasConnection()) return@queueUpdater
-                    UtilsManager.sqlManager.runChanges()
-                }, 1, 1, TimeUnit.SECONDS)
             }
         }, 1, TimeUnit.SECONDS)
     }
@@ -114,22 +105,21 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
 
         BungeeAPI.controller.unregister() // EduardAPI
         RedisBungeeAPI.Bungee.onDisableStopRedisSub()
-        RedisAPI.onDisableUnloadRedisAPI()
-        mySqlQueueUpdater?.cancel()
-        UtilsManager.dbManager.closeConnection()
+        RedisAPI.unloadRedisAPI()
+        DatabaseAPI.unloadDatabaseAPI()
 
         log(LangSystem.getText(Translation.UNLOADING_COMPLETE))
         MKPluginSystem.unregisterMKPlugin(this@UtilsBungeeMain)
     }
 
-    private fun prepareRedis() {
+    private fun prepareRedisAPI() {
         RedisAPI.managerData = config["Redis", RedisConnectionData::class.java]
         if (!RedisAPI.managerData.isEnabled) {
             log("§cRedis is not active on the config file. Some plugins and MK systems may not work correctly.")
             return
         }
         log("§eConnecting to Redis server...")
-        RedisAPI.onEnableLoadRedisAPI()
+        RedisAPI.loadRedisAPI()
         if (!RedisAPI.isInitialized) error("Cannot connect to Redis server.")
         RedisAPI.useRedisBungeeAPI = RedisAPI.managerData.useRedisBungeeAPI
         if (RedisBungeeAPI.isEnabled) {
@@ -138,15 +128,16 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         log("§aConnected to Redis server!")
     }
 
-    private fun prepareMySQL() {
-        UtilsManager.sqlManager = SQLManager(config["Database", DBManager::class.java])
-        if (!UtilsManager.sqlManager.dbManager.isEnabled) {
-            log("§cThe MySQL is not active on the config file. Some plugins and MK systems may not work correctly.")
+    private fun prepareDatabaseAPI() {
+        DatabaseAPI.usingDBInfo = config["Database", DBInfo::class.java]
+        if (!DatabaseAPI.usingDBInfo.isEnabled) {
+            log("§cDatabase (SQL) is not active on the config file. Some plugins and MK systems may not work correctly.")
+            return
         }
-        log("§eConnecting to MySQL database...")
-        UtilsManager.dbManager.openConnection()
-        if (!UtilsManager.sqlManager.hasConnection()) error("Cannot connect to MySQL database.")
-        log("§aConnected to MySQL database!")
+        log("§eConnecting to ${usingDBEngine.display} DB...")
+        if (DatabaseAPI.loadDatabaseAPI()) {
+            log("§aConnected to ${usingDBEngine.display} DB!")
+        }
     }
 
     private fun prepareStorageAPI() {
@@ -157,8 +148,8 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
     private fun reloadConfigs() {
         config.add(
             "Database",
-            DBManager(),
-            "Config of MySQL database."
+            DBInfo(),
+            "Config of SQL database."
         )
         config.add(
             "Redis",

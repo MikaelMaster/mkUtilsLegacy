@@ -1,4 +1,4 @@
-@file:Suppress("warnings")
+@file:Suppress("WARNINGS")
 
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 import java.nio.ByteBuffer
@@ -34,16 +34,33 @@ repositories {
 val userFolderPath: String = System.getProperty("user.home")
 
 dependencies {
+    // Spigot/Paper API, Waterfall API and Vault API for mkUtils hook Vault
     compileOnly("org.github.paperspigot:paperspigot-api:1.8.8-R0.1-SNAPSHOT")
+    compileOnly(files("libs/spigot-1.8.8.jar"))
     compileOnly("io.github.waterfallmc:waterfall-api:1.19-R0.1-SNAPSHOT")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
-    compileOnly(files("libs/spigot-1.8.8.jar"))
-    api(kotlin("stdlib"))
-    api(kotlin("reflect"))
-    api("redis.clients:jedis:4.3.1")
-    api("org.slf4j:slf4j-api:2.0.5")
-    api("org.slf4j:slf4j-log4j12:2.0.5")
-    api(files("${userFolderPath}\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar"))
+
+    // Kotlin stdlib and EduardAPI
+    implementation(kotlin("stdlib"))
+    implementation(files("${userFolderPath}\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar"))
+
+    // Jedis for mkUtils RedisAPI
+    implementation("redis.clients:jedis:5.1.3")
+
+    // Exposed (all modules) for mkUtils DB
+    val exposedVersion: String by project // defined in gradle.properties
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    // implementation("org.jetbrains.exposed:exposed-crypt:$exposedVersion") // Not compatible with Java 8
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-json:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-money:$exposedVersion")
+    // implementation("org.jetbrains.exposed:exposed-spring-boot-starter:$exposedVersion") // Not compatible with Java 8
+
+    // JDBC Drivers (MySQL and MariaDB) for Exposed (SQL)
+    implementation("com.mysql:mysql-connector-j:8.4.0")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.4.0")
 }
 
 fun generateVersion(): String {
@@ -72,8 +89,8 @@ fun generateVersion(): String {
         .joinToString(".")
 
     val sha1Bytes = MessageDigest.getInstance("SHA-1").digest(newVersion.toByteArray(StandardCharsets.UTF_8))
-    sha1Bytes[6] = (sha1Bytes[6].toInt() and 0x0F or 0x50).toByte() // Define a versão como 5 (UUID baseado em nome)
-    sha1Bytes[8] = (sha1Bytes[8].toInt() and 0x3F or 0x80).toByte() // Define a variante como IETF RFC 4122
+    sha1Bytes[6] = (sha1Bytes[6].toInt() and 0x0F or 0x50).toByte() // Defines version to 5 (name-based UUID)
+    sha1Bytes[8] = (sha1Bytes[8].toInt() and 0x3F or 0x80).toByte() // Dines the varient to IETF RFC 4122
     val byteBuffer = ByteBuffer.wrap(sha1Bytes)
     val versionVerifier = UUID(byteBuffer.long, byteBuffer.long).toString().split("-")[0]
 
@@ -108,8 +125,7 @@ bungee {
 
 tasks {
     jar {
-        destinationDirectory
-            .set(file("${userFolderPath}\\Desktop\\Meus Plugins - Jars"))
+        destinationDirectory.set(file("${userFolderPath}\\Desktop\\Meus Plugins - Jars"))
     }
     compileJava {
         options.encoding = "UTF-8"
@@ -131,7 +147,6 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-            //artifacts.add(artifact(tasks.shadowJar))
         }
     }
 }

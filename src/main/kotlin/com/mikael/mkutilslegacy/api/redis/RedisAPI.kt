@@ -56,7 +56,7 @@ object RedisAPI {
     // Internal methods - Start
 
     // Method to initialize and load the Redis API
-    internal fun onEnableLoadRedisAPI(): Boolean {
+    internal fun loadRedisAPI(): Boolean {
         val config = GenericObjectPoolConfig<Jedis>()
         config.maxTotal = managerData.jedisPoolMaxClients
         config.maxIdle = managerData.jedisPoolMaxIdle
@@ -75,9 +75,9 @@ object RedisAPI {
     }
 
     // Method to unload the Redis API
-    internal fun onDisableUnloadRedisAPI() {
+    internal fun unloadRedisAPI() {
         if (!isInitialized) return
-        // jedisPool.destroy() // Não é necessário e não pode.
+        // jedisPool.destroy() // This is not recommended because it will close all connections and may cause errors.
     }
 
     // Method to log debug messages
@@ -267,7 +267,13 @@ object RedisAPI {
         }
     }
 
-    // Method to get an extra client for a given connection data
+    /**
+     * Creates a new [Jedis] instance. This method doen't uses [jedisPool] resources.
+     *
+     * @param connectionData the connection data to create the [Jedis] instance.
+     * @return a new [Jedis] instance.
+     * @see Jedis
+     */
     fun getExtraClient(connectionData: RedisConnectionData): Jedis {
         if (!connectionData.isEnabled) error("Given RedisConnectionData isEnabled should not be false.")
         val start = System.currentTimeMillis()

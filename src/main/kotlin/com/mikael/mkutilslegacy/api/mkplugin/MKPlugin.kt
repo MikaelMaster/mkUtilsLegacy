@@ -61,4 +61,5 @@ interface MKPlugin: IPluginInstance {
      * @param msg the messages to log.
      */
     fun log(vararg msg: String)
+
 }
