@@ -25,7 +25,7 @@ object DatabaseAPI {
         (if (isProxyServer) utilsMain else utilsBungeeMain).log(*msg)
     }
 
-    fun loadDatabaseAPI(): Boolean {
+    internal fun loadDatabaseAPI(): Boolean {
         return try {
             val config = if (isProxyServer) utilsMain.config else utilsBungeeMain.config
             val dbInfo = config.get("Database", DBInfo::class.java)
@@ -59,7 +59,7 @@ object DatabaseAPI {
         }
     }
 
-    fun unloadDatabaseAPI() {
+    internal fun unloadDatabaseAPI() {
         if (!this::_exposedDB.isInitialized) return
         try {
             _exposedDB.connector().close()
