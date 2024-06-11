@@ -62,6 +62,7 @@ class UtilsBungeeMain : Plugin(), MKPlugin {
         UtilsManager.mkUtilsVersion = this.description.version
         prepareStorageAPI() // EduardAPI
         HybridTypes // {static} # Hybrid types - Load
+        store<DBInfo>()
         store<RedisConnectionData>()
 
         log(LangSystem.getText(Translation.LOADING_DIRECTORIES))
