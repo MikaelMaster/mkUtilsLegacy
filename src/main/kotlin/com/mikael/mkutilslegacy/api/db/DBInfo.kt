@@ -3,12 +3,20 @@ package com.mikael.mkutilslegacy.api.db
 /**
  * @see DatabaseAPI
  */
-data class DBInfo(
-    val isEnabled: Boolean = false,
-    val host: String = "localhost",
-    val port: Int = 3306,
-    val dbEngine: DBEngine = DBEngine.MYSQL,
-    val dbName: String = "mine_database",
-    val user: String = "mikael",
-    val pass: String = "dummy"
+class DBInfo(
+
+    var isEnabled: Boolean = false,
+
+    var host: String = "localhost",
+
+    var port: Int = 3306,
+
+    var dbEngine: DBEngine = DBEngine.MYSQL,
+
+    var dbName: String = "mine_database",
+
+    var user: String = "mikael",
+
+    var pass: String = "dummy"
+
 )

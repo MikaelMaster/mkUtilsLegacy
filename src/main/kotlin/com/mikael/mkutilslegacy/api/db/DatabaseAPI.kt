@@ -22,12 +22,12 @@ object DatabaseAPI {
     val isInitialized get() = this::_usingDBInfo.isInitialized && this::_exposedDB.isInitialized
 
     private fun log(vararg msg: String) {
-        (if (isProxyServer) utilsMain else utilsBungeeMain).log(*msg)
+        (if (isProxyServer) utilsBungeeMain else utilsMain).log(*msg)
     }
 
     internal fun loadDatabaseAPI(): Boolean {
         return try {
-            val config = if (isProxyServer) utilsMain.config else utilsBungeeMain.config
+            val config = if (isProxyServer) utilsBungeeMain.config else utilsMain.config
             val dbInfo = config.get("Database", DBInfo::class.java)
             when (usingDBEngine) {
                 DBEngine.MYSQL -> {
