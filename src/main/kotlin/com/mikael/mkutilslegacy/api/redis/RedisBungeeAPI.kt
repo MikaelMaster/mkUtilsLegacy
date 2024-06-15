@@ -34,7 +34,7 @@ import kotlin.concurrent.thread
  * @author Mikael
  * @see RedisAPI
  */
-@Suppress("WARNINGS")
+@Suppress("WARNINGS", "UNCHECKED_CAST")
 object RedisBungeeAPI {
 
     // Properties - Start

@@ -45,7 +45,7 @@ dependencies {
     api(files("${userFolderPath}\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar"))
 
     // Jedis for mkUtils RedisAPI
-    api("redis.clients:jedis:5.1.3")
+    api("redis.clients:jedis:4.3.1") // Don't update this version, because cause erros in pub-subs for some reason
 
     // Exposed (all modules) for mkUtils DB
     val exposedVersion: String by project // defined in gradle.properties
