@@ -88,7 +88,6 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
      */
     val subCommands = mutableListOf<MineCommand>()
 
-
     internal lateinit var bukkitCommand: SimpleCommand
 
     /**
