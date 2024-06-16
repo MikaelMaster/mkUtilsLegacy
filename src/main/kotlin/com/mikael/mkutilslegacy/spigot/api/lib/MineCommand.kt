@@ -37,6 +37,7 @@ import org.bukkit.plugin.java.JavaPlugin
  * @see command
  * @see playerCommand
  */
+@Suppress("WARNINGS", "UNUSED")
 open class MineCommand(command: String, vararg aliases: String) : MineListener(), CommandExecutor, TabExecutor {
     companion object {
         private val registeredMineCommands = mutableListOf<MineCommand>()
@@ -85,7 +86,8 @@ open class MineCommand(command: String, vararg aliases: String) : MineListener()
     /**
      * The command Subcommands.
      */
-    private val subCommands = mutableListOf<MineCommand>()
+    val subCommands = mutableListOf<MineCommand>()
+
 
     internal lateinit var bukkitCommand: SimpleCommand
 
