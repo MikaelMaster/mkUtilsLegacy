@@ -41,10 +41,7 @@ import com.mojang.authlib.properties.Property
 import net.eduard.api.lib.game.ItemBuilder
 import net.eduard.api.lib.game.Particle
 import net.eduard.api.lib.game.ParticleType
-import net.eduard.api.lib.kotlin.mineName
-import net.eduard.api.lib.kotlin.mineSendActionBar
-import net.eduard.api.lib.kotlin.mineSendPacket
-import net.eduard.api.lib.kotlin.mineSendTitle
+import net.eduard.api.lib.kotlin.*
 import net.eduard.api.lib.modules.Extra
 import net.eduard.api.lib.modules.Mine
 import net.eduard.api.lib.modules.MineReflect
@@ -1107,6 +1104,56 @@ fun Block.setDamage(damage: Int) {
     this.world.players.forEach { player ->
         player.mineSendPacket(PacketPlayOutBlockBreakAnimation(0, BlockPosition(this.x, this.y, this.z), damage))
     }
+}
+
+/**
+ * Get the drops of the given [Block] as if it was broken by the given [ItemStack]?.
+ * This method will consider the tool enchantments and the block drops.
+ *
+ * @param tool the [ItemStack] that will be used to break the block. If null, the player hand will be considered.
+ * @return a list of [ItemStack]s that will be dropped if the block was broken by the given tool.
+ */
+@Suppress("DEPRECATION")
+fun Block.getDropsAsBreaked(tool: ItemStack?): List<ItemStack> {
+    if (Material.AIR == this.type) return emptyList()
+
+    // This method uses the same algorithm as CraftBlock.breakNaturally, with will
+    // return the drops if the block was broken by the given tool. But, this method
+    // does not considerate the tool enchantments and nothing else, just if the tool
+    // breaking the block will drop something or not.
+    // So, if the tool is null (the player hand) and the block is a coal ore for example,
+    // nothing will be dropped, considering the Minecraft default behavior.
+    val drops = this.getDrops(tool)
+    if (drops.isEmpty()) {
+        return emptyList()
+    }
+
+    // Here we'll apply the enchantments behavior to the drops.
+    val mineTool = tool?.toMineItem()
+    if (mineTool != null) {
+        mineTool.enchantments[org.bukkit.enchantments.Enchantment.LOOT_BONUS_BLOCKS]?.let { fortuneLevel ->
+            val newDrops = mutableListOf<ItemStack>()
+            for (drop in drops) {
+                var dropAmount = drop.amount
+                for (i in 1..fortuneLevel) {
+                    if (0.33.chance()) { // 33% chance to drop 1 more for each level
+                        dropAmount++
+                    }
+                }
+                newDrops.add(drop.clone().apply { amount = dropAmount })
+            }
+            drops.clear()
+            drops.addAll(newDrops)
+        }
+        // SILK_TOUCH Enchantment will drop the block itself, not the block drops, and will
+        // like invalidade the LOOT_BONUS_BLOCKS enchantment above.
+        if (mineTool.enchantments.containsKey(org.bukkit.enchantments.Enchantment.SILK_TOUCH) && this.type.isSolid) {
+            drops.clear()
+            drops.add(MineItem(this.type).data(this.data.toInt()))
+        }
+    }
+
+    return drops.toList() // Finally, we return the drops considering the tool and its enchantments.
 }
 
 /**
