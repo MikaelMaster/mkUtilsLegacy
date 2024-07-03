@@ -1107,6 +1107,19 @@ fun Block.setDamage(damage: Int) {
 }
 
 /**
+ * @return True if the given [Material] is a plantation. Otherwise, false.
+ */
+val Material.isPlantation: Boolean
+    get() {
+        return when (this) {
+            Material.CROPS, Material.POTATO, Material.CARROT, Material.COCOA, Material.MELON_STEM,
+            Material.PUMPKIN_STEM, Material.SUGAR_CANE, Material.NETHER_WARTS -> true
+
+            else -> false
+        }
+    }
+
+/**
  * Get the drops of the given [Block] as if it was broken by the given [ItemStack]?.
  * This method will consider the tool enchantments and the block drops.
  *
@@ -1128,9 +1141,15 @@ fun Block.getDropsAsBreaked(tool: ItemStack?): List<ItemStack> {
         return emptyList()
     }
 
+    // If the block is a plantation, we'll return the drops as they are.
+    // Plantations will not be affected by the tool enchantments.
+    if (this.type.isPlantation) {
+        return drops.toList()
+    }
+
     // Here we'll apply the enchantments behavior to the drops.
-    val mineTool = tool?.toMineItem()
-    if (mineTool != null) {
+    tool?.toMineItem()?.let { mineTool ->
+        // LOOT_BONUS_BLOCKS Enchantment will increase the drops amount.
         mineTool.enchantments[org.bukkit.enchantments.Enchantment.LOOT_BONUS_BLOCKS]?.let { fortuneLevel ->
             val newDrops = mutableListOf<ItemStack>()
             for (drop in drops) {
@@ -1145,6 +1164,7 @@ fun Block.getDropsAsBreaked(tool: ItemStack?): List<ItemStack> {
             drops.clear()
             drops.addAll(newDrops)
         }
+
         // SILK_TOUCH Enchantment will drop the block itself, not the block drops, and will
         // like invalidade the LOOT_BONUS_BLOCKS enchantment above.
         if (mineTool.enchantments.containsKey(org.bukkit.enchantments.Enchantment.SILK_TOUCH) && this.type.isSolid) {
