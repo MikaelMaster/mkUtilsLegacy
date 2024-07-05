@@ -1107,7 +1107,7 @@ fun Block.setDamage(damage: Int) {
     }
 }
 
-// Data class used for the [ItemStack.damageConsideringEffects] method.
+// Data class used for the ItemStack.damageConsideringEffects method.
 data class DamageConsideingEffectsResult(val item: ItemStack, val hasAppliedDamage: Boolean) {
     val isDestroyed get() = item.durability > item.type.maxDurability
 }
@@ -1129,7 +1129,7 @@ fun ItemStack.damageConsideringEffects(damage: Int): DamageConsideingEffectsResu
             return DamageConsideingEffectsResult(this, false)
         }
     }
-    this.durability = (this.durability + 1).toShort() // Damage the item by 1. Always by 1.
+    this.durability = (this.durability + damage).toShort() // Damage the item by the given damage.
     return DamageConsideingEffectsResult(this, true)
 }
 
