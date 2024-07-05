@@ -56,6 +56,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlock
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.*
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Item
@@ -1104,6 +1105,32 @@ fun Block.setDamage(damage: Int) {
     this.world.players.forEach { player ->
         player.mineSendPacket(PacketPlayOutBlockBreakAnimation(0, BlockPosition(this.x, this.y, this.z), damage))
     }
+}
+
+// Data class used for the [ItemStack.damageConsideringEffects] method.
+data class DamageConsideingEffectsResult(val item: ItemStack, val hasAppliedDamage: Boolean) {
+    val isDestroyed get() = item.durability > item.type.maxDurability
+}
+
+/**
+ * Damages the given [ItemStack] considering the effects of the tool enchantments.
+ *
+ * If the given [ItemStack] has the [Enchantment.DURABILITY] enchantment, the damage will be applied
+ * considering the enchantment level. If the enchantment level is 3, for example, the item will have a
+ * 25% chance to not be damaged.
+ *
+ * @param damage the damage to apply to the given [ItemStack].
+ * @return a [DamageConsideingEffectsResult].
+ */
+fun ItemStack.damageConsideringEffects(damage: Int): DamageConsideingEffectsResult {
+    this.enchantments[Enchantment.DURABILITY]?.let { level ->
+        val chanceToDamage = 1 / (level + 1).toDouble()
+        if (!chanceToDamage.chance()) { // If the chance to damage is false, the item will not be damaged.
+            return DamageConsideingEffectsResult(this, false)
+        }
+    }
+    this.durability = (this.durability + 1).toShort() // Damage the item by 1. Always by 1.
+    return DamageConsideingEffectsResult(this, true)
 }
 
 /**
