@@ -8,7 +8,7 @@ import java.util.*
 
 plugins {
     java
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.1.21"
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.0.0"
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
@@ -24,9 +24,11 @@ java.targetCompatibility = JavaVersion.VERSION_1_8
 repositories {
     mavenLocal()
     mavenCentral()
-    maven("https://papermc.io/repo/repository/maven-public/")
+    maven {
+        name = "papermc"
+        url = uri("https://repo.papermc.io/repository/maven-public/")
+    }
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    maven("https://oss.sonatype.org/content/repositories/snapshots/")
     maven("https://jitpack.io/")
     maven("https://m2.dv8tion.net/releases")
 }
@@ -42,7 +44,7 @@ dependencies {
 
     // Kotlin stdlib and EduardAPI
     implementation(kotlin("stdlib"))
-    api(files("${userFolderPath}\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar"))
+    api(files("C:\\Users\\Usuario\\Desktop\\IntelliJ Global Depends\\EduardAPI-1.0-all.jar\\"))
 
     // Jedis for mkUtils RedisAPI
     api("redis.clients:jedis:4.3.1") // Don't update this version, because cause erros in pub-subs for some reason
@@ -50,13 +52,11 @@ dependencies {
     // Exposed (all modules) for mkUtils DB
     val exposedVersion: String by project // defined in gradle.properties
     api("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    // implementation("org.jetbrains.exposed:exposed-crypt:$exposedVersion") // Not compatible with Java 8
     api("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     api("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     api("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
     api("org.jetbrains.exposed:exposed-json:$exposedVersion")
     api("org.jetbrains.exposed:exposed-money:$exposedVersion")
-    // implementation("org.jetbrains.exposed:exposed-spring-boot-starter:$exposedVersion") // Not compatible with Java 8
 
     // JDBC Drivers (MySQL and MariaDB) for Exposed (SQL)
     api("com.mysql:mysql-connector-j:8.4.0")
