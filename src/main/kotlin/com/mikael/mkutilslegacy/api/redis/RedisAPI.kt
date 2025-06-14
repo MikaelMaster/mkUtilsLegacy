@@ -1,6 +1,8 @@
 package com.mikael.mkutilslegacy.api.redis
 
 import com.mikael.mkutilslegacy.api.isProxyServer
+import com.mikael.mkutilslegacy.api.redis.RedisAPI.exists
+import com.mikael.mkutilslegacy.api.redis.RedisAPI.jedisPool
 import com.mikael.mkutilslegacy.bungee.UtilsBungeeMain
 import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.UtilsMain

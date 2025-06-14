@@ -1,5 +1,7 @@
 package com.mikael.mkutilslegacy.spigot.api.util.hooks
 
+import com.mikael.mkutilslegacy.spigot.api.util.hooks.Vault.isHooked
+import com.mikael.mkutilslegacy.spigot.api.util.hooks.Vault.onEnable
 import com.mikael.mkutilslegacy.spigot.api.utilsMain
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.Bukkit

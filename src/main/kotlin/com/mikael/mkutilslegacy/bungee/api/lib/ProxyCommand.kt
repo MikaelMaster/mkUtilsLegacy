@@ -2,6 +2,7 @@ package com.mikael.mkutilslegacy.bungee.api.lib
 
 import com.mikael.mkutilslegacy.api.mkplugin.MKPlugin
 import com.mikael.mkutilslegacy.api.toTextComponent
+import com.mikael.mkutilslegacy.bungee.api.lib.ProxyCommand.Companion.registeredProxyCommands
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command

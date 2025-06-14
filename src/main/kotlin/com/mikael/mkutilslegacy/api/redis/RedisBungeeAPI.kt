@@ -582,7 +582,7 @@ object RedisBungeeAPI {
      * Methods inside [RedisBungeeAPI.Bungee] can only be used in BungeeCord servers.
      * If any method/val here is called in a Spigot server, it'll throw an [IllegalStateException].
      */
-    public object Bungee {
+    object Bungee {
         // Bungee RedisPubSub - Start
         private var redisPubSubThread: Thread? = null
         private var redisPubSubJedisClient: Jedis? = null

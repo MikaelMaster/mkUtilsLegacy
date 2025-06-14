@@ -1,5 +1,6 @@
 package com.mikael.mkutilslegacy.api
 
+import com.mikael.mkutilslegacy.api.UtilsManager.sqlManager
 import net.eduard.api.lib.database.DBManager
 import net.eduard.api.lib.database.SQLManager
 import org.bukkit.plugin.java.JavaPlugin
@@ -9,7 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin
  *
  * @author Mikael
  */
-@Suppress("WARNINGS")
+@Suppress("WARNINGS", "DEPRECATION")
 object UtilsManager {
 
     /**

@@ -3,7 +3,7 @@ package com.mikael.mkutilslegacy.api.db
 import com.mikael.mkutilslegacy.api.isProxyServer
 import com.mikael.mkutilslegacy.bungee.api.utilsBungeeMain
 import com.mikael.mkutilslegacy.spigot.api.utilsMain
-import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.v1.jdbc.Database
 
 @Suppress("WARNINGS")
 object DatabaseAPI {

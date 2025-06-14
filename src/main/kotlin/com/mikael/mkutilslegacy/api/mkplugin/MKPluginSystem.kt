@@ -1,5 +1,8 @@
 package com.mikael.mkutilslegacy.api.mkplugin
 
+import com.mikael.mkutilslegacy.api.mkplugin.MKPluginSystem.loadedMKPlugins
+
+
 /**
  * @see MKPlugin
  */
