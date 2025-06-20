@@ -30,10 +30,12 @@ class MineHologramListener : MineListener() {
             val clicked = e.rightClicked ?: return@runBlock
             if (clicked !is ArmorStand) return@runBlock
             val clickedMineHolo = hologramsClick.keys.firstOrNull { it.getLines().contains(clicked) } ?: return@runBlock
-            val clickAction = hologramsClick[clickedMineHolo] ?: return@runBlock
-            if (clickCooldown.cooldown(player.name)) {
-                player.runBlock {
-                    clickAction.invoke(e)
+            val clickAction = hologramsClick[clickedMineHolo]
+            if (clickAction != null) {
+                if (clickCooldown.cooldown(player.name)) {
+                    player.runBlock {
+                        clickAction.invoke(e)
+                    }
                 }
             }
             e.isCancelled = true
