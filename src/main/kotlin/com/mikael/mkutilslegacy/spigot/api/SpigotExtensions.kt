@@ -380,6 +380,21 @@ fun Player.hasAmountOfItemOnInv(needed: ItemStack, neededAmount: Int, exact: Boo
     return this.inventory.hasAmountOfItem(needed, neededAmount, exact)
 }
 
+fun Player.getAvailableSpaceForItem(item: ItemStack): Int {
+    var availableSpace = 0
+
+    for (invItem in inventory.contents) {
+        if (invItem == null || invItem.type == Material.AIR) {
+            availableSpace += item.maxStackSize
+        } else if (item.isSimilar(invItem)) {
+            availableSpace += item.maxStackSize - invItem.amount
+        }
+    }
+
+    return availableSpace
+}
+
+
 /**
  * @return True if the given [Inventory] has the needed amount of the needed [ItemStack].
  */

@@ -20,7 +20,7 @@ class MineHologramListener : MineListener() {
         instance = this@MineHologramListener
     }
 
-    internal val hologramsClick = mutableMapOf<MineHologram, ((PlayerInteractAtEntityEvent) -> Unit)>()
+    internal val holograms = mutableMapOf<MineHologram, ((PlayerInteractAtEntityEvent) -> Unit)?>()
     private val clickCooldown = MineCooldown(10).apply { noMessages() }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
@@ -29,8 +29,8 @@ class MineHologramListener : MineListener() {
         player.runBlock {
             val clicked = e.rightClicked ?: return@runBlock
             if (clicked !is ArmorStand) return@runBlock
-            val clickedMineHolo = hologramsClick.keys.firstOrNull { it.getLines().contains(clicked) } ?: return@runBlock
-            val clickAction = hologramsClick[clickedMineHolo]
+            val clickedMineHolo = holograms.keys.firstOrNull { it.getLines().contains(clicked) } ?: return@runBlock
+            val clickAction = holograms[clickedMineHolo]
             if (clickAction != null) {
                 if (clickCooldown.cooldown(player.name)) {
                     player.runBlock {

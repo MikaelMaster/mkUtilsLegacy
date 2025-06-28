@@ -34,6 +34,8 @@ open class MineHologram(vararg var lines: String?) {
     private var lastSpawnLoc: Location? = null
     private var lastWasToDown: Boolean? = null
 
+    private var click: ((PlayerInteractAtEntityEvent) -> Unit)? = null
+
     /**
      * @return all spawned lines of this hologram (List<[ArmorStand]>). Only lines spawned for ALL players will be returned.
      */
@@ -52,6 +54,7 @@ open class MineHologram(vararg var lines: String?) {
      * @return this [MineHologram].
      */
     fun spawn(player: Player, loc: Location, toDown: Boolean = true): MineHologram {
+        MineHologramListener.instance.holograms[this] = click
         lastSpawnLoc = loc.clone()
         lastWasToDown = toDown
         val holos = mutableListOf<Hologram>()
@@ -79,6 +82,7 @@ open class MineHologram(vararg var lines: String?) {
      * @return this [MineHologram].
      */
     fun spawn(loc: Location, toDown: Boolean = true): MineHologram {
+        MineHologramListener.instance.holograms[this] = click
         lastSpawnLoc = loc.clone()
         lastWasToDown = toDown
         val holos = mutableListOf<ArmorStand>()
@@ -133,6 +137,7 @@ open class MineHologram(vararg var lines: String?) {
      * @return this [MineHologram].
      */
     fun despawn(): MineHologram {
+        MineHologramListener.instance.holograms.remove(this)
         spawnedLines.forEach {
             if (!it.chunk.isLoaded) {
                 it.chunk.load(true)
@@ -213,7 +218,7 @@ open class MineHologram(vararg var lines: String?) {
      * @param click the block code to run when a player clicks this hologram.
      */
     fun setClick(click: (PlayerInteractAtEntityEvent) -> Unit): MineHologram {
-        MineHologramListener.instance.hologramsClick[this@MineHologram] = click
+        this.click = click
         return this
     }
 
@@ -222,7 +227,7 @@ open class MineHologram(vararg var lines: String?) {
      * If a click action was not set, nothing will happen.
      */
     fun removeClickAction(): MineHologram {
-        MineHologramListener.instance.hologramsClick.remove(this@MineHologram)
+        this.click = click
         return this
     }
 
